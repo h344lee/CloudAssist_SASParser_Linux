@@ -67,7 +67,9 @@ def get_sas_files(user_log_content):
     return zipped_sas_file_content_list
 
 
-
+# get input file such as *.csv
+# if there is not an input file, then return ""
+# completed
 def get_input_file_name(sas_file_content):
     input_file_name_regex = re.compile(r"NOTE: The infile '(.*)' is")
     sas_file_list = input_file_name_regex.search(sas_file_content)
@@ -78,8 +80,9 @@ def get_input_file_name(sas_file_content):
 
     return input_file_name
 
-
-# need to implement cases such as DATA statement, Procedure SQL, SAS Initialization
+# get SAS Step names such as DATA statement, Procedure SQL, SAS Initialization
+# return SAS STEP (such as DATA statement) and SAS Step name (ex)sql, Data
+# Completed but need to check if there is any other case regarding SAS Step (1/14)
 def get_sas_step_name(sas_file_content):
     sas_step_name_regex = re.compile(r"NOTE: (.*) (.*) used")
     sas_step_name_regex_obj = sas_step_name_regex.search(sas_file_content)
@@ -105,6 +108,9 @@ def get_sas_step_name(sas_file_content):
     return sas_step, sas_step_name
 
 
+# get time infomation
+# return execution date and execution time
+# completed
 def get_time_info(sas_file_content):
     time_info_regex = re.compile(r"(\d\d\d\d-\d\d-\d\d)T(\d\d:\d\d:\d\d).*real time")
     time_info_regex_obj = time_info_regex.search(sas_file_content)
@@ -120,6 +126,9 @@ def get_time_info(sas_file_content):
     return exc_date, exc_time
 
 
+# get process time for cpu time and real time
+# return cpu time and real time as second
+# comment: need to update the SAS System time part (1/14)
 def get_process_time(sas_file_content):
     cpu_time_regex = re.compile(r"cpu time \s+(\d+.\d+) ")
     cpu_time_regex_obj = cpu_time_regex.search(sas_file_content)
@@ -135,6 +144,10 @@ def get_process_time(sas_file_content):
     return cpu_time, real_time
 
 
+# get output library and output table from regular log message such as NOTE: ~~
+# return output library and output table
+# completed for the regular log message
+# comment: need to enhance to get information from actual sql query
 def get_output_library_table(sas_file_content):
     output_lib_table_regex = re.compile(r"NOTE: The data set (.*)\.(.*) has (\d+) observations and (\d+) "
                                         r"variables.")
@@ -149,6 +162,9 @@ def get_output_library_table(sas_file_content):
     return output_lib, output_table
 
 
+# get input library and input table from regular log output such as NOTE: ~
+# return input_lib, input_table as string
+# Need to enhance to process actual query based process.
 def get_input_library_table(sas_file_content):
     input_lib_table_regex = re.compile(r"NOTE: There were (\d+) observations read from the data set (.*)\.(.*).")
     input_lib_table_regex_obj = input_lib_table_regex.search(sas_file_content)
@@ -164,6 +180,9 @@ def get_input_library_table(sas_file_content):
     return input_lib, input_table
 
 
+# get number of rows write and output library and output table.
+# got the information from three regular log output
+# return a list of [rows, libs, tbls] ex) [row1;row2, lib1;lib2, table1; table2]
 def get_sas_row_write(record_content):
     rows = libs = tbls = ""
 
@@ -206,16 +225,13 @@ def get_sas_row_write(record_content):
             return [rows, libs, tbls]
 
 
+# update a row of record to the given dataframe 'log_df'
 def save_record_to_df(log_df, extracted_record):
-    # print(log_df)
-
     updated_log_df = log_df.append(pd.Series(extracted_record, index=log_df.columns), ignore_index=True)
-
-    # print(updated_log_df)
-
     return updated_log_df
 
 
+# save the dataframe to an excel file
 def save_df_to_xlsx(log_df):
     # check "\output" folder and make it if it is not exist
     if not os.path.isdir('output'):
@@ -223,6 +239,7 @@ def save_df_to_xlsx(log_df):
     log_df.to_excel("output\\output.xlsx", index=False)
 
 
+# main function
 if __name__ == "__main__":
 
     FILE_ID = ""
@@ -276,9 +293,6 @@ if __name__ == "__main__":
         FILE_PTH = file_full_path
         FILE_NM = file_name
         user_names = get_user_name(log_content)  # need to update later
-
-        print(user_names)
-
         test_record_content_sum = 0
 
         for user in user_names:
@@ -291,29 +305,23 @@ if __name__ == "__main__":
                 # print("number of content : " + str(len(record_content_list)))
                 test_record_content_sum += len(record_content_list)
                 for record_content in record_content_list:
+                    # drop if it is the end of the log content which does not have meaningful information
                     if record_content[-25:-17] != 'cpu time':
                         continue
-                    # print("*") * 50
-                    # print("start of content :" + record_content[:50])
-                    # print("end of content :" + record_content[-50:])
-                    # print("*") * 50
-                    #
-                    # print(record_content[-25:-17])
+                    # update sas file id and sas file name and path if it is updated.
                     if sas_file_abs_path != '':
-
                         if sas_file_dict.get(sas_file_abs_path) is None:
                             sas_file_dict[sas_file_abs_path] = 'SF_' + str(sas_file_id_counter)
                             sas_file_id_counter += 1
-
                         FILE_SAS_F_ID = sas_file_dict.get(sas_file_abs_path)
                         sas_file_norm_path = os.path.normpath(sas_file_abs_path)
                         FILE_SAS_F_NM = sas_file_norm_path.split(os.sep)[-1]
-                    FILE_SAS_F_LOC = sas_file_abs_path
 
+                    FILE_SAS_F_LOC = sas_file_abs_path
                     FILE_SAS_INP_FIL_NM = get_input_file_name(record_content)
                     FILE_SAS_OUT_LIB, FILE_SAS_OUT_TBL = get_output_library_table(record_content)
                     FILE_SAS_INP_LIB, FILE_SAS_INP_TBL = get_input_library_table(record_content)
-                    # FILE_SAS_INP_ROW_RD
+                    # FILE_SAS_INP_ROW_RD  # Need to get some example to implement
 
                     FILE_SAS_STP, FILE_SAS_STP_NM = get_sas_step_name(record_content)
                     FILE_EXC_DT, FILE_SAS_EXC_TM = get_time_info(record_content)
@@ -322,7 +330,6 @@ if __name__ == "__main__":
                     sas_row_write_data = get_sas_row_write(record_content)
 
                     if len(sas_row_write_data) != 0:
-                        # print(sas_row_write_data)
                         FILE_SAS_ROW_WRT = sas_row_write_data[0]
                         if FILE_SAS_OUT_LIB == "":
                             FILE_SAS_OUT_LIB = sas_row_write_data[1]
@@ -333,7 +340,7 @@ if __name__ == "__main__":
                         else:
                             FILE_SAS_OUT_TBL = ';'.join([FILE_SAS_OUT_TBL, str(sas_row_write_data[2])])
 
-                    # more data extractions here
+                    # more data extractions needed to be here
 
                     FILE_ID = 'LOG_' + str(file_id_counter)
                     file_id_counter += 1
@@ -348,8 +355,9 @@ if __name__ == "__main__":
 
                     log_df = save_record_to_df(log_df, extracted_record)
 
+                    # Data initialization
                     FILE_SAS_ROW_WRT = FILE_SAS_OUT_LIB = FILE_SAS_OUT_TBL = sas_row_write_data = ""
 
         save_df_to_xlsx(log_df)
-        # print("total record :" + str(test_record_content_sum))
+
 logging.debug('end of the program')
