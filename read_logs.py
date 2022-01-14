@@ -8,6 +8,9 @@ logging.basicConfig(level=logging.DEBUG, format='%(asctime)s-%(levelname)s-%(mes
 logging.debug('start of the program')
 
 
+# get log file from \logs folder. If there is not a log, it raises Exception
+# return absolute path of the log file and filename pair of list
+# comment: need to enhance to get all the log files regardless of folder structure (1/14)
 def get_log_file_list():
     # check log folder exists
     if not os.path.isdir('logs'):
@@ -17,33 +20,16 @@ def get_log_file_list():
         raise Exception('please put log files in the "\\logs" folder')
 
     log_file_list = []
-
     for filename in os.listdir('logs_test'):
         if os.path.isfile(os.path.join('logs_test', filename)):
             log_file_list.append([os.path.abspath('logs_test'), filename])
-
-            # print(os.path.abspath('logs_test'))
-            # print(filename)
-            # print(log_file_list)
-
     return log_file_list
-    # return [['logs\\Batch Server', 'cc_inactive_party_transaction.log']]
 
 
+# read log contents from given file_path
+# return log file as a big string
+# completed
 def get_log_content(file_path):
-    # # check log folder file exists
-    # servers = os.listdir('logs')
-    # if len(servers) == 0:
-    #     logging.debug('please put log files in the "\\logs" folder')
-    #     logging.debug('current location is ' + str(os.getcwd()))
-    #     raise Exception('logs folder is empty')
-    #
-    # # get file lists
-    # for server in servers:
-    #     files = os.listdir('logs\\' + server)
-    #     logging.debug(files)
-
-    # run a test case
     file_object = open(file_path)
     file_content = file_object.read()
     file_object.close()
@@ -121,7 +107,7 @@ def get_time_info(sas_file_content):
     time_info_regex = re.compile(r"(\d\d\d\d-\d\d-\d\d)T(\d\d:\d\d:\d\d).*real time")
     time_info_regex_obj = time_info_regex.search(sas_file_content)
 
-    if time_info_regex_obj is None :
+    if time_info_regex_obj is None:
         print("time info cannot get regex object")
         exc_date = "error"
         exc_time = "error"
@@ -160,14 +146,15 @@ def get_output_library_table(sas_file_content):
 
     return output_lib, output_table
 
+
 def get_input_library_table(sas_file_content):
     input_lib_table_regex = re.compile(r"NOTE: There were (\d+) observations read from the data set (.*)\.(.*).")
     input_lib_table_regex_obj = input_lib_table_regex.search(sas_file_content)
     if input_lib_table_regex_obj is not None:
         input_lib = input_lib_table_regex_obj.group(2)
         input_table = input_lib_table_regex_obj.group(3)
-        #print(input_lib)
-        #print(input_table)
+        # print(input_lib)
+        # print(input_table)
     else:
         input_lib = ''
         input_table = ''
@@ -185,7 +172,8 @@ def get_sas_row_write(record_content):
 
     sas_row_write_regex_case_two = re.compile(r"NOTE: Table (.*)\.(.*) created, with (\d+) rows")
     sas_row_write_regex_case_two_list = sas_row_write_regex_case_two.findall(record_content)
-    sas_row_write_regex_case_two_list = [(record[2], record[0], record[1]) for record in sas_row_write_regex_case_two_list]
+    sas_row_write_regex_case_two_list = [(record[2], record[0], record[1]) for record in
+                                         sas_row_write_regex_case_two_list]
 
     sas_row_write_regex_case_three = re.compile(r"NOTE: (\d+) rows were deleted from (.*)\.(.*).")
     sas_row_write_regex_case_three_list = sas_row_write_regex_case_three.findall(record_content)
@@ -323,7 +311,7 @@ if __name__ == "__main__":
                     FILE_SAS_INP_FIL_NM = get_input_file_name(record_content)
                     FILE_SAS_OUT_LIB, FILE_SAS_OUT_TBL = get_output_library_table(record_content)
                     FILE_SAS_INP_LIB, FILE_SAS_INP_TBL = get_input_library_table(record_content)
-                    #FILE_SAS_INP_ROW_RD
+                    # FILE_SAS_INP_ROW_RD
 
                     FILE_SAS_STP, FILE_SAS_STP_NM = get_sas_step_name(record_content)
                     FILE_EXC_DT, FILE_SAS_EXC_TM = get_time_info(record_content)
