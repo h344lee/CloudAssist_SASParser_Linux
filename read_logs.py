@@ -36,6 +36,9 @@ def get_log_content(file_path):
     return file_content
 
 
+# get all the user name of the given log file
+# return a list of usernames
+# comment: need to implement multi-user cases (1/14)
 def get_user_name(log_content):
     user_name_regex = re.compile(r".* INFO .*] :(.*) - ")
     user_name_obj = user_name_regex.search(log_content[:1000])
@@ -43,27 +46,26 @@ def get_user_name(log_content):
     return [user_name[0]]
 
 
+# provide a user's log file content given username and log_content
+# comment: need to implement split the log content based on the given user name (1/14)
 def get_user_log_content(user, log_content):
-    # need to implement later
-
     return log_content
 
 
+# input data: user's log content
+# split the user's log content based on SAS file
+# make a list of pair of SAS file name and the SAS file's log content
+# comment: need to implement SAS file line number part here (1/14)
 def get_sas_files(user_log_content):
     sas_file_regex = re.compile(r"_SASPROGRAMFILE='(.*)';")
     sas_file_list = sas_file_regex.findall(user_log_content)
     sas_file_list.insert(0, '')
-    # print(sas_file_list)
 
     sas_content_list = user_log_content.split("%LET _SASPROGRAMFILE='")
-
     zipped_sas_file_content_list = tuple(zip(sas_file_list, sas_content_list))
 
-    # print(zipped_sas_file_content_list[0][0], len(zipped_sas_file_content_list[0][1]) )
-    # print(zipped_sas_file_content_list[1][0], len(zipped_sas_file_content_list[1][1]) )
-    # print(zipped_sas_file_content_list[2][0], len(zipped_sas_file_content_list[2][1]) )
-
     return zipped_sas_file_content_list
+
 
 
 def get_input_file_name(sas_file_content):
