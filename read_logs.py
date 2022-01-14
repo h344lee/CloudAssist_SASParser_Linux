@@ -62,9 +62,47 @@ def get_sas_files(user_log_content):
     sas_file_list.insert(0, '')
 
     sas_content_list = user_log_content.split("%LET _SASPROGRAMFILE='")
-    zipped_sas_file_content_list = tuple(zip(sas_file_list, sas_content_list))
+    sas_content_numbered_list = sas_line_number_counter(sas_content_list)
+
+    zipped_sas_file_content_list = tuple(zip(sas_file_list, sas_content_numbered_list))
 
     return zipped_sas_file_content_list
+
+
+def sas_line_number_counter(sas_content_list):
+    temp_chunk = ""
+    sas_content_numbered_list = []
+    for line_num, line in enumerate(sas_content_list[0].splitlines(True)):
+        temp_chunk += str(line_num + 1) + "  " + line
+
+    sas_content_numbered_list.append(temp_chunk)
+    temp_chunk = ""
+    # with open("output\\chunk1.txt", 'w') as text_file:
+    #     text_file.write(temp_chunk)
+    # test_counter = 2
+    for sas_content in sas_content_list[1:]:
+        line_number_regex = re.compile(r"\n\d\d\d\d-\d\d-.* - (.*) ")
+        line_number_regex_obj = line_number_regex.search(sas_content)
+        start_line_number = int(line_number_regex_obj.group(1))
+
+        for line in sas_content.splitlines(True):
+            temp_chunk += str(start_line_number - 1) + "  " + line
+            start_line_number += 1
+        sas_content_numbered_list.append(temp_chunk)
+        # with open('output\\chunk' + str(test_counter) + '.txt', 'w') as text_file:
+        #     text_file.write(temp_chunk)
+        # test_counter += 1
+        temp_chunk = ""
+    return sas_content_numbered_list
+
+
+def get_sas_file_line_number(record_content):
+    sas_file_line_regex = re.compile(r"(.*)  \d\d\d\d-\d\d-\d\d.*\(Total process time\):")
+    sas_file_line_obj = sas_file_line_regex.search(record_content)
+    if sas_file_line_obj is None:
+        return ""
+    else:
+        return sas_file_line_obj.group(1)
 
 
 # get input file such as *.csv
@@ -79,6 +117,7 @@ def get_input_file_name(sas_file_content):
         input_file_name = ''
 
     return input_file_name
+
 
 # get SAS Step names such as DATA statement, Procedure SQL, SAS Initialization
 # return SAS STEP (such as DATA statement) and SAS Step name (ex)sql, Data
@@ -322,7 +361,7 @@ if __name__ == "__main__":
                     FILE_SAS_OUT_LIB, FILE_SAS_OUT_TBL = get_output_library_table(record_content)
                     FILE_SAS_INP_LIB, FILE_SAS_INP_TBL = get_input_library_table(record_content)
                     # FILE_SAS_INP_ROW_RD  # Need to get some example to implement
-
+                    FILE_LN_NUM = get_sas_file_line_number(record_content)
                     FILE_SAS_STP, FILE_SAS_STP_NM = get_sas_step_name(record_content)
                     FILE_EXC_DT, FILE_SAS_EXC_TM = get_time_info(record_content)
                     FILE_SAS_EXC_CPU_TM, FILE_SAS_EXC_RL_TM = get_process_time(record_content)
