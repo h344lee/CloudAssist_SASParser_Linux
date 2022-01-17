@@ -80,12 +80,14 @@ def sas_line_number_counter(sas_content_list):
         temp_chunk += str(line_num + 1) + "  " + line
 
     sas_content_numbered_list.append(temp_chunk)
+
+    with open("output\\chunk1.txt", 'w') as text_file:
+         text_file.write(temp_chunk)
+    test_counter = 2
+
     temp_chunk = ""
-    # with open("output\\chunk1.txt", 'w') as text_file:
-    #     text_file.write(temp_chunk)
-    # test_counter = 2
     for sas_content in sas_content_list[1:]:
-        line_number_regex = re.compile(r"\n\d\d\d\d-\d\d-.* - (.*) ")
+        line_number_regex = re.compile(r"\n\d\d\d\d-\d\d-.* - (\d+) ")
         line_number_regex_obj = line_number_regex.search(sas_content)
         start_line_number = int(line_number_regex_obj.group(1))
 
@@ -93,10 +95,13 @@ def sas_line_number_counter(sas_content_list):
             temp_chunk += str(start_line_number - 1) + "  " + line
             start_line_number += 1
         sas_content_numbered_list.append(temp_chunk)
-        # with open('output\\chunk' + str(test_counter) + '.txt', 'w') as text_file:
-        #     text_file.write(temp_chunk)
-        # test_counter += 1
+
+        with open('output\\chunk' + str(test_counter) + '.txt', 'w') as text_file:
+            text_file.write(temp_chunk)
+        test_counter += 1
+
         temp_chunk = ""
+
     return sas_content_numbered_list
 
 
@@ -366,7 +371,11 @@ if __name__ == "__main__":
                     FILE_SAS_OUT_LIB, FILE_SAS_OUT_TBL = get_output_library_table(record_content)
                     FILE_SAS_INP_LIB, FILE_SAS_INP_TBL = get_input_library_table(record_content)
                     # FILE_SAS_INP_ROW_RD  # Need to get some example to implement
-                    FILE_LN_NUM = get_sas_file_line_number(record_content)
+                    if FILE_SAS_F_LOC == "":
+                        FILE_LN_NUM = ""
+                    else:
+                        FILE_LN_NUM = get_sas_file_line_number(record_content)
+
                     FILE_SAS_STP, FILE_SAS_STP_NM = get_sas_step_name(record_content)
                     if FILE_SAS_STP == 'SAS Initialization' or FILE_SAS_STP == 'SAS System':
                         continue
