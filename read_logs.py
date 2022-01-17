@@ -3,27 +3,31 @@ import re
 import logging
 import pandas as pd
 
-# logging.disable(logging.DEBUG)
+logging.disable(logging.DEBUG)
 logging.basicConfig(level=logging.DEBUG, format='%(asctime)s-%(levelname)s-%(message)s')
-logging.debug('start of the program')
+logging.info('start of the program')
 
 
-# get log file from \logs folder. If there is not a log, it raises Exception
-# return absolute path of the log file and filename pair of list
-# comment: need to enhance to get all the log files regardless of folder structure (1/14)
-def get_log_file_list():
-    # check log folder exists
-    if not os.path.isdir('logs'):
-        os.makedirs('logs')
-        logging.debug('"logs" folder is just created on current location.\nplease put log files in the directory')
-        logging.debug('the location is ' + str(os.getcwd()) + "\\logs")
-        raise Exception('please put log files in the "\\logs" folder')
+def getInventory(current_path, current_folder, visited, file_list):
+    current_path = current_path + '\\' + current_folder
+    visited[current_path] = True
+    logging.debug("current path is " + current_path)
+    folders = []
+    current_path_files = os.listdir(current_path)
+    for file_or_folder in current_path_files:
+        if os.path.isdir(current_path + '\\' + file_or_folder):
+            folders.append(file_or_folder)
+        else:
+            file_list.append((current_path, file_or_folder))
 
-    log_file_list = []
-    for filename in os.listdir('logs_test'):
-        if os.path.isfile(os.path.join('logs_test', filename)):
-            log_file_list.append([os.path.abspath('logs_test'), filename])
-    return log_file_list
+    logging.debug("file list is")
+    for filepath, filename in file_list:
+        logging.debug(filepath + " " + filename)
+    logging.debug("***************************")
+    for child_folder in folders:
+        if visited.get(current_path + '\\' + child_folder) is None:
+            logging.debug("go down to " + child_folder)
+            getInventory(current_path, child_folder, visited, file_list)
 
 
 # read log contents from given file_path
@@ -305,12 +309,6 @@ if __name__ == "__main__":
     FILE_SAS_EXC_CPU_TM = ""
     FILE_SAS_EXC_RL_TM = ""
 
-    extracted_record = [FILE_ID, FILE_PTH, FILE_NM, FILE_USR_NM, FILE_SAS_F_ID, FILE_SAS_F_LOC, FILE_SAS_F_NM,
-                        FILE_SAS_STP, FILE_SAS_STP_NM, FILE_LN_NUM, FILE_SAS_INP_LIB, FILE_SAS_INP_TBL,
-                        FILE_SAS_INP_FIL_NM, FILE_SAS_INP_ROW_RD, FILE_SAS_OUT_LIB, FILE_SAS_OUT_TBL, FILE_SAS_ROW_WRT,
-                        FILE_SAS_INP_MUL_FLG, FILE_SAS_INP_MUL_TBLS, FILE_EXC_DT, FILE_SAS_EXC_TM, FILE_SAS_EXC_CPU_TM,
-                        FILE_SAS_EXC_RL_TM]
-
     log_df = pd.DataFrame(columns=['FILE_ID', 'FILE_PTH', 'FILE_NM', 'FILE_USR_NM', 'FILE_SAS_F_ID',
                                    'FILE_SAS_F_LOC', 'FILE_SAS_F_NM', 'FILE_SAS_STP',
                                    'FILE_SAS_STP_NM', 'FILE_LN_NUM', 'FILE_SAS_INP_LIB',
@@ -319,13 +317,20 @@ if __name__ == "__main__":
                                    'FILE_SAS_INP_MUL_FLG', 'FILE_SAS_INP_MUL_TBLS', 'FILE_EXC_DT',
                                    'FILE_SAS_EXC_TM', 'FILE_SAS_EXC_CPU_TM', 'FILE_SAS_EXC_RL_TM'])
 
-    log_file_path_list = get_log_file_list()
+    current_path = os.getcwd()
+    current_folder = 'logs_test'
+    visited = dict()
+    file_list = []
+
+    getInventory(current_path, current_folder, visited, file_list)
+
+    #    log_file_path_list = get_log_file_list()
 
     file_id_counter = 1
     sas_file_id_counter = 1
     sas_file_dict = dict()  # key: sas_file_abs_path, value: FILE_SAS_F_ID
 
-    for file_path, file_name in log_file_path_list:
+    for file_path, file_name in file_list:
         file_full_path = file_path + '\\' + file_name
         log_content = get_log_content(file_full_path)
 
@@ -363,6 +368,9 @@ if __name__ == "__main__":
                     # FILE_SAS_INP_ROW_RD  # Need to get some example to implement
                     FILE_LN_NUM = get_sas_file_line_number(record_content)
                     FILE_SAS_STP, FILE_SAS_STP_NM = get_sas_step_name(record_content)
+                    if FILE_SAS_STP == 'SAS Initialization' or FILE_SAS_STP == 'SAS System':
+                        continue
+
                     FILE_EXC_DT, FILE_SAS_EXC_TM = get_time_info(record_content)
                     FILE_SAS_EXC_CPU_TM, FILE_SAS_EXC_RL_TM = get_process_time(record_content)
 
@@ -399,4 +407,4 @@ if __name__ == "__main__":
 
         save_df_to_xlsx(log_df)
 
-logging.debug('end of the program')
+logging.info('end of the program')
