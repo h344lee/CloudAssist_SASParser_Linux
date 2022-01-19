@@ -742,12 +742,12 @@ def proc_sql_parsing(record_content):
         # print(proc_sql_regex_list[0][2])
 
         sql_block = proc_sql_regex_list[0][0] + proc_sql_regex_list[0][2] + proc_sql_regex_list[0][3]
-
         proc_sql = get_proc_sql(sql_block)
+        print(proc_sql)
 
 
 def get_proc_sql(sql_block):
-    # +proc sql case
+    # +proc sql case: hiragana - 874       +proc sql;
     sql_block_regex = re.compile(r"(.* - \d+ \s+\+)(.*)")
     sql_lines = ""
     for sql_block_line in sql_block.splitlines():
@@ -759,7 +759,7 @@ def get_proc_sql(sql_block):
         if len(filtered_line) == 1 and len(filtered_line[0]) == 2 and filtered_line[0][1] != '':
             sql_lines += filtered_line[0][1].strip() + " "
 
-    # MPRINT proc sql case
+    # MPRINT proc sql case: MPRINT(FCF_MAIN_PROCESS.FCF_PREP.FCF_CREATE_ASC_TRANS_VIEW):   proc sql noprint;
     if sql_lines == "":
         proc_sql_mprint_regex = re.compile(r"(MPRINT\(.*\)\:)(.+)((?:\n.+)+)(NOTE|quit)", re.MULTILINE)
         proc_sql_mprint_regex_list = proc_sql_mprint_regex.findall(sql_block)
@@ -784,16 +784,20 @@ def get_proc_sql(sql_block):
                 if len(mprint_block_line_list) == 1 and mprint_block_line_list != '' and mprint_block_line_list[0][:4] != 'NOTE' and mprint_block_line_list[0][:4] != 'SYMB':
                     sql_lines += mprint_block_line_list[0]
 
-    # number proc sql case
+    # number proc sql case: Bank2BU@SASBAP - 31         proc sql
     if sql_lines == "":
-        print(sql_block)
-        print("******")
-        proc_sql_mprint_regex = re.compile(r"(MPRINT\(.*\)\:)(.+)((?:\n.+)+)(NOTE|quit)", re.MULTILINE)
-        proc_sql_mprint_regex_list = proc_sql_mprint_regex.findall(sql_block)
 
+        proc_sql_num_regex = re.compile(r".* - \d+\s+(.*)")
+        for sql_block_line in sql_block.splitlines():
+            if 'connect to' in sql_block_line:
+                sql_lines = 'pass through'
+                break
+            filtered_line = proc_sql_num_regex.findall(sql_block_line)
 
+            if len(filtered_line) == 1 and filtered_line[0] != '':
+                sql_lines += filtered_line[0].strip() + " "
 
-
+    return sql_lines
 
 
 # update a row of record to the given dataframe 'log_df'
