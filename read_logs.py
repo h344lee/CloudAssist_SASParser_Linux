@@ -733,28 +733,28 @@ def get_sas_row_write(record_content):
 
 
 def proc_sql_parsing(record_content):
-    proc_sql_regex = re.compile(r"(.*proc sql)(.+)((?:\n.+)+)(quit?|run?)", re.MULTILINE)
+    proc_sql_regex = re.compile(r"(.*proc sql)(.+)((?:\n.+)+)(quit?|run?)", re.IGNORECASE)
     proc_sql_regex_list = proc_sql_regex.findall(record_content)
 
     input_library = []
     input_table = []
+    output_library = []
+    output_table = []
 
     if len(proc_sql_regex_list) != 0:
-
         sql_block = proc_sql_regex_list[0][0] + proc_sql_regex_list[0][2] + proc_sql_regex_list[0][3]
         proc_sql = get_proc_sql(sql_block)
         input_library, input_table = get_input_table_from_sql(proc_sql)
-
-    return input_library, input_table
+        output_library, output_table = get_output_table_from_sql(proc_sql)
+    return input_library, input_table, output_library, output_table
 
 
 def get_proc_sql(sql_block):
-
     sql_lines = ""
 
     # MPRINT proc sql case: MPRINT(FCF_MAIN_PROCESS.FCF_PREP.FCF_CREATE_ASC_TRANS_VIEW):   proc sql noprint;
     if sql_lines == "":
-        proc_sql_mprint_regex = re.compile(r"(MPRINT\(.*\)\:)(.+)((?:\n.+)+)(NOTE|quit)", re.MULTILINE)
+        proc_sql_mprint_regex = re.compile(r"(MPRINT\(.*\)\:)(.+)((?:\n.+)+)(NOTE|quit)", re.IGNORECASE)
         proc_sql_mprint_regex_list = proc_sql_mprint_regex.findall(sql_block)
         if len(proc_sql_mprint_regex_list) >= 1:
             sql_lines = proc_sql_mprint_regex_list[0][1].strip() + " "
@@ -774,7 +774,9 @@ def get_proc_sql(sql_block):
                 else:
                     mprint_block_line_list = general_regex.findall(mprint_block_line)
                 # print(mprint_block_line_list)
-                if len(mprint_block_line_list) == 1 and mprint_block_line_list != '' and mprint_block_line_list[0][:4] != 'NOTE' and mprint_block_line_list[0][:4] != 'SYMB':
+                if len(mprint_block_line_list) == 1 and mprint_block_line_list != '' and mprint_block_line_list[0][
+                                                                                         :4] != 'NOTE' and \
+                        mprint_block_line_list[0][:4] != 'SYMB':
                     sql_lines += mprint_block_line_list[0]
 
     # +proc sql case: hiragana - 874       +proc sql;
@@ -788,7 +790,6 @@ def get_proc_sql(sql_block):
             # print(filtered_line)
             if len(filtered_line) == 1 and len(filtered_line[0]) == 2 and filtered_line[0][1] != '':
                 sql_lines += filtered_line[0][1].strip() + " "
-
 
     # number proc sql case: Bank2BU@SASBAP - 31         proc sql
     if sql_lines == "":
@@ -806,7 +807,7 @@ def get_proc_sql(sql_block):
 
 
 def get_input_table_from_sql(proc_sql):
-    print(proc_sql)
+    # print(proc_sql)
     input_library = []
     input_table = []
     lib_table_list = []
@@ -849,7 +850,7 @@ def get_input_table_from_sql(proc_sql):
         lib_table_list += sql_from_where_regex.findall(proc_sql)
 
     if len(lib_table_list) != 0:
-        each_lib_table_list= []
+        each_lib_table_list = []
         for lib_table in lib_table_list:
             each_lib_table_list += lib_table.split(',')
         each_lib_table_list = list(set(each_lib_table_list))
@@ -861,7 +862,7 @@ def get_input_table_from_sql(proc_sql):
                 table = table.split(' ')[0]
                 table = table.split('.')
             if len(table) == 1 and table[0] not in input_table:
-                input_library.append('WORK')
+                input_library.append('work')
                 input_table.append(table[0])
             elif table[1] not in input_table:
                 input_library.append(table[0])
@@ -873,6 +874,145 @@ def get_input_table_from_sql(proc_sql):
     # print("******")
 
     return input_library, input_table
+
+
+def get_output_table_from_sql(proc_sql):
+    # print(proc_sql)
+    output_library = []
+    output_table = []
+    lib_table_list = []
+
+    sql_view_regex = re.compile(r"create view (.*?) ")
+    lib_table_list = sql_view_regex.findall(proc_sql)
+
+    sql_table_regex = re.compile(r"create table (.*?) ")
+    lib_table_list += sql_table_regex.findall(proc_sql)
+
+    if len(lib_table_list) != 0:
+        # print(lib_table_list)
+
+        for table in lib_table_list:
+            if len(table) != 0:
+                table = table.strip()
+                table = table.split(' as ')[0]
+                table = table.split(' ')[0]
+                table = table.split('.')
+            if len(table) == 1 and table[0] not in input_table:
+                output_library.append('work')
+                output_table.append(table[0])
+            elif table[1] not in input_table:
+                output_library.append(table[0])
+                output_table.append(table[1])
+        # print(output_library)
+        # print(output_table)
+
+    return output_library, output_table
+
+
+def data_step_parsing(record_content):
+    data_step_regex = re.compile(r"(.*data)(.+?)((?:\n.+)+)(run)",  re.IGNORECASE)
+    data_step_regex_list = data_step_regex.findall(record_content)
+
+    input_library = []
+    input_table = []
+    output_library = []
+    output_table = []
+
+    if len(data_step_regex_list) != 0:
+        sql_block = data_step_regex_list[0][0] + data_step_regex_list[0][1] + data_step_regex_list[0][2] + \
+                    data_step_regex_list[0][3]
+
+        data_step_sql = get_data_step_sql(sql_block)
+        input_library, input_table = get_input_table_from_data_sql(data_step_sql)
+        output_library, output_table = get_output_table_from_data_sql(data_step_sql)
+
+    return input_library, input_table, output_library, output_table
+
+
+def get_data_step_sql(sql_block):
+    sql_lines = ""
+
+    # MPRINT proc sql case: :hxdhiraj - MPRINT(ETLS_LOADER):   data
+    if sql_lines == "":
+        data_step_sql_mprint_regex = re.compile(r"(MPRINT\(.*\)\:)(.+?)((?:\n.+)+)(run)", re.IGNORECASE)
+        data_step_sql_mprint_regex_list = data_step_sql_mprint_regex.findall(sql_block)
+        if len(data_step_sql_mprint_regex_list) >= 1:
+            sql_lines = data_step_sql_mprint_regex_list[0][1].strip() + " "
+
+            mprint_regex = re.compile(r".* - MPRINT\(.*\)\:\s+(.*)")
+            general_regex = re.compile(r".* - (.*)")
+
+            mprint_block = data_step_sql_mprint_regex_list[0][2]
+            for mprint_block_line in mprint_block.splitlines():
+
+                if 'connect to' in mprint_block_line:
+                    sql_lines = 'pass through'
+                    break
+
+                if re.match(mprint_regex, mprint_block_line) is not None:
+                    mprint_block_line_list = mprint_regex.findall(mprint_block_line)
+                else:
+                    mprint_block_line_list = general_regex.findall(mprint_block_line)
+                    if mprint_block_line_list:
+                        mprint_block_line_list = "" if "The SAS System" in mprint_block_line_list[
+                            0] else mprint_block_line_list
+
+                if len(mprint_block_line_list) == 1 and mprint_block_line_list != '' and mprint_block_line_list[0][
+                                                                                         :4] != 'NOTE' and \
+                        mprint_block_line_list[0][:4] != 'SYMB':
+                    sql_lines += mprint_block_line_list[0]
+
+    # number + case :  - 1354      +set DmdMgt.GEOBRANDSUPADDS(where=(country_code='US'));
+    if sql_lines == "":
+
+        plus_data_step_regex = re.compile(r"(.*\+[data])(.+?)((?:\n.*)*)(run)", re.IGNORECASE)
+        plus_data_step_regex_list = plus_data_step_regex.findall(sql_block)
+
+        if len(plus_data_step_regex_list) != 0:
+            plus_sql_block = plus_data_step_regex_list[0][0] + plus_data_step_regex_list[0][1] + \
+                             plus_data_step_regex_list[0][2] + \
+                             plus_data_step_regex_list[0][3]
+
+            sql_block_regex = re.compile(r"(.* - \d+ \s+\+)(.*)")
+            for sql_block_line in plus_sql_block.splitlines():
+                if 'connect to' in sql_block_line:
+                    sql_lines = 'pass through'
+                    break
+                filtered_line = sql_block_regex.findall(sql_block_line)
+                if len(filtered_line) == 1 and len(filtered_line[0]) == 2 and filtered_line[0][1] != '':
+                    sql_lines += filtered_line[0][1].strip() + " "
+
+    # number data step sql case: :hxdhiraj - 673        data
+    if sql_lines == "":
+
+        num_data_step_regex = re.compile(r"(.*  data)(.+?)((?:\n.+)+)(run)", re.MULTILINE)
+        num_data_step_regex_list = num_data_step_regex.findall(sql_block)
+
+        if len(num_data_step_regex_list) != 0:
+            num_sql_block = num_data_step_regex_list[0][0] + num_data_step_regex_list[0][1] + \
+                            num_data_step_regex_list[0][2] + \
+                            num_data_step_regex_list[0][3]
+
+            data_step_sql_num_regex = re.compile(r".* - \d+\s+(.*)")
+            for sql_block_line in num_sql_block.splitlines():
+                if 'connect to' in sql_block_line:
+                    sql_lines = 'pass through'
+                    break
+                elif 'The SAS System' in sql_block_line or '/*' in sql_block_line:
+                    continue
+
+                filtered_line = data_step_sql_num_regex.findall(sql_block_line)
+
+                if len(filtered_line) == 1 and filtered_line[0] != '':
+                    sql_lines += filtered_line[0].strip() + " "
+
+    print(sql_lines)
+
+
+def get_input_table_from_data_sql(data_step_sql):
+
+
+
 
 # update a row of record to the given dataframe 'log_df'
 def save_record_to_df(log_df, extracted_record):
@@ -1017,17 +1157,33 @@ if __name__ == "__main__":
                     # more data extractions needed to be here
 
                     if FILE_SAS_STP == "PROCEDURE Statement":
-                        input_lib, input_table = proc_sql_parsing(record_content)
+                        input_lib, input_table, output_lib, output_table = proc_sql_parsing(record_content)
                         if input_table and len(input_table) != 0:
-                            for lib in input_lib:
-                                if lib not in FILE_SAS_INP_LIB:
-                                    FILE_SAS_INP_LIB += lib+";"
-                            for tbl in input_table:
-                                if tbl not in FILE_SAS_INP_TBL:
-                                    FILE_SAS_INP_TBL += tbl+";"
+                            if FILE_SAS_INP_TBL == "":
+                                FILE_SAS_INP_LIB = ';'.join(input_lib)
+                                FILE_SAS_INP_TBL = ';'.join(input_table)
+                            else:
+                                for lib, tbl in zip(input_lib, input_table):
+                                    if tbl not in FILE_SAS_INP_TBL:
+                                        FILE_SAS_INP_LIB += ";" + lib
+                                        FILE_SAS_INP_TBL += ";" + tbl
+
+                        if output_table and len(output_table) != 0:
+                            if FILE_SAS_OUT_TBL == "":
+                                FILE_SAS_OUT_LIB = ';'.join(output_lib)
+                                FILE_SAS_OUT_TBL = ';'.join(output_table)
+                            else:
+                                for lib, tbl in zip(output_lib, output_table):
+                                    if tbl not in FILE_SAS_OUT_TBL:
+                                        FILE_SAS_OUT_LIB += ";" + lib
+                                        FILE_SAS_OUT_TBL += ";" + tbl
+
+
+
 
                     else:
                         pass  # data_step_parsing(record_content)
+                        input_lib, input_table = data_step_parsing(record_content)
 
                     if FILE_SAS_STP_NM == 'DATA':
                         FILE_SAS_PROC_PROD, FILE_SAS_PROC_CAT = 'Base SAS', 'Data Management'
