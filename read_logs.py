@@ -885,8 +885,8 @@ def get_input_table_from_sql(proc_sql):
                 input_table.append(table[1])
 
     # print("query :" + proc_sql)
-    print(input_library)
-    print(input_table)
+    # print(input_library)
+    # print(input_table)
     # print("******")
 
     return input_library, input_table
@@ -918,8 +918,6 @@ def get_output_table_from_sql(proc_sql):
             elif table[1] not in output_table:
                 output_library.append(table[0])
                 output_table.append(table[1])
-    print(output_library)
-    print(output_table)
 
     return output_library, output_table
 
@@ -1040,17 +1038,51 @@ def get_input_table_from_data_sql(data_step_sql):
     input_lib = []
     input_table = []
 
-    set_regex = re.compile(r" set (.*?)(;|\(| )")
-    set_regex_list = set_regex.findall(data_step_sql)
+    set_lib_table_list = []
+    merge_lib_table_list = []
+    update_lib_table_list = []
 
-    # need to work with 'UPDATE' and 'MERGE'
+    # get input library and table from set
+    set_between_quote_regex = re.compile(r"\".*? set .*\"")
 
-    if len(set_regex_list) != 0:
-        # print(set_regex_list)
+    if re.search(set_between_quote_regex, data_step_sql) is None:
+        set_regex = re.compile(r" set (.*?)(;|\(| )")
+        set_lib_table_list = set_regex.findall(data_step_sql)
+        set_lib_table_list = [element[0] for element in set_lib_table_list if element[0] is not ""]
 
-        for table in set_regex_list:
-            if len(table) != 0:
-                table = table[0].strip()
+    # get input library and table from merge
+    merge_regex = re.compile(r"merge (.*?);")
+    if re.search(merge_regex, data_step_sql) is not None:
+        merge_regex_list = merge_regex.findall(data_step_sql)
+        merge_lib_table_regex = re.compile(r"(.*?)(\(.*\) | \(.*\)| )")
+        merge_lib_table_list = merge_lib_table_regex.findall(merge_regex_list[0])
+        merge_lib_table_list = [element[0] for element in merge_lib_table_list if element[0] is not ""]
+
+        # exception case 1 : if merge is between quotes
+        merge_between_quote_regex = re.compile(r"\".*?merge .*?\"")
+        if re.search(merge_between_quote_regex, data_step_sql) is not None:
+            merge_lib_table_list = []
+
+    # need to work with 'UPDATE'
+    update_regex = re.compile(r"update (.*?);")
+    if re.search(update_regex, data_step_sql) is not None:
+        update_regex_list = update_regex.findall(data_step_sql)
+        update_lib_table_regex = re.compile(r"(.*?)(\(.*\) | \(.*\)| )")
+        update_lib_table_list = update_lib_table_regex.findall(update_regex_list[0])
+        update_lib_table_list = [element[0] for element in update_lib_table_list if element[0] is not ""]
+
+        # exception case 1 : if update is between quotes
+        update_between_quote_regex = re.compile(r"\".*?update .*?\"")
+        if re.search(update_between_quote_regex, data_step_sql) is not None:
+            update_lib_table_list = []
+
+    input_regex_list = set_lib_table_list + merge_lib_table_list + update_lib_table_list
+
+    if len(input_regex_list) != 0:
+
+        for table in input_regex_list:
+            if table != "":
+                table = table.strip()
                 table = table.split(' as ')[0]
                 table = table.split(' ')[0]
                 table = table.split('.')
@@ -1063,8 +1095,6 @@ def get_input_table_from_data_sql(data_step_sql):
                 input_lib.append(table[0])
                 input_table.append(table[1])
 
-    print(input_lib)
-    print(input_table)
     return input_lib, input_table
 
 
@@ -1111,9 +1141,7 @@ def get_output_table_from_data_sql(data_step_sql):
                     output_table.append(table[1])
         #
         # print(data_out_tbl_list)
-    print(output_lib)
-    print(output_table)
-    print("*")*50
+
     return output_lib, output_table
 
 
@@ -1255,8 +1283,6 @@ if __name__ == "__main__":
                     FILE_SAS_INP_FIL_NM = get_input_file_name(record_content)
                     FILE_SAS_OUT_LIB, FILE_SAS_OUT_TBL = get_output_library_table(record_content)
 
-                    print("point 1 ")
-                    print(FILE_SAS_OUT_TBL)
 
                     FILE_SAS_INP_LIB, FILE_SAS_INP_TBL = get_input_library_table(record_content)
                     # FILE_SAS_INP_ROW_RD  # Need to get some example to implement
@@ -1285,8 +1311,7 @@ if __name__ == "__main__":
                             FILE_SAS_OUT_TBL = sas_row_write_data[2]
                         else:
                             FILE_SAS_OUT_TBL = ';'.join([FILE_SAS_OUT_TBL, str(sas_row_write_data[2])])
-                        print("point 2 ")
-                        print(FILE_SAS_OUT_TBL)
+
                     # more data extractions needed to be here
 
                     if FILE_SAS_STP == "PROCEDURE Statement":
@@ -1304,9 +1329,6 @@ if __name__ == "__main__":
                                                                                          FILE_SAS_OUT_LIB,
                                                                                          FILE_SAS_OUT_TBL)
 
-                        print("point 3 ")
-                        print(FILE_SAS_OUT_TBL)
-
                     if FILE_SAS_STP_NM == 'DATA':
                         FILE_SAS_PROC_PROD, FILE_SAS_PROC_CAT = 'Base SAS', 'Data Management'
                     elif FILE_SAS_STP_NM == '':
@@ -1314,8 +1336,12 @@ if __name__ == "__main__":
                     else:
                         FILE_SAS_PROC_PROD, FILE_SAS_PROC_CAT = cat_prod_dict[FILE_SAS_STP_NM.upper()]
 
-                    print("point 4 ")
-                    print(FILE_SAS_OUT_TBL)
+                    if FILE_SAS_INP_LIB != "":
+                        FILE_SAS_INP_MUL_FLG = 1
+                        FILE_SAS_INP_MUL_TBLS = 1
+                    else:
+                        FILE_SAS_INP_MUL_FLG = 0
+                        FILE_SAS_INP_MUL_TBLS = 0
 
                     FILE_ID = 'LOG_' + str(file_id_counter)
                     file_id_counter += 1
