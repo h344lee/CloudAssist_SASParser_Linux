@@ -1258,7 +1258,7 @@ def get_migration_disp(FILE_SAS_EXC_CPU_TM, FILE_SAS_EXC_RL_TM, FILE_SAS_STP, FI
     if FILE_SAS_EXC_CPU_TM >= 30.00:
         recommendation = "Code Change"
         RULE_ID = '1'
-    elif FILE_SAS_EXC_CPU_TM >= FILE_SAS_EXC_RL_TM:
+    elif FILE_SAS_EXC_CPU_TM >= FILE_SAS_EXC_RL_TM and FILE_SAS_EXC_CPU_TM != 0 :
         recommendation = "Code Change"
         RULE_ID = '2'
     elif FILE_SAS_STP == 'PROCEDURE Statement' and FILE_SAS_STP_NM == 'LOGISTIC':
@@ -1444,10 +1444,19 @@ if __name__ == "__main__":
         sas_file_content_list = get_sas_files(log_content)
         for sas_file_abs_path, sas_file_content in sas_file_content_list:
 
+            temp_num = 1
+
             record_content_list = re.split(r"seconds\n.* -       \n", sas_file_content)
             for record_content in record_content_list:
                 if record_content[-25:-17] != 'cpu time':
                     continue
+
+                # print("record content num:" + str(temp_num))
+                # temp_num+=1
+                # print(record_content)
+                # print("********************")
+
+
                 # update sas file id and sas file name and path if it is updated.
                 if sas_file_abs_path != '':
                     if sas_file_dict.get(sas_file_abs_path) is None:
@@ -1503,7 +1512,7 @@ if __name__ == "__main__":
                                                                                      FILE_SAS_INP_TBL)
 
                 else:
-                    pass  # data_step_parsing(record_content)
+                    #pass  # data_step_parsing(record_content)
                     input_lib, input_table, output_lib, output_table = data_step_parsing(record_content)
                     FILE_SAS_OUT_LIB, FILE_SAS_OUT_TBL = lib_table_write_to_variable(input_lib, input_table,
                                                                                      output_lib, output_table,
