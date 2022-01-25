@@ -2,11 +2,12 @@ import os
 import re
 import logging
 import pandas as pd
+import warnings
+warnings.simplefilter(action='ignore', category=FutureWarning)
 
 logging.disable(logging.DEBUG)
 logging.basicConfig(level=logging.DEBUG, format='%(asctime)s-%(levelname)s-%(message)s')
 logging.info('start of the program')
-
 
 def init_proc_cat_prod(cat_prod_dict):
     cat_prod_dict["ACECLUS"] = ("SAS/STAT", "Analytics")
@@ -544,7 +545,7 @@ def get_sas_file_line_number(record_content):
     if sas_file_line_obj is None:
         return ""
     else:
-        return sas_file_line_obj.group(1)
+        return float(sas_file_line_obj.group(1))
 
 
 # get input file such as *.csv
@@ -1053,7 +1054,7 @@ def get_input_table_from_data_sql(data_step_sql):
     if re.search(set_between_quote_regex, data_step_sql) is None:
         set_regex = re.compile(r" set (.*?)(;|\(| )")
         set_lib_table_list = set_regex.findall(data_step_sql)
-        set_lib_table_list = [element[0] for element in set_lib_table_list if element[0] is not ""]
+        set_lib_table_list = [element[0] for element in set_lib_table_list if element[0] != ""]
 
     # get input library and table from merge
     merge_regex = re.compile(r"merge (.*?);")
@@ -1061,7 +1062,7 @@ def get_input_table_from_data_sql(data_step_sql):
         merge_regex_list = merge_regex.findall(data_step_sql)
         merge_lib_table_regex = re.compile(r"(.*?)(\(.*\) | \(.*\)| )")
         merge_lib_table_list = merge_lib_table_regex.findall(merge_regex_list[0])
-        merge_lib_table_list = [element[0] for element in merge_lib_table_list if element[0] is not ""]
+        merge_lib_table_list = [element[0] for element in merge_lib_table_list if element[0] != ""]
 
         # exception case 1 : if merge is between quotes
         merge_between_quote_regex = re.compile(r"\".*?merge .*?\"")
@@ -1074,7 +1075,7 @@ def get_input_table_from_data_sql(data_step_sql):
         update_regex_list = update_regex.findall(data_step_sql)
         update_lib_table_regex = re.compile(r"(.*?)(\(.*\) | \(.*\)| )")
         update_lib_table_list = update_lib_table_regex.findall(update_regex_list[0])
-        update_lib_table_list = [element[0] for element in update_lib_table_list if element[0] is not ""]
+        update_lib_table_list = [element[0] for element in update_lib_table_list if element[0] != ""]
 
         # exception case 1 : if update is between quotes
         update_between_quote_regex = re.compile(r"\".*?update .*?\"")
@@ -1120,7 +1121,7 @@ def get_output_table_from_data_sql(data_step_sql):
             data_out_tbl_regex = re.compile(r"(.*?)(\(.*?\)| )")
             data_out_tbl_list = data_out_tbl_regex.findall(data_out_string)
             if len(data_out_tbl_list) != 0:
-                data_out_tbl_list = [element[0] for element in data_out_tbl_list if element[0] is not ""]
+                data_out_tbl_list = [element[0] for element in data_out_tbl_list if element[0] != ""]
                 # print(data_out_tbl_list)
 
         elif ' ' in data_out_tbl_list[0]:
@@ -1174,6 +1175,11 @@ def lib_table_write_to_variable(input_lib, input_table, output_lib, output_table
     return FILE_SAS_LIB, FILE_SAS_TBL
 
 
+# 1. check the record_contest has a libname ABC oracle/db2/hadoop/etc
+# 2. if the database type is not base or V9 save it to ext_db_lib_ref_list
+# 3.     ext_db_ref_list is created based on each file as empty list
+#        return the name of the database name
+# 4. on main function, check proc sql in / out part before save it to pandas.
 def get_ext_db(record_content):
     ext_db_name_list = []
     # Check with proc sql statement
@@ -1223,11 +1229,126 @@ def ext_db_checker(record_content):
 
     return library_name_list, database_name_list
 
-    # 1. check the record_contest has a libname ABC oracle/db2/hadoop/etc
-    # 2. if the database type is not base or V9 save it to ext_db_lib_ref_list
-    # 3.     ext_db_ref_list is created based on each file as empty list
-    #        return the name of the database name
-    # 4. on main function, check proc sql in / out part before save it to pandas.
+
+def get_migration_disp(FILE_SAS_EXC_CPU_TM, FILE_SAS_EXC_RL_TM, FILE_SAS_STP, FILE_SAS_STP_NM, record_content):
+    RULE_ID = ""
+    recommendation = "Lift and Shift"
+
+    FILE_SAS_EXC_CPU_TM = float(FILE_SAS_EXC_CPU_TM)
+    FILE_SAS_EXC_RL_TM = float(FILE_SAS_EXC_RL_TM)
+
+    data_statement = ""
+
+    data_step_regex = re.compile(r"(.* INFO .* data)(.+?)((?:\n.+)+)(run)", re.IGNORECASE)
+    data_step_regex_list = data_step_regex.findall(record_content)
+
+    if len(data_step_regex_list) != 0:
+        sql_block = data_step_regex_list[0][0] + data_step_regex_list[0][1] + data_step_regex_list[0][2] + \
+                    data_step_regex_list[0][3]
+        data_statement = get_data_step_sql(sql_block)
+
+    proc_sql = ""
+    proc_sql_regex = re.compile(r"(.* INFO .*proc sql)(.+)((?:\n.+)+)(quit?|run?)", re.IGNORECASE)
+    proc_sql_regex_list = proc_sql_regex.findall(record_content)
+
+    if len(proc_sql_regex_list) != 0:
+        sql_block = proc_sql_regex_list[0][0] + proc_sql_regex_list[0][2] + proc_sql_regex_list[0][3]
+        proc_sql = get_proc_sql(sql_block)
+
+    if FILE_SAS_EXC_CPU_TM >= 30.00:
+        recommendation = "Code Change"
+        RULE_ID = '1'
+    elif FILE_SAS_EXC_CPU_TM >= FILE_SAS_EXC_RL_TM:
+        recommendation = "Code Change"
+        RULE_ID = '2'
+    elif FILE_SAS_STP == 'PROCEDURE Statement' and FILE_SAS_STP_NM == 'LOGISTIC':
+        recommendation = "Code Change"
+        RULE_ID = '4'
+    elif FILE_SAS_STP == 'PROCEDURE Statement' and FILE_SAS_STP_NM == 'MIXED':
+        recommendation = "Code Change"
+        RULE_ID = '5'
+    elif FILE_SAS_STP == 'PROCEDURE Statement' and FILE_SAS_STP_NM == 'REG':
+        recommendation = "Code Change"
+        RULE_ID = '6'
+    elif FILE_SAS_STP == 'PROCEDURE Statement' and FILE_SAS_STP_NM == 'SQL':
+        recommendation = "Code Change"
+        RULE_ID = '9'
+    elif FILE_SAS_STP == 'PROCEDURE Statement' and FILE_SAS_STP_NM == 'SORT':
+        recommendation = "Code Change"
+        RULE_ID = '10'
+    elif FILE_SAS_STP == 'PROCEDURE Statement' and FILE_SAS_STP_NM == 'TRANSPOSE':
+        recommendation = "Code Change"
+        RULE_ID = '11'
+    elif FILE_SAS_STP == 'PROCEDURE Statement' and FILE_SAS_STP_NM == 'FORMAT':
+        recommendation = "Code Change"
+        RULE_ID = '12'
+    elif FILE_SAS_STP == 'PROCEDURE Statement' and FILE_SAS_STP_NM == 'FEDSQL':
+        recommendation = "Code Change"
+        RULE_ID = '13'
+    elif FILE_SAS_STP == 'PROCEDURE Statement' and FILE_SAS_STP_NM == 'APPEND':
+        recommendation = "Code Change"
+        RULE_ID = '14'
+    elif FILE_SAS_STP == 'DATA statement' and 'index' in data_statement.lower():
+        recommendation = "Code Change"
+        RULE_ID = '15'
+    elif FILE_SAS_STP == 'DATA statement' and 'firstobs' in data_statement.lower():
+        recommendation = "Code Change"
+        RULE_ID = '16'
+    elif FILE_SAS_STP == 'DATA statement' and 'obs' in data_statement.lower():
+        recommendation = "Code Change"
+        RULE_ID = '17'
+    elif FILE_SAS_STP == 'DATA statement' and 'pointobs' in data_statement.lower():
+        recommendation = "Code Change"
+        RULE_ID = '18'
+    elif FILE_SAS_STP == 'DATA statement' and 'infile' in data_statement.lower():
+        recommendation = "Code Change"
+        RULE_ID = '19'
+    elif FILE_SAS_STP == 'DATA statement' and 'input' in data_statement.lower():
+        recommendation = "Code Change"
+        RULE_ID = '20'
+    elif FILE_SAS_STP == 'DATA statement' and 'datalines' in data_statement.lower():
+        recommendation = "Code Change"
+        RULE_ID = '21'
+    elif FILE_SAS_STP == 'DATA statement' and 'varfmt' in data_statement.lower():
+        recommendation = "Code Change"
+        RULE_ID = '22'
+    elif FILE_SAS_STP == 'PROCEDURE Statement' and 'varfmt' in proc_sql.lower():
+        recommendation = "Code Change"
+        RULE_ID = '22'
+
+    return RULE_ID, recommendation
+
+def get_migr_rule(FILE_SAS_MIGR_RUL_ID):
+
+    if FILE_SAS_MIGR_RUL_ID == "":
+        return ""
+
+    migr_rule_dict = {
+        "1": "Real_Time >=30",
+        "2": "CPU Time >= Real Time",
+        "3": "volume of table > 50GB",
+        "4": "SAS Step == PROC LOGISTIC",
+        "5": "SAS Step == PROC MIXED",
+        "6": "SAS Step == PROC REG",
+        "7": "no_of_functon_used > 20",
+        "8": "Reporting Proc Real Time >  1 hr",
+        "9": "Procedure == PROC SQL",
+        "10": "Procedure == PROC SORT",
+        "11": "Procedure == PROC TRANSPOSE",
+        "12": "Procedure == PROC FORMAT",
+        "13": "Procedure == PROC FedSQL",
+        "14": "Procedure == PROC APPEND",
+        "15": "INDEX  used in DATA statement",
+        "16": "FIRSTOBS used in DATA statement",
+        "17": "OBS used in DATA statement",
+        "18": "POINTOBS used in DATA statement",
+        "19": "INFILE in Data statement",
+        "20": "INPUT in Data statement",
+        "21": "DATALINES in Data statement",
+        "22": "VARFMT function present"
+    }
+    migration_rule = migr_rule_dict.get(FILE_SAS_MIGR_RUL_ID)
+    return migration_rule
 
 # update a row of record to the given dataframe 'log_df'
 def save_record_to_df(log_df, extracted_record):
@@ -1238,6 +1359,7 @@ def save_record_to_df(log_df, extracted_record):
 # save the dataframe to an excel file
 def save_df_to_xlsx(log_df):
     # check "\output" folder and make it if it is not exist
+
     if not os.path.isdir('output'):
         os.makedirs('output')
     log_df.to_excel("output\\output.xlsx", float_format="%0.2f", index=False)
@@ -1275,6 +1397,7 @@ if __name__ == "__main__":
     FILE_SAS_PROC_PROD = ""
     FILE_SAS_MIGR_DISP = ""
     FILE_SAS_MIGR_RUL_ID = ""
+    FILE_SAS_MIGR_RUL = ""
     FILE_SAS_MIGR_REC_ACT = ""
     FILE_SAS_PROC_INMEM_FLG = 0
     FILE_SAS_PROC_ELT_FLG = 0
@@ -1291,9 +1414,9 @@ if __name__ == "__main__":
                                    'FILE_SAS_INP_MUL_FLG', 'FILE_SAS_INP_MUL_TBLS', 'FILE_SAS_EXT_DB', 'FILE_EXC_DT',
                                    'FILE_SAS_EXC_TM', 'FILE_SAS_EXC_CPU_TM', 'FILE_SAS_EXC_RL_TM',
                                    'FILE_SAS_PROC_CAT', 'FILE_SAS_PROC_PROD', 'FILE_SAS_MIGR_DISP',
-                                   'FILE_SAS_MIGR_RUL_ID', 'FILE_SAS_MIGR_REC_ACT', 'FILE_SAS_PROC_INMEM_FLG',
-                                   'FILE_SAS_PROC_ELT_FLG', 'FILE_SAS_PROC_GRID_FLG', 'FILE_SAS_PROC_INDB_FLG',
-                                   'FILE_SAS_SRC_TYP', 'FILE_SAS_ENV_NAME'])
+                                   'FILE_SAS_MIGR_RUL_ID', 'FILE_SAS_MIGR_RUL', 'FILE_SAS_MIGR_REC_ACT',
+                                   'FILE_SAS_PROC_INMEM_FLG', 'FILE_SAS_PROC_ELT_FLG', 'FILE_SAS_PROC_GRID_FLG',
+                                   'FILE_SAS_PROC_INDB_FLG', 'FILE_SAS_SRC_TYP', 'FILE_SAS_ENV_NAME'])
 
     current_path = os.getcwd()
     current_folder = 'logs_test'
@@ -1315,24 +1438,14 @@ if __name__ == "__main__":
 
         file_full_path = file_path + '\\' + file_name
         log_content = get_log_content(file_full_path)
-        print(file_name)
-        print("*")*50
         FILE_PTH = file_full_path
         FILE_NM = file_name
-        # user_names = get_user_name(log_content)  # need to update later
-        # test_record_content_sum = 0
 
-        # for user in user_names:
-        #    FILE_USR_NM = user
-        #    user_log_content = get_user_log_content(user, log_content)
         sas_file_content_list = get_sas_files(log_content)
         for sas_file_abs_path, sas_file_content in sas_file_content_list:
 
             record_content_list = re.split(r"seconds\n.* -       \n", sas_file_content)
-            # print("number of content : " + str(len(record_content_list)))
-            # test_record_content_sum += len(record_content_list)
             for record_content in record_content_list:
-                # drop if it is the end of the log content which does not have meaningful information
                 if record_content[-25:-17] != 'cpu time':
                     continue
                 # update sas file id and sas file name and path if it is updated.
@@ -1344,15 +1457,11 @@ if __name__ == "__main__":
                     sas_file_norm_path = os.path.normpath(sas_file_abs_path)
                     FILE_SAS_F_NM = sas_file_norm_path.split(os.sep)[-1]
 
-                # get a list of name of external database library reference
-                # for future purpose
-                # lib_name_list, db_type_list = ext_db_checker(record_content)
-                # ext_db_lib_name_list += lib_name_list
-                # ext_db_lib_name_list = list(set(ext_db_lib_name_list))
-                # print(ext_db_lib_name_list)
-
                 FILE_USR_NM = get_user_name(record_content)
                 FILE_SAS_F_LOC = sas_file_abs_path
+                if FILE_SAS_F_LOC == "":
+                    FILE_SAS_F_NM = ""
+                    FILE_SAS_F_ID = ""
                 FILE_SAS_INP_FIL_NM = get_input_file_name(record_content)
                 FILE_SAS_OUT_LIB, FILE_SAS_OUT_TBL = get_output_library_table(record_content)
 
@@ -1402,9 +1511,7 @@ if __name__ == "__main__":
                                                                                      FILE_SAS_OUT_TBL)
 
                 ext_db_list = get_ext_db(record_content)
-
                 FILE_SAS_EXT_DB = ';'.join(ext_db_list)
-
                 if FILE_SAS_EXT_DB != "":
                     FILE_SAS_OUT_LIB = FILE_SAS_OUT_TBL = FILE_SAS_INP_LIB = FILE_SAS_INP_TBL = FILE_SAS_ROW_WRT = ""
                     FILE_SAS_INP_MUL_TBLS = FILE_SAS_INP_MUL_FLG = 0
@@ -1423,6 +1530,11 @@ if __name__ == "__main__":
                     FILE_SAS_INP_MUL_FLG = 0
                     FILE_SAS_INP_MUL_TBLS = 0
 
+                FILE_SAS_MIGR_RUL_ID, FILE_SAS_MIGR_DISP = get_migration_disp(FILE_SAS_EXC_CPU_TM, FILE_SAS_EXC_RL_TM,
+                                                                         FILE_SAS_STP, FILE_SAS_STP_NM, record_content)
+
+                FILE_SAS_MIGR_RUL = get_migr_rule(FILE_SAS_MIGR_RUL_ID)
+
                 FILE_ID = 'LOG_' + str(file_id_counter)
                 file_id_counter += 1
                 extracted_record = [FILE_ID, FILE_PTH, FILE_NM, FILE_USR_NM, FILE_SAS_F_ID, FILE_SAS_F_LOC,
@@ -1431,7 +1543,7 @@ if __name__ == "__main__":
                                     FILE_SAS_OUT_TBL, FILE_SAS_ROW_WRT, FILE_SAS_INP_MUL_FLG, FILE_SAS_INP_MUL_TBLS,
                                     FILE_SAS_EXT_DB, FILE_EXC_DT, FILE_SAS_EXC_TM, FILE_SAS_EXC_CPU_TM,
                                     FILE_SAS_EXC_RL_TM, FILE_SAS_PROC_CAT, FILE_SAS_PROC_PROD, FILE_SAS_MIGR_DISP,
-                                    FILE_SAS_MIGR_RUL_ID, FILE_SAS_MIGR_REC_ACT, FILE_SAS_PROC_INMEM_FLG,
+                                    FILE_SAS_MIGR_RUL_ID, FILE_SAS_MIGR_RUL, FILE_SAS_MIGR_REC_ACT, FILE_SAS_PROC_INMEM_FLG,
                                     FILE_SAS_PROC_ELT_FLG, FILE_SAS_PROC_GRID_FLG, FILE_SAS_PROC_INDB_FLG,
                                     FILE_SAS_SRC_TYP, FILE_SAS_ENV_NAME]
 
