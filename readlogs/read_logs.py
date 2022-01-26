@@ -1050,9 +1050,8 @@ def get_input_table_from_data_sql(data_step_sql):
 
     # get input library and table from set
     set_between_quote_regex = re.compile(r"\".*? set .*\"")
-
     if re.search(set_between_quote_regex, data_step_sql) is None:
-        set_regex = re.compile(r" set (.*?)(;|\(| )")
+        set_regex = re.compile(r"[;| ]set (.*?)(;|\(| )")
         set_lib_table_list = set_regex.findall(data_step_sql)
         set_lib_table_list = [element[0] for element in set_lib_table_list if element[0] != ""]
 
@@ -1105,32 +1104,59 @@ def get_input_table_from_data_sql(data_step_sql):
 
 
 def get_output_table_from_data_sql(data_step_sql):
+
+    # if 'index' in data_step_sql and 'compress=yes' in data_step_sql:
+    #     print(data_step_sql)
+
     output_lib = []
     output_table = []
 
     data_out_tbl_regex = re.compile(r"data (.*?);")
     data_out_tbl_list = data_out_tbl_regex.findall(data_step_sql)
+    data_out_bracket_list = []
+    data_out_space_list = []
+    data_out_view_list = []
 
     if len(data_out_tbl_list) != 0:
 
         if '_null_' in data_out_tbl_list[0]:
-            data_out_tbl_list = ""
-
-        elif '(' in data_out_tbl_list[0]:
+            data_out_tbl_list = []
+        else:
             data_out_string = data_out_tbl_list[0]
-            data_out_tbl_regex = re.compile(r"(.*?)(\(.*?\)| )")
-            data_out_tbl_list = data_out_tbl_regex.findall(data_out_string)
-            if len(data_out_tbl_list) != 0:
-                data_out_tbl_list = [element[0] for element in data_out_tbl_list if element[0] != ""]
-                # print(data_out_tbl_list)
+            data_out_tbl_list = []
 
-        elif ' ' in data_out_tbl_list[0]:
-            data_out_tbl_list = data_out_tbl_list[0].split(" ")
+            if " " not in data_out_string:
+                data_out_tbl_list.append(data_out_string)
 
-        # print(data_out_tbl_list)
+            if '(' in data_out_string:
+                data_out_tbl_regex = re.compile(r"(.*?)(\(.*?\)| )")
+                data_out_bracket_list = data_out_tbl_regex.findall(data_out_string)
+                if len(data_out_bracket_list) != 0:
+                    data_out_bracket_list = [element[0] for element in data_out_bracket_list if '.' in element[0]]
+
+            elif ' ' in data_out_string and '/view' not in data_out_string:
+                data_out_space_list = data_out_string.split(" ")
+
+            elif ' ' in data_out_string and '/view' in data_out_string:
+                data_out_space_list = [data_out_string.split(" ")[0]]
+
+            if '/view' in data_out_string:
+                data_out_view_list = [data_out_string.split("=")[-1]]
+
+            # print(data_out_string)
+            # print(data_out_bracket_list)
+            # print(data_out_space_list)
+            # print(data_out_view_list)
+            # print("*****")
+    data_out_tbl_list = data_out_tbl_list + data_out_bracket_list + data_out_space_list + data_out_view_list
+
     if len(data_out_tbl_list) != 0:
 
         for table in data_out_tbl_list:
+
+            if table == "":
+                continue
+            # print(table)
             if len(table) != 0:
                 table = table.strip()
                 table = table.split(' as ')[0]
@@ -1145,8 +1171,8 @@ def get_output_table_from_data_sql(data_step_sql):
                 elif table[1] not in output_table:
                     output_lib.append(table[0])
                     output_table.append(table[1])
-        #
-        # print(data_out_tbl_list)
+                # print(output_lib)
+                # print(output_table)
 
     return output_lib, output_table
 

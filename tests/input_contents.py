@@ -216,3 +216,149 @@ def input_case7():
 1456  2021-05-15T08:06:45,363 INFO  [00000090] :hxdhiraj -       real time           0.08 seconds
 1457  2021-05-15T08:06:45,363 INFO  [00000090] :hxdhiraj -       cpu time            0.09 
 """
+
+
+@fixture(scope='function')
+def input_case8():
+    return """
+19087  2021-05-14T06:46:03,905 INFO  [00001214] :Bank2BU@SASBAP - MPRINT(FCF_MAIN_PROCESS.FCF_AGP.FCF_RUN_GENERATED_HEADERS):   data stg_wtch.fsc_entity_watch_list_dim(
+19088  2021-05-14T06:46:03,906 INFO  [00001214] :Bank2BU@SASBAP - MPRINT(FCF_MAIN_PROCESS.FCF_AGP.FCF_RUN_GENERATED_HEADERS):   keep=entity_watch_list_key entity_watch_list_number watch_list_name tax_id date_of_birth year_of_birth first_name last_name middle_name entity_name match_code_individual match_code_organization 
+19089  2021-05-14T06:46:03,906 INFO  [00001214] :Bank2BU@SASBAP - match_code_addr_lines match_code_city match_code_state match_code_country match_code_full_address index=(entity_watch_list_key) compress=yes) stg_wtch.wl_ind_name(
+19090  2021-05-14T06:46:03,906 INFO  [00001214] :Bank2BU@SASBAP - MPRINT(FCF_MAIN_PROCESS.FCF_AGP.FCF_RUN_GENERATED_HEADERS):   keep=entity_watch_list_key last_name rename=(last_name=in_last_name) compress=yes) stg_wtch.wl_ind_match(
+19091  2021-05-14T06:46:03,906 INFO  [00001214] :Bank2BU@SASBAP - MPRINT(FCF_MAIN_PROCESS.FCF_AGP.FCF_RUN_GENERATED_HEADERS):   keep=entity_watch_list_key match_code_individual rename=(match_code_individual=im_match_code_individual) compress=yes) stg_wtch.wl_org_name(
+19092  2021-05-14T06:46:03,908 INFO  [00001214] :Bank2BU@SASBAP - MPRINT(FCF_MAIN_PROCESS.FCF_AGP.FCF_RUN_GENERATED_HEADERS):   keep=entity_watch_list_key entity_name rename=(entity_name=on_organization_name) compress=yes) stg_wtch.wl_org_match(
+19093  2021-05-14T06:46:03,908 INFO  [00001214] :Bank2BU@SASBAP - MPRINT(FCF_MAIN_PROCESS.FCF_AGP.FCF_RUN_GENERATED_HEADERS):   keep=entity_watch_list_key match_code_organization rename=(match_code_organization=om_match_code_organization) compress=yes) ;
+19094  2021-05-14T06:46:03,946 INFO  [00001214] :Bank2BU@SASBAP - MPRINT(FCF_MAIN_PROCESS.FCF_AGP.FCF_RUN_GENERATED_HEADERS):   set seg_kc.fsc_entity_watch_list_dim(keep=entity_watch_list_key entity_watch_list_number watch_list_name type_desc tax_id date_of_birth year_of_birth first_name last_name middle_name 
+19095  2021-05-14T06:46:03,947 INFO  [00001214] :Bank2BU@SASBAP - entity_name match_code_individual match_code_organization match_code_addr_lines match_code_city match_code_state match_code_country match_code_full_address exclude_ind change_current_ind where=(upcase(change_current_ind) eq 'Y' and upcase(exclude_ind) eq 
+19096  2021-05-14T06:46:03,947 INFO  [00001214] :Bank2BU@SASBAP - 'N')) end=eof;
+19097  2021-05-14T06:46:03,947 INFO  [00001214] :Bank2BU@SASBAP - MPRINT(FCF_MAIN_PROCESS.FCF_AGP.FCF_RUN_GENERATED_HEADERS):   if upcase(type_desc) eq 'INDIVIDUAL' and not missing(last_name) then do;
+19098  2021-05-14T06:46:03,947 INFO  [00001214] :Bank2BU@SASBAP - MPRINT(FCF_MAIN_PROCESS.FCF_AGP.FCF_RUN_GENERATED_HEADERS):   last_name=upcase(compbl(kstrip(last_name)));
+19099  2021-05-14T06:46:03,947 INFO  [00001214] :Bank2BU@SASBAP - MPRINT(FCF_MAIN_PROCESS.FCF_AGP.FCF_RUN_GENERATED_HEADERS):   output stg_wtch.fsc_entity_watch_list_dim stg_wtch.wl_ind_name stg_wtch.wl_ind_match;
+19100  2021-05-14T06:46:03,947 INFO  [00001214] :Bank2BU@SASBAP - MPRINT(FCF_MAIN_PROCESS.FCF_AGP.FCF_RUN_GENERATED_HEADERS):   end;
+19101  2021-05-14T06:46:03,947 INFO  [00001214] :Bank2BU@SASBAP - MPRINT(FCF_MAIN_PROCESS.FCF_AGP.FCF_RUN_GENERATED_HEADERS):   else if upcase(type_desc) eq 'ORGANIZATION' and not missing(entity_name) then do;
+19102  2021-05-14T06:46:03,947 INFO  [00001214] :Bank2BU@SASBAP - MPRINT(FCF_MAIN_PROCESS.FCF_AGP.FCF_RUN_GENERATED_HEADERS):   entity_name=upcase(compbl(kstrip(entity_name)));
+19103  2021-05-14T06:46:03,947 INFO  [00001214] :Bank2BU@SASBAP - MPRINT(FCF_MAIN_PROCESS.FCF_AGP.FCF_RUN_GENERATED_HEADERS):   output stg_wtch.fsc_entity_watch_list_dim stg_wtch.wl_org_name stg_wtch.wl_org_match;
+19104  2021-05-14T06:46:03,947 INFO  [00001214] :Bank2BU@SASBAP - MPRINT(FCF_MAIN_PROCESS.FCF_AGP.FCF_RUN_GENERATED_HEADERS):   end;
+19105  2021-05-14T06:46:03,947 INFO  [00001214] :Bank2BU@SASBAP - MPRINT(FCF_MAIN_PROCESS.FCF_AGP.FCF_RUN_GENERATED_HEADERS):   run;
+19106  2021-05-14T06:46:03,947 INFO  [00001214] :Bank2BU@SASBAP - 
+19107  2021-05-14T06:46:03,988 INFO  [00001214] :Bank2BU@SASBAP - NOTE: There were 0 observations read from the data set SEG_KC.FSC_ENTITY_WATCH_LIST_DIM.
+19108  2021-05-14T06:46:03,988 INFO  [00001214] :Bank2BU@SASBAP -       WHERE (UPCASE(change_current_ind)='Y') and (UPCASE(exclude_ind)='N');
+19109  2021-05-14T06:46:03,996 INFO  [00001214] :Bank2BU@SASBAP - NOTE: The data set STG_WTCH.FSC_ENTITY_WATCH_LIST_DIM has 0 observations and 17 variables.
+19110  2021-05-14T06:46:04,017 INFO  [00001214] :Bank2BU@SASBAP - NOTE: The data set STG_WTCH.WL_IND_NAME has 0 observations and 2 variables.
+19111  2021-05-14T06:46:04,022 INFO  [00001214] :Bank2BU@SASBAP - NOTE: The data set STG_WTCH.WL_IND_MATCH has 0 observations and 2 variables.
+19112  2021-05-14T06:46:04,026 INFO  [00001214] :Bank2BU@SASBAP - NOTE: The data set STG_WTCH.WL_ORG_NAME has 0 observations and 2 variables.
+19113  2021-05-14T06:46:04,038 INFO  [00001214] :Bank2BU@SASBAP - NOTE: The data set STG_WTCH.WL_ORG_MATCH has 0 observations and 2 variables.
+19114  2021-05-14T06:46:04,041 INFO  [00001214] :Bank2BU@SASBAP - NOTE: DATA statement used (Total process time):
+19115  2021-05-14T06:46:04,041 INFO  [00001214] :Bank2BU@SASBAP -       real time           0.13 seconds
+19116  2021-05-14T06:46:04,041 INFO  [00001214] :Bank2BU@SASBAP -       cpu time            0.06 
+"""
+
+
+@fixture(scope='function')
+def input_case9():
+    return """
+266  2021-05-14T06:45:18,222 INFO  [00000011] :Bank2BU@SASBAP - 
+267  2021-05-14T06:45:18,227 INFO  [00000080] :Bank2BU@SASBAP - MPRINT(FCF_MAIN_PROCESS.FCF_PREP):   proc sql noprint;
+268  2021-05-14T06:45:18,228 INFO  [00000080] :Bank2BU@SASBAP - SYMBOLGEN:  Macro variable RUNASOFDATE resolves to 20181102
+269  2021-05-14T06:45:18,228 INFO  [00000080] :Bank2BU@SASBAP - SYMBOLGEN:  Macro variable PBEGINDATE resolves to 20181026
+270  2021-05-14T06:45:18,228 INFO  [00000080] :Bank2BU@SASBAP - MPRINT(FCF_MAIN_PROCESS.FCF_PREP):   create table mst_prep.DORMANT_ACCOUNT_TRANSACTIONS as ( select b.account_number, a.dorm_days, c.currency_amount , input(put(c.date_key,8.),yymmdd8.) as date_key, c.transaction_key from work.dormprepaccts a, 
+271  2021-05-14T06:45:18,228 INFO  [00000080] :Bank2BU@SASBAP - seg_kc.fsc_account_dim b, seg_kc.fsc_cash_flow_fact c where b.account_key = c.account_key and c.date_key <= 20181102 and c.date_key >= 20181026 and b.account_number = a.account_number and a.dorm_days <= 60 ) order by account_number, date_key;
+272  2021-05-14T06:45:19,229 INFO  [00000080] :Bank2BU@SASBAP - NOTE: Table MST_PREP.DORMANT_ACCOUNT_TRANSACTIONS created, with 0 rows and 5 columns.
+273  2021-05-14T06:45:19,229 INFO  [00000080] :Bank2BU@SASBAP - 
+274  2021-05-14T06:45:19,229 INFO  [00000080] :Bank2BU@SASBAP - MPRINT(FCF_MAIN_PROCESS.FCF_PREP):   quit;
+275  2021-05-14T06:45:19,229 INFO  [00000080] :Bank2BU@SASBAP - NOTE: PROCEDURE SQL used (Total process time):
+276  2021-05-14T06:45:19,229 INFO  [00000080] :Bank2BU@SASBAP -       real time           1.00 seconds
+277  2021-05-14T06:45:19,229 INFO  [00000080] :Bank2BU@SASBAP -       cpu time            0.03 
+"""
+
+
+@fixture(scope='function')
+def input_case10():
+    return """
+813  2021-05-14T06:45:23,526 INFO  [00000141] :Bank2BU@SASBAP - SYMBOLGEN:  Macro variable RUNASOFDATE resolves to 20181102
+814  2021-05-14T06:45:23,526 INFO  [00000141] :Bank2BU@SASBAP - SYMBOLGEN:  Macro variable SEGKCSCHEMA resolves to BANK2BU
+815  2021-05-14T06:45:23,526 INFO  [00000141] :Bank2BU@SASBAP - MPRINT(FCF_MAIN_PROCESS.FCF_PREP):   create table mst_prep.account_trans20181102 as select account_number length=50, account_type_desc length=20, currency_based_account_ind length=1, account_tax_state_code length=3, party_number length=50, 
+816  2021-05-14T06:45:23,527 INFO  [00000141] :Bank2BU@SASBAP - acc_entity_segment_id, pty_entity_segment_id, annual_income_amount length=8, last_susp_actv_rpt_date length=8, last_cash_trans_rpt_date length=8, politically_exposed_person_ind length=1, customer_since_date length=8, input("20181102",yymmdd8.) as date_key 
+817  2021-05-14T06:45:23,527 INFO  [00000141] :Bank2BU@SASBAP - format=yymmdd8. length=5, transaction_cdi_code length=1, primary_medium_desc length=20, secondary_medium_desc length=20, mechanism_desc length=20, street_state_code length=3, branch_number length=25, branch_type_desc length=10, country_code_3 length=3, 
+818  2021-05-14T06:45:23,527 INFO  [00000141] :Bank2BU@SASBAP - currency_code length=3, status_desc length=20, status_reason_desc length=35, currency_amount length=8, transaction_key length=8, risk_classification length=3, associate_number length=20, expected_incoming_amount length=8, expected_outgoing_amount 
+819  2021-05-14T06:45:23,527 INFO  [00000141] :Bank2BU@SASBAP - length=8, expected_incoming_count length=8, expected_outgoing_count length=8, increased_behavior_credit_amt length=8 , increased_behavior_debit_amt length=8, increased_behavior_credit_cnt length=8, increased_behavior_debit_cnt length=8, 
+820  2021-05-14T06:45:23,527 INFO  [00000141] :Bank2BU@SASBAP - expected_credit_ceiling_amount length=8, expected_debit_ceiling_amount length=8 from connection to oracle (select Innr.*, AA.expected_incoming_amount, AA.expected_outgoing_amount, AA.expected_incoming_count, AA.expected_outgoing_count, 
+821  2021-05-14T06:45:23,527 INFO  [00000141] :Bank2BU@SASBAP - AA.increased_behavior_credit_amt , AA.increased_behavior_debit_amt, AA.increased_behavior_credit_cnt, AA.increased_behavior_debit_cnt , AA.expected_credit_ceiling_amount, AA.expected_debit_ceiling_amount from (select A.account_number, A.account_type_desc, 
+822  2021-05-14T06:45:23,527 INFO  [00000141] :Bank2BU@SASBAP - A.currency_based_account_ind, A.account_tax_state_code, B.party_number, A.entity_segment_id as acc_entity_segment_id, B.entity_segment_id as pty_entity_segment_id, B.annual_income_amount, B.last_susp_actv_rpt_date, B.last_cash_trans_rpt_date, 
+823  2021-05-14T06:45:23,527 INFO  [00000141] :Bank2BU@SASBAP - B.politically_exposed_person_ind, B.customer_since_date, B.risk_classification, C.transaction_cdi_code, C.primary_medium_desc, C.secondary_medium_desc, C.mechanism_desc, D.street_state_code, D.branch_number, D.branch_type_desc, E.country_code_3, 
+824  2021-05-14T06:45:23,527 INFO  [00000141] :Bank2BU@SASBAP - F.currency_code, G.status_desc, G.status_reason_desc, I.currency_amount, I.transaction_key, L.associate_number from BANK2BU.fsc_account_dim A, BANK2BU.fsc_party_dim B, BANK2BU.fsc_transaction_type_dim C, BANK2BU.fsc_branch_dim D, BANK2BU.fsc_country_dim 
+825  2021-05-14T06:45:23,527 INFO  [00000141] :Bank2BU@SASBAP - E, BANK2BU.fsc_currency_dim F, BANK2BU.fsc_transaction_status_dim G, BANK2BU.fsc_party_account_bridge H, BANK2BU.fsc_cash_flow_fact I, BANK2BU.fsc_associate_dim L where I.account_key = A.account_key and A.account_key = H.account_key and B.party_key = 
+826  2021-05-14T06:45:23,527 INFO  [00000141] :Bank2BU@SASBAP - H.party_key and I.transaction_type_key = C.transaction_type_key and I.transaction_status_key = G.transaction_status_key and I.country_key = E.country_key and I.branch_key = D.branch_key and I.transaction_currency_key = F.currency_key and I.date_key = 
+827  2021-05-14T06:45:23,527 INFO  [00000141] :Bank2BU@SASBAP - 20181102 and H.role_key = 1 and H.change_current_ind = 'Y' and I.associate_key = L.associate_key ) Innr left join BANK2BU.fsc_account_analysis_dim AA on AA.account_number=Innr.account_number union all select Innr.*, AA.expected_incoming_amount, 
+828  2021-05-14T06:45:23,527 INFO  [00000141] :Bank2BU@SASBAP - AA.expected_outgoing_amount, AA.expected_incoming_count, AA.expected_outgoing_count, AA.increased_behavior_credit_amt , AA.increased_behavior_debit_amt, AA.increased_behavior_credit_cnt, AA.increased_behavior_debit_cnt , AA.expected_credit_ceiling_amount, 
+829  2021-05-14T06:45:23,527 INFO  [00000141] :Bank2BU@SASBAP - AA.expected_debit_ceiling_amount from (select A.account_number, A.account_type_desc, A.currency_based_account_ind, A.account_tax_state_code, B.party_number, A.entity_segment_id as acc_entity_segment_id, B.entity_segment_id as pty_entity_segment_id, 
+830  2021-05-14T06:45:23,527 INFO  [00000141] :Bank2BU@SASBAP - B.annual_income_amount, B.last_susp_actv_rpt_date, B.last_cash_trans_rpt_date, B.politically_exposed_person_ind, B.customer_since_date, B.risk_classification, C.transaction_cdi_code, C.primary_medium_desc, C.secondary_medium_desc, C.mechanism_desc, 
+831  2021-05-14T06:45:23,527 INFO  [00000141] :Bank2BU@SASBAP - D.street_state_code, D.branch_number, D.branch_type_desc, E.country_code_3, '' as currency_code, G.status_desc, G.status_reason_desc, 0 as currency_amount, I.transaction_key, 'UNKNOWN' as associate_number from BANK2BU.fsc_account_dim A, 
+832  2021-05-14T06:45:23,527 INFO  [00000141] :Bank2BU@SASBAP - BANK2BU.fsc_party_dim B, BANK2BU.fsc_transaction_type_dim C, BANK2BU.fsc_branch_dim D, BANK2BU.fsc_country_dim E, BANK2BU.fsc_transaction_status_dim G, BANK2BU.fsc_party_account_bridge H, BANK2BU.fsc_account_event_fact I where I.account_key = 
+833  2021-05-14T06:45:23,527 INFO  [00000141] :Bank2BU@SASBAP - A.account_key and A.account_key = H.account_key and B.party_key = H.party_key and I.transaction_type_key = C.transaction_type_key and I.transaction_status_key = G.transaction_status_key and I.country_key = E.country_key and I.branch_key = D.branch_key and 
+834  2021-05-14T06:45:23,527 INFO  [00000141] :Bank2BU@SASBAP - I.date_key = 20181102 and H.role_key = 1 and H.change_current_ind = 'Y' ) Innr left join BANK2BU.fsc_account_analysis_dim AA on AA.account_number=Innr.account_number ) order by account_number, date_key;
+835  2021-05-14T06:45:23,937 INFO  [00000141] :Bank2BU@SASBAP - NOTE: Table MST_PREP.ACCOUNT_TRANS20181102 created, with 0 rows and 38 columns.
+836  2021-05-14T06:45:23,937 INFO  [00000141] :Bank2BU@SASBAP - 
+837  2021-05-14T06:45:23,939 INFO  [00000141] :Bank2BU@SASBAP - SYMBOLGEN:  Macro variable DBFLAVOR resolves to oracle
+838  2021-05-14T06:45:23,939 INFO  [00000141] :Bank2BU@SASBAP - MPRINT(FCF_MAIN_PROCESS.FCF_PREP):   disconnect from oracle;
+839  2021-05-14T06:45:23,943 INFO  [00000141] :Bank2BU@SASBAP - MPRINT(FCF_MAIN_PROCESS.FCF_PREP):   quit;
+840  2021-05-14T06:45:23,943 INFO  [00000141] :Bank2BU@SASBAP - NOTE: PROCEDURE SQL used (Total process time):
+841  2021-05-14T06:45:23,943 INFO  [00000141] :Bank2BU@SASBAP -       real time           0.68 seconds
+842  2021-05-14T06:45:23,943 INFO  [00000141] :Bank2BU@SASBAP -       cpu time            0.01 
+"""
+
+
+@fixture(scope='function')
+def input_case11():
+    return """
+857  2021-05-14T06:45:23,960 INFO  [00000011] :Bank2BU@SASBAP - 
+858  2021-05-14T06:45:23,961 INFO  [00000011] :Bank2BU@SASBAP - MLOGIC(FCF_CREATE_ACCT_TRANS_VIEW):  Beginning execution.
+859  2021-05-14T06:45:23,965 INFO  [00000143] :Bank2BU@SASBAP - MPRINT(FCF_MAIN_PROCESS.FCF_PREP.FCF_CREATE_ACCT_TRANS_VIEW):   proc sql noprint;
+860  2021-05-14T06:45:23,965 INFO  [00000143] :Bank2BU@SASBAP - MPRINT(FCF_MAIN_PROCESS.FCF_PREP.FCF_CREATE_ACCT_TRANS_VIEW):   select max(input(sp.parm_value,best32.)) into :numdays from seg_kc.fsk_header h, seg_kc.fsk_scenario s, seg_kc.fsk_scenario_parameter sp where h.header_id=s.header_id and 
+861  2021-05-14T06:45:23,965 INFO  [00000143] :Bank2BU@SASBAP - upcase(h.denorm_table_name) = "ACCOUNT_TRANSACTIONS" and upcase(s.scenario_status_code) = "ACT" and upcase(s.current_ind) = "Y" and upcase(s.logical_delete_ind) ne 'Y' and s.scenario_id = sp.scenario_id and sp.parm_name like 'p%_num_days' ;
+862  2021-05-14T06:45:24,210 INFO  [00000143] :Bank2BU@SASBAP - MPRINT(FCF_MAIN_PROCESS.FCF_PREP.FCF_CREATE_ACCT_TRANS_VIEW):   quit;
+863  2021-05-14T06:45:24,210 INFO  [00000143] :Bank2BU@SASBAP - NOTE: PROCEDURE SQL used (Total process time):
+864  2021-05-14T06:45:24,210 INFO  [00000143] :Bank2BU@SASBAP -       real time           0.24 seconds
+865  2021-05-14T06:45:24,210 INFO  [00000143] :Bank2BU@SASBAP -       cpu time            0.04 
+"""
+
+
+@fixture(scope='function')
+def input_case12():
+    return """
+884  2021-05-14T06:45:24,250 INFO  [00000011] :Bank2BU@SASBAP - 
+885  2021-05-14T06:45:24,250 INFO  [00000011] :Bank2BU@SASBAP - MLOGIC(FCF_CREATE_ACCT_TRANS_VIEW):  %LET (variable name is DEFAULT_NUM_DAYS_ZERO)
+886  2021-05-14T06:45:24,250 INFO  [00000011] :Bank2BU@SASBAP - SYMBOLGEN:  Macro variable DEFAULT_NUM_DAYS_ZERO resolves to        5
+887  2021-05-14T06:45:24,250 INFO  [00000011] :Bank2BU@SASBAP - SYMBOLGEN:  Macro variable DEFAULT_NUM_DAYS_ZERO resolves to 5
+888  2021-05-14T06:45:24,250 INFO  [00000011] :Bank2BU@SASBAP - MLOGIC(FCF_CREATE_ACCT_TRANS_VIEW):  %IF condition &default_num_days_zero eq . is FALSE
+889  2021-05-14T06:45:24,250 INFO  [00000011] :Bank2BU@SASBAP - MLOGIC(FCF_CREATE_ACCT_TRANS_VIEW):  %PUT Account_header scenarios with default number of days equal to zero: &default_num_days_zero
+890  2021-05-14T06:45:24,250 INFO  [00000011] :Bank2BU@SASBAP - SYMBOLGEN:  Macro variable DEFAULT_NUM_DAYS_ZERO resolves to 5
+891  2021-05-14T06:45:24,250 INFO  [00000011] :Bank2BU@SASBAP - Account_header scenarios with default number of days equal to zero: 5
+892  2021-05-14T06:45:24,252 INFO  [00000011] :Bank2BU@SASBAP - SYMBOLGEN:  Macro variable DEFAULT_NUM_DAYS_ZERO resolves to 5
+893  2021-05-14T06:45:24,252 INFO  [00000011] :Bank2BU@SASBAP - MLOGIC(FCF_CREATE_ACCT_TRANS_VIEW):  %IF condition &default_num_days_zero gt 0 is TRUE
+894  2021-05-14T06:45:24,252 INFO  [00000011] :Bank2BU@SASBAP - MLOGIC(FCF_CREATE_ACCT_TRANS_VIEW):  %PUT These scenarios need month-to-runasofdate number of days of transactions.
+895  2021-05-14T06:45:24,252 INFO  [00000011] :Bank2BU@SASBAP - These scenarios need month-to-runasofdate number of days of transactions.
+896  2021-05-14T06:45:24,252 INFO  [00000011] :Bank2BU@SASBAP - MLOGIC(FCF_CREATE_ACCT_TRANS_VIEW):  %PUT Adjust numdays if necessary.
+897  2021-05-14T06:45:24,252 INFO  [00000011] :Bank2BU@SASBAP - Adjust numdays if necessary.
+898  2021-05-14T06:45:24,255 INFO  [00000145] :Bank2BU@SASBAP - MPRINT(FCF_MAIN_PROCESS.FCF_PREP.FCF_CREATE_ACCT_TRANS_VIEW):   data _null_;
+899  2021-05-14T06:45:24,255 INFO  [00000145] :Bank2BU@SASBAP - SYMBOLGEN:  Macro variable RUNASOFDATE resolves to 20181102
+900  2021-05-14T06:45:24,270 INFO  [00000145] :Bank2BU@SASBAP - MPRINT(FCF_MAIN_PROCESS.FCF_PREP.FCF_CREATE_ACCT_TRANS_VIEW):   runasofdate = input(put(20181102,8.),yymmdd8.);
+901  2021-05-14T06:45:24,272 INFO  [00000145] :Bank2BU@SASBAP - MPRINT(FCF_MAIN_PROCESS.FCF_PREP.FCF_CREATE_ACCT_TRANS_VIEW):   put 'runasofdate: ' runasofdate nldate.;
+902  2021-05-14T06:45:24,272 INFO  [00000145] :Bank2BU@SASBAP - MPRINT(FCF_MAIN_PROCESS.FCF_PREP.FCF_CREATE_ACCT_TRANS_VIEW):   startmonth = runasofdate - day(runasofdate) + 1;
+903  2021-05-14T06:45:24,272 INFO  [00000145] :Bank2BU@SASBAP - MPRINT(FCF_MAIN_PROCESS.FCF_PREP.FCF_CREATE_ACCT_TRANS_VIEW):   put 'Start of month: ' startmonth nldate.;
+904  2021-05-14T06:45:24,272 INFO  [00000145] :Bank2BU@SASBAP - MPRINT(FCF_MAIN_PROCESS.FCF_PREP.FCF_CREATE_ACCT_TRANS_VIEW):   num_days = runasofdate - startmonth + 1;
+905  2021-05-14T06:45:24,273 INFO  [00000145] :Bank2BU@SASBAP - MPRINT(FCF_MAIN_PROCESS.FCF_PREP.FCF_CREATE_ACCT_TRANS_VIEW):   put 'Days month-to-runasofdate: ' num_days;
+906  2021-05-14T06:45:24,273 INFO  [00000145] :Bank2BU@SASBAP - SYMBOLGEN:  Macro variable NUMDAYS resolves to 20
+907  2021-05-14T06:45:24,273 INFO  [00000145] :Bank2BU@SASBAP - MPRINT(FCF_MAIN_PROCESS.FCF_PREP.FCF_CREATE_ACCT_TRANS_VIEW):   final_num_days = max(num_days, 20);
+908  2021-05-14T06:45:24,273 INFO  [00000145] :Bank2BU@SASBAP - MPRINT(FCF_MAIN_PROCESS.FCF_PREP.FCF_CREATE_ACCT_TRANS_VIEW):   call symput('numdays',kstrip(put(final_num_days, best32.)));
+909  2021-05-14T06:45:24,273 INFO  [00000145] :Bank2BU@SASBAP - MPRINT(FCF_MAIN_PROCESS.FCF_PREP.FCF_CREATE_ACCT_TRANS_VIEW):   run;
+910  2021-05-14T06:45:24,273 INFO  [00000145] :Bank2BU@SASBAP - 
+911  2021-05-14T06:45:24,277 INFO  [00000145] :Bank2BU@SASBAP - runasofdate: November 02, 2018   
+912  2021-05-14T06:45:24,277 INFO  [00000145] :Bank2BU@SASBAP - Start of month: November 01, 2018   
+913  2021-05-14T06:45:24,277 INFO  [00000145] :Bank2BU@SASBAP - Days month-to-runasofdate: 2
+914  2021-05-14T06:45:24,277 INFO  [00000145] :Bank2BU@SASBAP - NOTE: DATA statement used (Total process time):
+915  2021-05-14T06:45:24,277 INFO  [00000145] :Bank2BU@SASBAP -       real time           0.02 seconds
+916  2021-05-14T06:45:24,277 INFO  [00000145] :Bank2BU@SASBAP -       cpu time            0.03 
+"""
+
+
