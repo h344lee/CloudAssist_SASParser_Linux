@@ -827,7 +827,6 @@ def get_proc_sql(sql_block):
 
 def get_input_table_from_sql(proc_sql):
 
-
     input_library = []
     input_table = []
     lib_table_list = []
@@ -899,7 +898,10 @@ def get_input_table_from_sql(proc_sql):
         each_lib_table_list = []
         for lib_table in lib_table_list:
             each_lib_table_list += lib_table.split(',')
-        each_lib_table_list = list(set(each_lib_table_list))
+
+        seen = set()
+        seen_add = seen.add
+        each_lib_table_list = [x for x in each_lib_table_list if not (x in seen or seen_add(x))]
 
         for table in each_lib_table_list:
             if len(table) != 0:
@@ -1225,6 +1227,7 @@ def get_ext_db(record_content):
     if len(proc_sql_regex_list) != 0:
         sql_block = proc_sql_regex_list[0][0] + proc_sql_regex_list[0][2] + proc_sql_regex_list[0][3]
         proc_sql = get_proc_sql(sql_block)
+        #print(proc_sql)
         if "connect to" in proc_sql:
             ext_db_regex = re.compile(r"connect to (.*?)(\(| )")
             ext_db_obj = ext_db_regex.search(proc_sql)
@@ -1235,6 +1238,9 @@ def get_ext_db(record_content):
 
     ext_db_name_list += db_name_list
     ext_db_name_list = list(set(ext_db_name_list))
+
+
+    #print(ext_db_name_list)
 
     return ext_db_name_list
 
