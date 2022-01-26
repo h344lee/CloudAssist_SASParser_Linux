@@ -3,11 +3,13 @@ import re
 import logging
 import pandas as pd
 import warnings
+
 warnings.simplefilter(action='ignore', category=FutureWarning)
 
 logging.disable(logging.DEBUG)
 logging.basicConfig(level=logging.DEBUG, format='%(asctime)s-%(levelname)s-%(message)s')
 logging.info('start of the program')
+
 
 def init_proc_cat_prod(cat_prod_dict):
     cat_prod_dict["ACECLUS"] = ("SAS/STAT", "Analytics")
@@ -638,7 +640,10 @@ def get_output_library_table(sas_file_content):
     output_lib_table_regex_2 = re.compile(r"NOTE: SQL view (.*)\.(.*) has been defined.")
     output_lib_table_list_2 = output_lib_table_regex_2.findall(sas_file_content)
 
-    output_lib_table_list = output_lib_table_list_1 + output_lib_table_list_2
+    output_lib_table_regex_3 = re.compile(r"NOTE: Table (.*?)\.(.*?) created, with \d+ rows and \d+ columns.")
+    output_lib_table_list_3 = output_lib_table_regex_3.findall(sas_file_content)
+
+    output_lib_table_list = output_lib_table_list_1 + output_lib_table_list_2 + output_lib_table_list_3
 
     output_lib = ''
     output_table = ''
@@ -750,7 +755,10 @@ def proc_sql_parsing(record_content):
         sql_block = proc_sql_regex_list[0][0] + proc_sql_regex_list[0][2] + proc_sql_regex_list[0][3]
         proc_sql = get_proc_sql(sql_block)
         input_library, input_table = get_input_table_from_sql(proc_sql)
+
         output_library, output_table = get_output_table_from_sql(proc_sql)
+
+
     return input_library, input_table, output_library, output_table
 
 
@@ -818,7 +826,8 @@ def get_proc_sql(sql_block):
 
 
 def get_input_table_from_sql(proc_sql):
-    # print(proc_sql)
+
+
     input_library = []
     input_table = []
     lib_table_list = []
@@ -841,20 +850,32 @@ def get_input_table_from_sql(proc_sql):
         lib_table_list += sql_join_list
 
     # case 1: from ~ where
-    sql_from_where_regex = re.compile(r"from (.*?) where ")
+    sql_from_where_regex = re.compile(r"from (.*?) where ", re.IGNORECASE)
     sql_from_where_list = sql_from_where_regex.findall(proc_sql)
     if len(sql_from_where_list) != 0:
         lib_table_list += sql_from_where_list[0].split(',')
 
+        # check1 whether from is in values
+        is_from_in_bracket_regex = re.compile(r'(.*)from')
+        from_in_bracket = is_from_in_bracket_regex.search(proc_sql)
+        former_part = from_in_bracket.group(1)
+        if former_part.count('(') != former_part.count(')'):
+            lib_table_list = []
+
     # case 2: from ~ order by
-    if len(lib_table_list) == 0:
-        sql_from_order_regex = re.compile(r"from (.*?) order")
+    elif len(lib_table_list) == 0:
+        sql_from_order_regex = re.compile(r"from (.*?) order", re.IGNORECASE)
         sql_from_order_list = sql_from_where_regex.findall(proc_sql)
         if len(sql_from_order_list) != 0:
             lib_table_list += sql_from_order_list[0].split(',')
 
+            # check1 whether from is in brackets
+            is_from_in_values_regex = re.compile(r'\(.*from.*\)')
+            if re.search(is_from_in_values_regex, proc_sql) is not None:
+                lib_table_list = []
+
     # case LAST: from ~ ;
-    if len(lib_table_list) == 0:
+    elif len(lib_table_list) == 0:
         sql_from_where_regex = re.compile(r"from (.*?)(;| )")
         lib_table_list += sql_from_where_regex.findall(proc_sql)
         lib_table_list = [element[0] for element in lib_table_list if element[0] != ""]
@@ -865,7 +886,7 @@ def get_input_table_from_sql(proc_sql):
             lib_table_list = []
 
     # case LAST: from ~ \n
-    if len(lib_table_list) == 0:
+    elif len(lib_table_list) == 0:
         sql_from_where_regex = re.compile(r"from (.*?) quit;")
         lib_table_list = sql_from_where_regex.findall(proc_sql)
 
@@ -894,6 +915,7 @@ def get_input_table_from_sql(proc_sql):
                 input_library.append(table[0])
                 input_table.append(table[1])
 
+    # print(proc_sql)
     # print(input_library)
     # print(input_table)
     # print("******")
@@ -1104,7 +1126,6 @@ def get_input_table_from_data_sql(data_step_sql):
 
 
 def get_output_table_from_data_sql(data_step_sql):
-
     # if 'index' in data_step_sql and 'compress=yes' in data_step_sql:
     #     print(data_step_sql)
 
@@ -1177,23 +1198,13 @@ def get_output_table_from_data_sql(data_step_sql):
     return output_lib, output_table
 
 
-def lib_table_write_to_variable(input_lib, input_table, output_lib, output_table, FILE_SAS_LIB, FILE_SAS_TBL):
-    if input_table and len(input_table) != 0:
+def lib_table_write_to_variable(library, table, FILE_SAS_LIB, FILE_SAS_TBL):
+    if table and len(table) != 0:
         if FILE_SAS_TBL == "":
-            FILE_SAS_LIB = ';'.join(input_lib)
-            FILE_SAS_TBL = ';'.join(input_table)
+            FILE_SAS_LIB = ';'.join(library)
+            FILE_SAS_TBL = ';'.join(table)
         else:
-            for lib, tbl in zip(input_lib, input_table):
-                if tbl.lower() not in FILE_SAS_TBL and tbl.upper() not in FILE_SAS_TBL:
-                    FILE_SAS_LIB += ";" + lib
-                    FILE_SAS_TBL += ";" + tbl
-
-    if output_table and len(output_table) != 0:
-        if FILE_SAS_TBL == "":
-            FILE_SAS_LIB = ';'.join(output_lib)
-            FILE_SAS_TBL = ';'.join(output_table)
-        else:
-            for lib, tbl in zip(output_lib, output_table):
+            for lib, tbl in zip(library, table):
                 if tbl.lower() not in FILE_SAS_TBL and tbl.upper() not in FILE_SAS_TBL:
                     FILE_SAS_LIB += ";" + lib
                     FILE_SAS_TBL += ";" + tbl
@@ -1284,7 +1295,7 @@ def get_migration_disp(FILE_SAS_EXC_CPU_TM, FILE_SAS_EXC_RL_TM, FILE_SAS_STP, FI
     if FILE_SAS_EXC_CPU_TM >= 30.00:
         recommendation = "Code Change"
         RULE_ID = '1'
-    elif FILE_SAS_EXC_CPU_TM >= FILE_SAS_EXC_RL_TM and FILE_SAS_EXC_CPU_TM != 0 :
+    elif FILE_SAS_EXC_CPU_TM >= FILE_SAS_EXC_RL_TM and FILE_SAS_EXC_CPU_TM != 0:
         recommendation = "Code Change"
         RULE_ID = '2'
     elif FILE_SAS_STP == 'PROCEDURE Statement' and FILE_SAS_STP_NM == 'LOGISTIC':
@@ -1344,8 +1355,8 @@ def get_migration_disp(FILE_SAS_EXC_CPU_TM, FILE_SAS_EXC_RL_TM, FILE_SAS_STP, FI
 
     return RULE_ID, recommendation
 
-def get_migr_rule(FILE_SAS_MIGR_RUL_ID):
 
+def get_migr_rule(FILE_SAS_MIGR_RUL_ID):
     if FILE_SAS_MIGR_RUL_ID == "":
         return ""
 
@@ -1375,6 +1386,7 @@ def get_migr_rule(FILE_SAS_MIGR_RUL_ID):
     }
     migration_rule = migr_rule_dict.get(FILE_SAS_MIGR_RUL_ID)
     return migration_rule
+
 
 # update a row of record to the given dataframe 'log_df'
 def save_record_to_df(log_df, extracted_record):
@@ -1482,7 +1494,6 @@ if __name__ == "__main__":
                 # print(record_content)
                 # print("********************")
 
-
                 # update sas file id and sas file name and path if it is updated.
                 if sas_file_abs_path != '':
                     if sas_file_dict.get(sas_file_abs_path) is None:
@@ -1532,18 +1543,16 @@ if __name__ == "__main__":
 
                 if FILE_SAS_STP == "PROCEDURE Statement":
                     input_lib, input_table, output_lib, output_table = proc_sql_parsing(record_content)
-                    FILE_SAS_INP_LIB, FILE_SAS_INP_TBL = lib_table_write_to_variable(input_lib, input_table,
-                                                                                     output_lib, output_table,
-                                                                                     FILE_SAS_INP_LIB,
-                                                                                     FILE_SAS_INP_TBL)
-
                 else:
-                    #pass  # data_step_parsing(record_content)
                     input_lib, input_table, output_lib, output_table = data_step_parsing(record_content)
-                    FILE_SAS_OUT_LIB, FILE_SAS_OUT_TBL = lib_table_write_to_variable(input_lib, input_table,
-                                                                                     output_lib, output_table,
-                                                                                     FILE_SAS_OUT_LIB,
-                                                                                     FILE_SAS_OUT_TBL)
+
+                FILE_SAS_INP_LIB, FILE_SAS_INP_TBL = lib_table_write_to_variable(input_lib, input_table,
+                                                                                 FILE_SAS_INP_LIB,
+                                                                                 FILE_SAS_INP_TBL)
+
+                FILE_SAS_OUT_LIB, FILE_SAS_OUT_TBL = lib_table_write_to_variable(output_lib, output_table,
+                                                                                 FILE_SAS_OUT_LIB,
+                                                                                 FILE_SAS_OUT_TBL)
 
                 ext_db_list = get_ext_db(record_content)
                 FILE_SAS_EXT_DB = ';'.join(ext_db_list)
@@ -1566,7 +1575,8 @@ if __name__ == "__main__":
                     FILE_SAS_INP_MUL_TBLS = 0
 
                 FILE_SAS_MIGR_RUL_ID, FILE_SAS_MIGR_DISP = get_migration_disp(FILE_SAS_EXC_CPU_TM, FILE_SAS_EXC_RL_TM,
-                                                                         FILE_SAS_STP, FILE_SAS_STP_NM, record_content)
+                                                                              FILE_SAS_STP, FILE_SAS_STP_NM,
+                                                                              record_content)
 
                 FILE_SAS_MIGR_RUL = get_migr_rule(FILE_SAS_MIGR_RUL_ID)
 
@@ -1578,7 +1588,8 @@ if __name__ == "__main__":
                                     FILE_SAS_OUT_TBL, FILE_SAS_ROW_WRT, FILE_SAS_INP_MUL_FLG, FILE_SAS_INP_MUL_TBLS,
                                     FILE_SAS_EXT_DB, FILE_EXC_DT, FILE_SAS_EXC_TM, FILE_SAS_EXC_CPU_TM,
                                     FILE_SAS_EXC_RL_TM, FILE_SAS_PROC_CAT, FILE_SAS_PROC_PROD, FILE_SAS_MIGR_DISP,
-                                    FILE_SAS_MIGR_RUL_ID, FILE_SAS_MIGR_RUL, FILE_SAS_MIGR_REC_ACT, FILE_SAS_PROC_INMEM_FLG,
+                                    FILE_SAS_MIGR_RUL_ID, FILE_SAS_MIGR_RUL, FILE_SAS_MIGR_REC_ACT,
+                                    FILE_SAS_PROC_INMEM_FLG,
                                     FILE_SAS_PROC_ELT_FLG, FILE_SAS_PROC_GRID_FLG, FILE_SAS_PROC_INDB_FLG,
                                     FILE_SAS_SRC_TYP, FILE_SAS_ENV_NAME]
 

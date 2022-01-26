@@ -576,3 +576,73 @@ def test_get_migration_disp_8(input_case8):
     assert rule_id == '2' and migration_disp == "Code Change", rule_id + " " + migration_disp
 
 
+
+
+
+@mark.case9
+def test_get_user_name_9(input_case9):
+    user_name = get_user_name(input_case9)
+    assert user_name == "Bank2BU"
+
+
+@mark.case9
+def test_get_input_file_name_9(input_case9):
+    input_file = get_input_file_name(input_case9)
+    assert input_file == "", input_file
+
+
+@mark.case9
+def test_get_output_library_table_9(input_case9):
+    output_library, output_table = get_output_library_table(input_case9)
+    assert output_library == "MST_PREP" and output_table == "DORMANT_ACCOUNT_TRANSACTIONS", output_library + output_table
+
+
+@mark.case9
+def test_get_input_library_table_9(input_case9):
+    input_lib, input_table = get_input_library_table(input_case9)
+    assert input_lib == "" and input_table == "", input_lib + input_table
+
+
+@mark.case9
+def test_get_sas_step_name_9(input_case9):
+    step, step_name = get_sas_step_name(input_case9)
+    assert step == "PROCEDURE Statement" and step_name == "SQL", step + step_name
+
+
+@mark.case9
+def test_proc_sql_parsing_9(input_case9):
+    input_lib, input_table, output_lib, output_table = proc_sql_parsing(input_case9)
+    assert input_lib == [] and input_table == [] and output_lib == ['mst_prep'] and \
+           output_table == ['DORMANT_ACCOUNT_TRANSACTIONS'], str(input_lib) + str(input_table) + str(output_lib) + str(output_table)
+
+
+@mark.case9
+def test_data_step_parsing_9(input_case9):
+    input_lib, input_table, output_lib, output_table = data_step_parsing(input_case9)
+    assert input_lib == [] and input_table == [] and output_lib == [] \
+           and output_table == [], \
+           str(input_lib) + str(input_table) + str(output_lib) + str(output_table)
+
+
+@mark.case9
+def test_get_ext_db_9(input_case9):
+    ext_db_list = get_ext_db(input_case9)
+    assert ext_db_list == []
+
+
+@mark.case9
+def test_get_time_info_9(input_case9):
+    exe_date, exe_time = get_time_info(input_case9)
+    assert exe_date == '2021-05-14' and exe_time == '06:45:19'
+
+
+@mark.case9
+def test_get_process_time_9(input_case9):
+    cpu_time, real_time = get_process_time(input_case9)
+    assert real_time == 1 and cpu_time == 0.03, str(cpu_time) + " " + str(real_time)
+
+
+@mark.case9
+def test_get_migration_disp_9(input_case9):
+    rule_id, migration_disp = get_migration_disp(0.09, 0.09, 'PROCEDURE Statement', 'SQL', input_case9)
+    assert rule_id == '2' and migration_disp == "Code Change", rule_id + " " + migration_disp
