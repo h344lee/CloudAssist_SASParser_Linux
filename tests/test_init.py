@@ -10,6 +10,7 @@ from readlogs.D_CLDASST_Reader import get_ext_db
 from readlogs.D_CLDASST_Reader import get_time_info
 from readlogs.D_CLDASST_Reader import get_process_time
 from readlogs.D_CLDASST_Reader import get_migration_disp
+from readlogs.D_CLDASST_Reader import get_sas_row_read
 
 from input_contents import input_case1
 from input_contents import input_case2
@@ -878,7 +879,7 @@ def test_get_input_file_name_13(input_case13):
 @mark.case13
 def test_get_output_library_table_13(input_case13):
     output_library, output_table = get_output_library_table(input_case13)
-    assert output_library == "DB_KC" and output_table == "FSK_JOB_CALENDAR", output_library + output_table
+    assert output_library == "" and output_table == "", output_library + output_table
 
 
 @mark.case13
@@ -890,7 +891,7 @@ def test_get_input_library_table_13(input_case13):
 @mark.case13
 def test_get_sas_step_name_13(input_case13):
     step, step_name = get_sas_step_name(input_case13)
-    assert step == "DATA statement" and step_name == "DATA", step + step_name
+    assert step == "PROCEDURE Statement" and step_name == "SQL", step + step_name
 
 
 @mark.case13
@@ -917,17 +918,23 @@ def test_get_ext_db_13(input_case13):
 @mark.case13
 def test_get_time_info_13(input_case13):
     exe_date, exe_time = get_time_info(input_case13)
-    assert exe_date == '2021-05-14' and exe_time == '06:45:24'
+    assert exe_date == '2021-05-14' and exe_time == '07:49:41'
 
 
 @mark.case13
 def test_get_process_time_13(input_case13):
     cpu_time, real_time = get_process_time(input_case13)
-    assert real_time == 0.02 and cpu_time == 0.03, str(cpu_time) + " " + str(real_time)
+    assert real_time == 2.03 and cpu_time == 0.73, str(cpu_time) + " " + str(real_time)
 
 
 @mark.case13
 def test_get_migration_disp_13(input_case13):
-    rule_id, migration_disp = get_migration_disp(0.02, 0.03, 'DATA statement', 'DATA', input_case13)
-    assert rule_id == '20' and migration_disp == "Code Change", rule_id + " " + migration_disp
+    rule_id, migration_disp = get_migration_disp(0.73, 2.03, 'PROCEDURE Statement', 'SQL', input_case13)
+    assert rule_id == '9' and migration_disp == "Code Change", rule_id + " " + migration_disp
+
+
+@mark.case13
+def test_get_sas_row_read_13(input_case13):
+    lib, table = get_sas_row_read(input_case13)
+    assert lib == 'DB_KC' and table == 'FSK_JOB_CALENDAR'
 

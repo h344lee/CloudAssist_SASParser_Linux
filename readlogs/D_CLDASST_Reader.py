@@ -554,14 +554,29 @@ def get_sas_file_line_number(record_content):
 # if there is not an input file, then return ""
 # completed
 def get_input_file_name(sas_file_content):
-    input_file_name_regex = re.compile(r"NOTE: The infile '(.*)' is")
-    sas_file_list = input_file_name_regex.search(sas_file_content)
-    if sas_file_list is not None:
-        input_file_name = sas_file_list.group(1)
-    else:
-        input_file_name = ''
+    input_file_name_regex = re.compile(r"NOTE: The infile \'(.*)\' is:")
+    input_file_list = input_file_name_regex.findall(sas_file_content)
 
-    return input_file_name
+    input_file_dict = dict()
+
+    for input_file in input_file_list:
+        if not input_file_dict.get(input_file):
+            input_file_dict[input_file] = '0'
+
+    input_row_file_name_regex = re.compile(r"NOTE: (.*) records were read from the infile \'(.*)\'.")
+    input_row_file_list = input_row_file_name_regex.findall(sas_file_content)
+
+    for row, input_file in input_row_file_list:
+        input_file_dict[input_file] = row
+
+    rows = ''
+    input_files = ''
+    if len(input_file_dict) != 0:
+        for input_file, row in input_file_dict.items():
+            rows += ';' + row
+            input_files += ';' + input_file
+
+    return rows[1:], input_files[1:]
 
 
 # get SAS Step names such as DATA statement, Procedure SQL, SAS Initialization
@@ -667,13 +682,20 @@ def get_output_library_table(sas_file_content):
 def get_input_library_table(sas_file_content):
 
     input_lib_table_regex_case_one = re.compile(r"NOTE: There were \d+ observations read from the data set (.*)\.(.*).")
-    input_lib_table_list_case_one = input_lib_table_regex_case_one.findall(sas_file_content)
+    input_lib_table_list = input_lib_table_regex_case_one.findall(sas_file_content)
+
+    input_lib_table_regex_case_two = re.compile(r"NOTE: \d+ rows were updated in (.*)\.(.*).")
+    input_lib_table_list += input_lib_table_regex_case_two.findall(record_content)
 
     input_lib = ''
     input_table = ''
 
-    if len(input_lib_table_list_case_one) != 0:
-        for record in input_lib_table_list_case_one:
+    seen = set()
+    seen_add = seen.add
+    input_lib_table_list = [x for x in input_lib_table_list if not (x in seen or seen_add(x))]
+
+    if len(input_lib_table_list) != 0:
+        for record in input_lib_table_list:
 
             input_lib += ';' + record[0]
             input_table += ';' + record[1]
@@ -681,31 +703,30 @@ def get_input_library_table(sas_file_content):
     return input_lib[1:], input_table[1:]
 
 
-def get_sas_row_read(record_content):
-    input_lib_table_regex_case_one = re.compile(r"NOTE: (\d+) rows were updated in (.*\..*).")
-    input_lib_table_list_case_one = input_lib_table_regex_case_one.findall(record_content)
-
-    input_row = ''
-    input_lib = ''
-    input_table = ''
-
-    lib_dict = dict()
-
-    if len(input_lib_table_list_case_one) != 0:
-        for rows, lib_table in input_lib_table_list_case_one:
-            lib_dict[lib_table] = rows
-
-    if len(lib_dict) != 0:
-        for lib_table, rows in lib_dict.items():
-            lib_table_list = lib_table.split('.')
-            input_row += ';' + rows
-            input_lib += ';' + lib_table_list[0]
-            input_table += ';' + lib_table_list[1]
-
-    if input_row == '':
-        return None, None, None
-    else:
-        return input_row[1:], input_lib[1:], input_table[1:]
+#
+# def get_sas_row_read(record_content):
+#     input_lib_table_regex_case_one = re.compile(r"NOTE: \d+ rows were updated in (.*\..*).")
+#     input_lib_table_list_case_one = input_lib_table_regex_case_one.findall(record_content)
+#
+#     input_lib = ''
+#     input_table = ''
+#
+#     seen = set()
+#     seen_add = seen.add
+#     input_lib_table_list_case_one = [x for x in input_lib_table_list_case_one if not (x in seen or seen_add(x))]
+#
+#     if len(input_lib_table_list_case_one) != 0:
+#         for lib_table in input_lib_table_list_case_one:
+#
+#             lib_table_list = lib_table.split('.')
+#             input_lib += ';' + lib_table_list[0]
+#             input_table += ';' + lib_table_list[1]
+#
+#     if input_lib == '':
+#         return None, None
+#     else:
+#         return input_lib[1:], input_table[1:]
+#     return None, None
 
 
 # get number of rows write and output library and output table.
@@ -1513,7 +1534,7 @@ if __name__ == "__main__":
                 if FILE_SAS_F_LOC == "":
                     FILE_SAS_F_NM = ""
                     FILE_SAS_F_ID = ""
-                FILE_SAS_INP_FIL_NM = get_input_file_name(record_content)
+                FILE_SAS_INP_ROW_RD, FILE_SAS_INP_FIL_NM = get_input_file_name(record_content)
                 FILE_SAS_OUT_LIB, FILE_SAS_OUT_TBL = get_output_library_table(record_content)
 
                 FILE_SAS_INP_LIB, FILE_SAS_INP_TBL = get_input_library_table(record_content)
@@ -1541,18 +1562,6 @@ if __name__ == "__main__":
                         FILE_SAS_OUT_TBL = tbls
                     else:
                         FILE_SAS_OUT_TBL = ';'.join([FILE_SAS_OUT_TBL, tbls])
-
-                rows, libs, tbls = get_sas_row_read(record_content)
-                if rows is not None:
-                    FILE_SAS_INP_ROW_RD = rows
-                    if FILE_SAS_INP_LIB == "":
-                        FILE_SAS_INP_LIB = libs
-                    else:
-                        FILE_SAS_INP_LIB = ';'.join([FILE_SAS_INP_LIB, libs])
-                    if FILE_SAS_INP_TBL == "":
-                        FILE_SAS_INP_TBL = tbls
-                    else:
-                        FILE_SAS_INP_TBL = ';'.join([FILE_SAS_INP_TBL, tbls])
 
                 # more data extractions needed to be here
 
