@@ -665,36 +665,41 @@ def get_output_library_table(sas_file_content):
 # return input_lib, input_table as string
 # Need to enhance to process actual query based process.
 def get_input_library_table(sas_file_content):
-    input_lib_table_regex = re.compile(r"NOTE: There were \d+ observations read from the data set (.*)\.(.*).")
-    input_lib_table_list = input_lib_table_regex.findall(sas_file_content)
+
+    input_lib_table_regex_case_one = re.compile(r"NOTE: There were \d+ observations read from the data set (.*)\.(.*).")
+    input_lib_table_list_case_one = input_lib_table_regex_case_one.findall(sas_file_content)
 
     input_lib = ''
     input_table = ''
 
-    if len(input_lib_table_list) != 0:
+    if len(input_lib_table_list_case_one) != 0:
+        for record in input_lib_table_list_case_one:
 
-        for idx, record in enumerate(input_lib_table_list):
+            input_lib += ';' + record[0]
+            input_table += ';' + record[1]
 
-            if idx == 0:
-                input_lib += record[0]
-                input_table += record[1]
-            else:
-                input_lib += ';' + record[0]
-                input_table += ';' + record[1]
-        # print(input_lib)
-        # print(input_table)
-    return input_lib, input_table
+    return input_lib[1:], input_table[1:]
 
-    # if input_lib_table_regex_obj is not None:
-    #     input_lib = input_lib_table_regex_obj.group(2)
-    #     input_table = input_lib_table_regex_obj.group(3)
-    #     # print(input_lib)
-    #     # print(input_table)
-    # else:
-    #     input_lib = ''
-    #     input_table = ''
-    #
-    # return input_lib, input_table
+
+def get_sas_row_read(record_content):
+    input_lib_table_regex_case_one = re.compile(r"NOTE: (\d+) rows were updated in (.*)\.(.*).")
+    input_lib_table_list_case_one = input_lib_table_regex_case_one.findall(record_content)
+
+    input_row = ''
+    input_lib = ''
+    input_table = ''
+
+    if len(input_lib_table_list_case_one) != 0:
+        for record in input_lib_table_list_case_one:
+
+            input_row += ';' + str(record[0])
+            input_lib += ';' + record[1]
+            input_table += ';' + record[2]
+
+    if input_row == '':
+        return None, None, None
+    else:
+        return input_row[1:], input_lib[1:], input_table[1:]
 
 
 # get number of rows write and output library and output table.
@@ -703,43 +708,30 @@ def get_input_library_table(sas_file_content):
 def get_sas_row_write(record_content):
     rows = libs = tbls = ""
 
-    sas_row_write_regex_case_one = re.compile(r"NOTE: (\d+) rows were updated in (.*)\.(.*).")
+    sas_row_write_regex_case_one = re.compile(r"NOTE: Table (.*)\.(.*) created, with (\d+) rows")
     sas_row_write_regex_case_one_list = sas_row_write_regex_case_one.findall(record_content)
-    if len(sas_row_write_regex_case_one_list) != 0:
-        sas_row_write_regex_case_one_list = sas_row_write_regex_case_one_list[-1]
+    sas_row_write_regex_case_one_list = [(record[2], record[0], record[1]) for record in
+                                         sas_row_write_regex_case_one_list]
 
-    sas_row_write_regex_case_two = re.compile(r"NOTE: Table (.*)\.(.*) created, with (\d+) rows")
+    sas_row_write_regex_case_two = re.compile(r"NOTE: (\d+) rows were deleted from (.*)\.(.*).")
     sas_row_write_regex_case_two_list = sas_row_write_regex_case_two.findall(record_content)
-    sas_row_write_regex_case_two_list = [(record[2], record[0], record[1]) for record in
-                                         sas_row_write_regex_case_two_list]
+    if len(sas_row_write_regex_case_two_list) != 0:
+        for record in sas_row_write_regex_case_two_list:
+            if record[0] == 'No':
+                record[0] = '0'
+            rows = ';'.join([rows, str(record[0])])
+            libs = ';'.join([libs, str(record[1])])
+            tbls = ';'.join([tbls, str(record[2])])
 
-    sas_row_write_regex_case_three = re.compile(r"NOTE: (\d+) rows were deleted from (.*)\.(.*).")
-    sas_row_write_regex_case_three_list = sas_row_write_regex_case_three.findall(record_content)
-    if len(sas_row_write_regex_case_three_list) != 0:
-        sas_row_write_regex_case_three_list = sas_row_write_regex_case_three_list[-1]
-        if sas_row_write_regex_case_three_list[0] == 'No':
-            sas_row_write_regex_case_three_list[0] = '0'
-        rows = str(sas_row_write_regex_case_three_list[0])
-        libs = str(sas_row_write_regex_case_three_list[1])
-        tbls = str(sas_row_write_regex_case_three_list[2])
-
-    for record in sas_row_write_regex_case_two_list:
+    for record in sas_row_write_regex_case_one_list:
         rows = ';'.join([rows, str(record[0])])
         libs = ';'.join([libs, str(record[1])])
         tbls = ';'.join([tbls, str(record[2])])
 
-    if len(sas_row_write_regex_case_one_list) != 0:
-        rows = ';'.join([rows, str(sas_row_write_regex_case_one_list[0])])
-        libs = ';'.join([libs, str(sas_row_write_regex_case_one_list[1])])
-        tbls = ';'.join([tbls, str(sas_row_write_regex_case_one_list[2])])
-
     if rows == "":
-        return []
+        return None, None, None
     else:
-        if rows[0] == ';':
-            return [rows[1:], libs[1:], tbls[1:]]
-        else:
-            return [rows, libs, tbls]
+        return rows[1:], libs[1:], tbls[1:]
 
 
 def proc_sql_parsing(record_content):
@@ -857,9 +849,10 @@ def get_input_table_from_sql(proc_sql):
         # check1 whether from is in values
         is_from_in_bracket_regex = re.compile(r'(.*)from')
         from_in_bracket = is_from_in_bracket_regex.search(proc_sql)
-        former_part = from_in_bracket.group(1)
-        if former_part.count('(') != former_part.count(')'):
-            lib_table_list = []
+        if from_in_bracket is not None:
+            former_part = from_in_bracket.group(1)
+            if former_part.count('(') != former_part.count(')'):
+                lib_table_list = []
 
     # case 2: from ~ order by
     elif len(lib_table_list) == 0:
@@ -1531,19 +1524,29 @@ if __name__ == "__main__":
                 FILE_EXC_DT, FILE_SAS_EXC_TM = get_time_info(record_content)
                 FILE_SAS_EXC_CPU_TM, FILE_SAS_EXC_RL_TM = get_process_time(record_content)
 
-                sas_row_write_data = get_sas_row_write(record_content)
-                if len(sas_row_write_data) != 0:
-                    FILE_SAS_ROW_WRT = sas_row_write_data[0]
-
+                rows, libs, tbls = get_sas_row_write(record_content)
+                if rows is not None:
+                    FILE_SAS_ROW_WRT = rows
                     if FILE_SAS_OUT_LIB == "":
-                        FILE_SAS_OUT_LIB = sas_row_write_data[1]
+                        FILE_SAS_OUT_LIB = libs
                     else:
-                        FILE_SAS_OUT_LIB = ';'.join([FILE_SAS_OUT_LIB, str(sas_row_write_data[1])])
-
+                        FILE_SAS_OUT_LIB = ';'.join([FILE_SAS_OUT_LIB, libs])
                     if FILE_SAS_OUT_TBL == "":
-                        FILE_SAS_OUT_TBL = sas_row_write_data[2]
+                        FILE_SAS_OUT_TBL = tbls
                     else:
-                        FILE_SAS_OUT_TBL = ';'.join([FILE_SAS_OUT_TBL, str(sas_row_write_data[2])])
+                        FILE_SAS_OUT_TBL = ';'.join([FILE_SAS_OUT_TBL, tbls])
+
+                rows, libs, tbls = get_sas_row_read(record_content)
+                if rows is not None:
+                    FILE_SAS_INP_ROW_RD = rows
+                    if FILE_SAS_INP_LIB == "":
+                        FILE_SAS_INP_LIB = libs
+                    else:
+                        FILE_SAS_INP_LIB = ';'.join([FILE_SAS_INP_LIB, libs])
+                    if FILE_SAS_INP_TBL == "":
+                        FILE_SAS_INP_TBL = tbls
+                    else:
+                        FILE_SAS_INP_TBL = ';'.join([FILE_SAS_INP_TBL, tbls])
 
                 # more data extractions needed to be here
 
@@ -1573,7 +1576,7 @@ if __name__ == "__main__":
                 else:
                     FILE_SAS_PROC_PROD, FILE_SAS_PROC_CAT = cat_prod_dict[FILE_SAS_STP_NM.upper()]
 
-                if FILE_SAS_INP_LIB != "":
+                if len(FILE_SAS_INP_LIB.split(';')) > 1:
                     FILE_SAS_INP_MUL_FLG = 1
                     FILE_SAS_INP_MUL_TBLS = 1
                 else:
@@ -1602,7 +1605,8 @@ if __name__ == "__main__":
                 log_df = save_record_to_df(log_df, extracted_record)
 
                 # Data initialization
-                FILE_SAS_ROW_WRT = FILE_SAS_OUT_LIB = FILE_SAS_OUT_TBL = sas_row_write_data = ""
+                FILE_SAS_ROW_WRT = FILE_SAS_OUT_LIB = FILE_SAS_OUT_TBL = ""
+                FILE_SAS_INP_ROW_RD = FILE_SAS_INP_LIB = FILE_SAS_INP_TBL = ""
 
         save_df_to_xlsx(log_df)
 

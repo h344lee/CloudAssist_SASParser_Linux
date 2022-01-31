@@ -1,6 +1,7 @@
 from pytest import fixture
 
 
+# mcebelsasd003_30796.log
 @fixture(scope='function')
 def input_case1():
     return """
@@ -63,10 +64,11 @@ def input_case1():
 63  2021-05-15T08:03:54,926 INFO  [00000015] :hxdhiraj -       cpu time            0.02 """
 
 
+# mcebelsasd003_30796.log
 @fixture(scope='function')
 def input_case2():
     return """
-    65  2021-05-15T08:03:54,927 INFO  [00000010] :hxdhiraj - 
+65  2021-05-15T08:03:54,927 INFO  [00000010] :hxdhiraj - 
 66  2021-05-15T08:03:54,927 INFO  [00000010] :hxdhiraj - 46         
 67  2021-05-15T08:03:54,927 INFO  [00000010] :hxdhiraj - 47         
 68  2021-05-15T08:03:54,928 INFO  [00000010] :hxdhiraj - 48         /*-----------------------Product based gap filling-------------------------*/
@@ -112,6 +114,7 @@ def input_case2():
     """
 
 
+# mcebelsasd003_30796.log
 @fixture(scope='function')
 def input_case3():
     return """
@@ -144,6 +147,7 @@ def input_case3():
 """
 
 
+# mcebelsasd003_30796.log
 @fixture(scope='function')
 def input_case4():
     return """
@@ -162,6 +166,7 @@ def input_case4():
 """
 
 
+# mcebelsasd003_30796.log
 @fixture(scope='function')
 def input_case5():
     return """
@@ -183,6 +188,7 @@ def input_case5():
 """
 
 
+# mcebelsasd003_30796.log
 @fixture(scope='function')
 def input_case6():
     return """
@@ -201,6 +207,7 @@ def input_case6():
 """
 
 
+# mcebelsasd003_30796.log
 @fixture(scope='function')
 def input_case7():
     return """
@@ -218,6 +225,7 @@ def input_case7():
 """
 
 
+# SASBAP_30420.log
 @fixture(scope='function')
 def input_case8():
     return """
@@ -254,6 +262,7 @@ def input_case8():
 """
 
 
+# SASBAP_30420.log
 @fixture(scope='function')
 def input_case9():
     return """
@@ -272,6 +281,7 @@ def input_case9():
 """
 
 
+# SASBAP_30420.log
 @fixture(scope='function')
 def input_case10():
     return """
@@ -375,6 +385,7 @@ def input_case10():
 """
 
 
+# SASBAP_30420.log
 @fixture(scope='function')
 def input_case11():
     return """
@@ -390,6 +401,7 @@ def input_case11():
 """
 
 
+# SASBAP_30420.log
 @fixture(scope='function')
 def input_case12():
     return """
@@ -429,3 +441,272 @@ def input_case12():
 """
 
 
+# SASBAP_25212.log
+@fixture(scope='function')
+def input_case13():
+    return """
+77  2021-05-14T07:49:39,496 INFO  [00000011] :Bank2BU@SASBAP - 
+78  2021-05-14T07:49:39,497 INFO  [00000011] :Bank2BU@SASBAP - SYMBOLGEN:  Macro variable RUNASOFDATE resolves to 20181105
+79  2021-05-14T07:49:39,499 INFO  [00000011] :Bank2BU@SASBAP - 29         %put NOTE: FCF: runasofdate=&runasofdate;
+80  2021-05-14T07:49:39,499 INFO  [00000011] :Bank2BU@SASBAP - NOTE: FCF: runasofdate=20181105
+81  2021-05-14T07:49:39,499 INFO  [00000011] :Bank2BU@SASBAP - 30         
+82  2021-05-14T07:49:39,501 INFO  [00000022] :Bank2BU@SASBAP - 31         proc sql;
+83  2021-05-14T07:49:39,501 INFO  [00000022] :Bank2BU@SASBAP - 32               update db_kc.fsk_job_calendar set status_ind ='N';
+84  2021-05-14T07:49:41,379 INFO  [00000022] :Bank2BU@SASBAP - NOTE: 7304 rows were updated in DB_KC.FSK_JOB_CALENDAR.
+85  2021-05-14T07:49:41,379 INFO  [00000022] :Bank2BU@SASBAP - 
+86  2021-05-14T07:49:41,385 INFO  [00000022] :Bank2BU@SASBAP - 33         
+87  2021-05-14T07:49:41,385 INFO  [00000022] :Bank2BU@SASBAP - 34               update db_kc.fsk_job_calendar set status_ind='Y'
+88  2021-05-14T07:49:41,385 INFO  [00000022] :Bank2BU@SASBAP - 35               where datepart(calendar_date) lt "02Nov2018"d;
+89  2021-05-14T07:49:41,532 INFO  [00000022] :Bank2BU@SASBAP - NOTE: 305 rows were updated in DB_KC.FSK_JOB_CALENDAR.
+90  2021-05-14T07:49:41,532 INFO  [00000022] :Bank2BU@SASBAP - 
+91  2021-05-14T07:49:41,537 INFO  [00000022] :Bank2BU@SASBAP - 36         quit;
+92  2021-05-14T07:49:41,537 INFO  [00000022] :Bank2BU@SASBAP - NOTE: PROCEDURE SQL used (Total process time):
+93  2021-05-14T07:49:41,537 INFO  [00000022] :Bank2BU@SASBAP -       real time           2.03 seconds
+94  2021-05-14T07:49:41,537 INFO  [00000022] :Bank2BU@SASBAP -       cpu time            0.73 
+"""
+
+
+# SASBAP_25212.log
+@fixture(scope='function')
+def input_case14():
+    return """
+461  2021-05-14T07:50:09,278 INFO  [00000011] :Bank2BU@SASBAP - 
+462  2021-05-14T07:50:09,285 INFO  [00000025] :Bank2BU@SASBAP - MPRINT(CLEAR_CORE_KC):   proc sql;
+463  2021-05-14T07:50:09,287 INFO  [00000025] :Bank2BU@SASBAP - MPRINT(CLEAR_CORE_KC):   delete from db_kc.FSK_CASH_FLOW_ALERT where FSK_CASH_FLOW_ALERT.ALERT_ID>=0 ;
+464  2021-05-14T07:50:09,386 INFO  [00000025] :Bank2BU@SASBAP - NOTE: No rows were deleted from DB_KC.FSK_CASH_FLOW_ALERT.
+465  2021-05-14T07:50:09,386 INFO  [00000025] :Bank2BU@SASBAP - 
+466  2021-05-14T07:50:09,390 INFO  [00000025] :Bank2BU@SASBAP - MPRINT(CLEAR_CORE_KC):   quit;
+467  2021-05-14T07:50:09,390 INFO  [00000025] :Bank2BU@SASBAP - NOTE: PROCEDURE SQL used (Total process time):
+468  2021-05-14T07:50:09,390 INFO  [00000025] :Bank2BU@SASBAP -       real time           0.10 seconds
+469  2021-05-14T07:50:09,390 INFO  [00000025] :Bank2BU@SASBAP -       cpu time            0.03 
+"""
+
+
+# 2124.log
+@fixture(scope='function')
+def input_case15():
+    return """
+1776  2021-05-05T04:37:35,389 INFO  [00000014] :hxdhiraj - 
+1777  2021-05-05T04:37:35,389 INFO  [00000014] :hxdhiraj - 164       +
+1778  2021-05-05T04:37:35,389 INFO  [00000014] :hxdhiraj - 165       +
+1779  2021-05-05T04:37:35,393 INFO  [00000019] :hxdhiraj - 166       +proc sql;
+1780  2021-05-05T04:37:35,394 INFO  [00000019] :hxdhiraj - 167       +
+1781  2021-05-05T04:37:35,395 INFO  [00000019] :hxdhiraj - 168       +create table work.&SASDATASET as
+1782  2021-05-05T04:37:35,395 INFO  [00000019] :hxdhiraj - 169       +  select
+1783  2021-05-05T04:37:35,396 INFO  [00000019] :hxdhiraj - 170       +    MonWeekStartDate,
+1784  2021-05-05T04:37:35,396 INFO  [00000019] :hxdhiraj - 171       +    CalendarMonthStartDate,
+1785  2021-05-05T04:37:35,397 INFO  [00000019] :hxdhiraj - 172       +    ShipToDistributorNbr,
+1786  2021-05-05T04:37:35,397 INFO  [00000019] :hxdhiraj - 173       +    OrderableSKUId,
+1787  2021-05-05T04:37:35,398 INFO  [00000019] :hxdhiraj - 174       +    ModifyDts,
+1788  2021-05-05T04:37:35,398 INFO  [00000019] :hxdhiraj -                                                                                           The SAS System
+1789  2021-05-05T04:37:35,398 INFO  [00000019] :hxdhiraj - 
+1790  2021-05-05T04:37:35,399 INFO  [00000019] :hxdhiraj - 175       +    BarrelQty
+1791  2021-05-05T04:37:35,399 INFO  [00000019] :hxdhiraj - 176       +   from
+1792  2021-05-05T04:37:35,399 INFO  [00000019] :hxdhiraj - 177       +     indata.&SASDATASET;
+1793  2021-05-05T04:37:44,303 INFO  [00000019] :hxdhiraj - NOTE: Table WORK.STRHISTORYWEEKLY created, with 12507689 rows and 6 columns.
+1794  2021-05-05T04:37:44,304 INFO  [00000019] :hxdhiraj - 
+1795  2021-05-05T04:37:44,304 INFO  [00000019] :hxdhiraj - 178       +quit;
+1796  2021-05-05T04:37:44,305 INFO  [00000019] :hxdhiraj - NOTE: PROCEDURE SQL used (Total process time):
+1797  2021-05-05T04:37:44,305 INFO  [00000019] :hxdhiraj -       real time           8.91 seconds
+1798  2021-05-05T04:37:44,305 INFO  [00000019] :hxdhiraj -       cpu time            5.50 
+"""
+
+
+# 2124.log
+@fixture(scope='function')
+def input_case16():
+    return """
+1800  2021-05-05T04:37:44,306 INFO  [00000014] :hxdhiraj - 
+1801  2021-05-05T04:37:44,307 INFO  [00000014] :hxdhiraj - 179       +
+1802  2021-05-05T04:37:44,307 INFO  [00000014] :hxdhiraj - 180       +data &_OUTPUT0;
+1803  2021-05-05T04:37:44,312 INFO  [00000020] :hxdhiraj - 181       +   set work.&SASDATASET;
+1804  2021-05-05T04:37:44,313 INFO  [00000020] :hxdhiraj - 182       +run;
+1805  2021-05-05T04:37:44,313 INFO  [00000020] :hxdhiraj - 
+1806  2021-05-05T04:37:46,423 INFO  [00000020] :hxdhiraj - NOTE: There were 12507689 observations read from the data set WORK.STRHISTORYWEEKLY.
+1807  2021-05-05T04:37:46,424 INFO  [00000020] :hxdhiraj - NOTE: The data set WORK.W17OV4L6I has 12507689 observations and 6 variables.
+1808  2021-05-05T04:37:46,425 INFO  [00000020] :hxdhiraj - NOTE: DATA statement used (Total process time):
+1809  2021-05-05T04:37:46,425 INFO  [00000020] :hxdhiraj -       real time           2.11 seconds
+1810  2021-05-05T04:37:46,425 INFO  [00000020] :hxdhiraj -       cpu time            2.11 
+"""
+
+
+# 2124.log
+@fixture(scope='function')
+def input_case17():
+    return """
+2483  2021-05-05T04:37:47,951 INFO  [00000014] :hxdhiraj - 
+2484  2021-05-05T04:37:47,951 INFO  [00000014] :hxdhiraj - 758       +
+2485  2021-05-05T04:37:47,952 INFO  [00000028] :hxdhiraj - 759       +proc sql;
+2486  2021-05-05T04:37:47,953 INFO  [00000028] :hxdhiraj - 760       +   create view work.W3HPGFA3 as
+2487  2021-05-05T04:37:47,953 INFO  [00000028] :hxdhiraj - 761       +   select
+2488  2021-05-05T04:37:47,954 INFO  [00000028] :hxdhiraj - 762       +      W66KBMFQ.etls_source_row length = 8
+2489  2021-05-05T04:37:47,954 INFO  [00000028] :hxdhiraj - 763       +         label = 'The row number in the source table',
+2490  2021-05-05T04:37:47,954 INFO  [00000028] :hxdhiraj - 764       +      W66KBMFQ.etls_lookup_table length = 41
+2491  2021-05-05T04:37:47,955 INFO  [00000028] :hxdhiraj - 765       +         label = 'The name of the lookup table',
+2492  2021-05-05T04:37:47,955 INFO  [00000028] :hxdhiraj - 766       +      W66KBMFQ.etls_exception_cond length = 32
+2493  2021-05-05T04:37:47,956 INFO  [00000028] :hxdhiraj - 767       +         label = 'The name of the condition that caused this exception',
+2494  2021-05-05T04:37:47,956 INFO  [00000028] :hxdhiraj - 768       +      W66KBMFQ.etls_exception_action length = 32
+2495  2021-05-05T04:37:47,956 INFO  [00000028] :hxdhiraj - 769       +         label = 'The name of the action to take for this exception',
+2496  2021-05-05T04:37:47,957 INFO  [00000028] :hxdhiraj - 770       +      W66KBMFI.ANALYSIS_ID length = 32,
+2497  2021-05-05T04:37:47,957 INFO  [00000028] :hxdhiraj - 771       +      W66KBMFI.TYPE_ID length = 32,
+2498  2021-05-05T04:37:47,957 INFO  [00000028] :hxdhiraj - 772       +      W66KBMFI.AFFECTED_TIME_PERIOD_ID length = 32,
+2499  2021-05-05T04:37:47,958 INFO  [00000028] :hxdhiraj - 773       +      W66KBMFI.SPLIT_WK_DATE length = 32,
+2500  2021-05-05T04:37:47,958 INFO  [00000028] :hxdhiraj - 774       +      W66KBMFI.TIME_SPLIT_WK length = 32,
+2501  2021-05-05T04:37:47,958 INFO  [00000028] :hxdhiraj - 775       +      W66KBMFI.SHIPTODIST_ID length = 32,
+2502  2021-05-05T04:37:47,959 INFO  [00000028] :hxdhiraj - 776       +      W66KBMFI.OSKU_ID length = 32,
+2503  2021-05-05T04:37:47,959 INFO  [00000028] :hxdhiraj - 777       +      W66KBMFI.GL_ACCOUT_ID length = 32,
+2504  2021-05-05T04:37:47,959 INFO  [00000028] :hxdhiraj - 778       +      W66KBMFI.TRANSACTION_DT length = 8
+2505  2021-05-05T04:37:47,959 INFO  [00000028] :hxdhiraj - 779       +         format = DATE9.
+2506  2021-05-05T04:37:47,960 INFO  [00000028] :hxdhiraj - 780       +         informat = DATE9.
+2507  2021-05-05T04:37:47,960 INFO  [00000028] :hxdhiraj - 781       +         label = 'Transaction Date',
+2508  2021-05-05T04:37:47,960 INFO  [00000028] :hxdhiraj -                                                                                           The SAS System
+2509  2021-05-05T04:37:47,961 INFO  [00000028] :hxdhiraj - 
+2510  2021-05-05T04:37:47,961 INFO  [00000028] :hxdhiraj - 782       +      W66KBMFI.TRANSACTION_AMT length = 8
+2511  2021-05-05T04:37:47,961 INFO  [00000028] :hxdhiraj - 783       +   from
+2512  2021-05-05T04:37:47,962 INFO  [00000028] :hxdhiraj - 784       +      work.W66KBMFI,
+2513  2021-05-05T04:37:47,962 INFO  [00000028] :hxdhiraj - 785       +      work.W66KBMFQ
+2514  2021-05-05T04:37:47,962 INFO  [00000028] :hxdhiraj - 786       +   where
+2515  2021-05-05T04:37:47,963 INFO  [00000028] :hxdhiraj - 787       +      W66KBMFI.etls_source_row = W66KBMFQ.etls_source_row
+2516  2021-05-05T04:37:47,963 INFO  [00000028] :hxdhiraj - 788       +   ;
+2517  2021-05-05T04:37:47,965 INFO  [00000028] :hxdhiraj - NOTE: SQL view WORK.W3HPGFA3 has been defined.
+2518  2021-05-05T04:37:47,965 INFO  [00000028] :hxdhiraj - 789       +quit;
+2519  2021-05-05T04:37:47,966 INFO  [00000028] :hxdhiraj - NOTE: PROCEDURE SQL used (Total process time):
+2520  2021-05-05T04:37:47,966 INFO  [00000028] :hxdhiraj -       real time           0.01 seconds
+2521  2021-05-05T04:37:47,966 INFO  [00000028] :hxdhiraj -       cpu time            0.01 
+"""
+
+
+# 2124.log
+@fixture(scope='function')
+def input_case18():
+    return """
+2564  2021-05-05T04:37:47,982 INFO  [00000014] :hxdhiraj - 
+2565  2021-05-05T04:37:47,982 INFO  [00000014] :hxdhiraj - 823       +
+2566  2021-05-05T04:37:47,983 INFO  [00000014] :hxdhiraj - 824       +%put %str(NOTE: Mapping columns ...);
+2567  2021-05-05T04:37:47,983 INFO  [00000014] :hxdhiraj - NOTE: Mapping columns ...
+2568  2021-05-05T04:37:47,984 INFO  [00000030] :hxdhiraj - 825       +proc sql;
+2569  2021-05-05T04:37:47,985 INFO  [00000030] :hxdhiraj - 826       +   create view work.W5D32RTX as
+2570  2021-05-05T04:37:47,985 INFO  [00000030] :hxdhiraj - 827       +      select
+2571  2021-05-05T04:37:47,986 INFO  [00000030] :hxdhiraj - 828       +         SHIPTODIST_ID,
+2572  2021-05-05T04:37:47,986 INFO  [00000030] :hxdhiraj - 829       +         OSKU_ID
+2573  2021-05-05T04:37:47,986 INFO  [00000030] :hxdhiraj - 830       +   from &SYSLAST
+2574  2021-05-05T04:37:47,987 INFO  [00000030] :hxdhiraj - 831       +      where etls_lookup_table = 'IncomFM.GEOBRANDSUP_LKUP'
+2575  2021-05-05T04:37:47,987 INFO  [00000030] :hxdhiraj - 832       +   order by
+2576  2021-05-05T04:37:47,988 INFO  [00000030] :hxdhiraj - 833       +      SHIPTODIST_ID,
+2577  2021-05-05T04:37:47,988 INFO  [00000030] :hxdhiraj - 834       +      OSKU_ID
+2578  2021-05-05T04:37:47,988 INFO  [00000030] :hxdhiraj - 835       +   ;
+2579  2021-05-05T04:37:47,990 INFO  [00000030] :hxdhiraj - NOTE: SQL view WORK.W5D32RTX has been defined.
+2580  2021-05-05T04:37:47,990 INFO  [00000030] :hxdhiraj - 836       +quit;
+2581  2021-05-05T04:37:47,991 INFO  [00000030] :hxdhiraj - NOTE: PROCEDURE SQL used (Total process time):
+2582  2021-05-05T04:37:47,991 INFO  [00000030] :hxdhiraj -       real time           0.00 seconds
+2583  2021-05-05T04:37:47,992 INFO  [00000030] :hxdhiraj -       cpu time            0.01 
+"""
+
+
+# 2124.log
+@fixture(scope='function')
+def input_case19():
+    return """
+2697  2021-05-05T04:37:48,031 INFO  [00000014] :hxdhiraj - 
+2698  2021-05-05T04:37:48,031 INFO  [00000014] :hxdhiraj - 925       +
+2699  2021-05-05T04:37:48,035 INFO  [00000034] :hxdhiraj - 926       +data _null_;
+2700  2021-05-05T04:37:48,035 INFO  [00000034] :hxdhiraj - 927       +   put "NOTE: The following column(s) do not have a column mapping, so the"
+2701  2021-05-05T04:37:48,036 INFO  [00000034] :hxdhiraj - 928       +        " value(s) will be set to missing: GeoBrandSup_ID, GeoBrandSupplier";
+2702  2021-05-05T04:37:48,036 INFO  [00000034] :hxdhiraj - 929       +run;
+2703  2021-05-05T04:37:48,036 INFO  [00000034] :hxdhiraj - 
+2704  2021-05-05T04:37:48,037 INFO  [00000034] :hxdhiraj - NOTE: DATA statement used (Total process time):
+2705  2021-05-05T04:37:48,037 INFO  [00000034] :hxdhiraj -       real time           0.00 seconds
+2706  2021-05-05T04:37:48,037 INFO  [00000034] :hxdhiraj -       cpu time            0.00 
+"""
+
+
+# 2124.log
+@fixture(scope='function')
+def input_case20():
+    return """
+3010  2021-05-05T04:37:48,184 INFO  [00000014] :hxdhiraj - 
+3011  2021-05-05T04:37:48,188 INFO  [00000040] :hxdhiraj - MPRINT(ETLS_VALIDATE):   data _null_;
+3012  2021-05-05T04:37:48,189 INFO  [00000040] :hxdhiraj - MPRINT(ETLS_VALIDATE):   putlog
+3013  2021-05-05T04:37:48,190 INFO  [00000040] :hxdhiraj - MPRINT(ETLS_VALIDATE):   "NOTE: DATA VALIDATION SUMMARY: Total rows - SOURCE = 0";
+3014  2021-05-05T04:37:48,190 INFO  [00000040] :hxdhiraj - MPRINT(ETLS_VALIDATE):   putlog
+3015  2021-05-05T04:37:48,191 INFO  [00000040] :hxdhiraj - MPRINT(ETLS_VALIDATE):   "NOTE: DATA VALIDATION SUMMARY: Total rows - VALID RECORDS = 0";
+3016  2021-05-05T04:37:48,191 INFO  [00000040] :hxdhiraj - MPRINT(ETLS_VALIDATE):   putlog
+3017  2021-05-05T04:37:48,191 INFO  [00000040] :hxdhiraj - MPRINT(ETLS_VALIDATE):   "NOTE: DATA VALIDATION SUMMARY: Total rows - ERROR = 0";
+3018  2021-05-05T04:37:48,191 INFO  [00000040] :hxdhiraj - MPRINT(ETLS_VALIDATE):   putlog
+3019  2021-05-05T04:37:48,192 INFO  [00000040] :hxdhiraj - MPRINT(ETLS_VALIDATE):   "NOTE: DATA VALIDATION SUMMARY: Total rows - EXCEPTION = 0";
+3020  2021-05-05T04:37:48,192 INFO  [00000040] :hxdhiraj - MPRINT(ETLS_VALIDATE):   run;
+3021  2021-05-05T04:37:48,192 INFO  [00000040] :hxdhiraj - 
+3022  2021-05-05T04:37:48,193 INFO  [00000040] :hxdhiraj - NOTE: DATA statement used (Total process time):
+3023  2021-05-05T04:37:48,193 INFO  [00000040] :hxdhiraj -       real time           0.00 seconds
+3024  2021-05-05T04:37:48,193 INFO  [00000040] :hxdhiraj -       cpu time            0.02
+"""
+
+
+# 2124.log
+@fixture(scope='function')
+def input_case21():
+    return """
+3026  2021-05-05T04:37:48,194 INFO  [00000014] :hxdhiraj - 
+3027  2021-05-05T04:37:48,196 INFO  [00000041] :hxdhiraj - MPRINT(ETLS_VALIDATE):   proc append base=work.WA6LR3AU data=etls_target force;
+3028  2021-05-05T04:37:48,196 INFO  [00000041] :hxdhiraj -                                                                                           The SAS System
+3029  2021-05-05T04:37:48,196 INFO  [00000041] :hxdhiraj - 
+3030  2021-05-05T04:37:48,196 INFO  [00000041] :hxdhiraj - MPRINT(ETLS_VALIDATE):   run;
+3031  2021-05-05T04:37:48,197 INFO  [00000041] :hxdhiraj - 
+3032  2021-05-05T04:37:48,197 INFO  [00000041] :hxdhiraj - NOTE: The data set WORK.WA6LR3AU has 0 observations and 0 variables.
+3033  2021-05-05T04:37:48,198 INFO  [00000041] :hxdhiraj - NOTE: PROCEDURE APPEND used (Total process time):
+3034  2021-05-05T04:37:48,198 INFO  [00000041] :hxdhiraj -       real time           0.00 seconds
+3035  2021-05-05T04:37:48,198 INFO  [00000041] :hxdhiraj -       cpu time            0.00 
+"""
+
+
+# 2124.log
+@fixture(scope='function')
+def input_case22():
+    return """
+3056  2021-05-05T04:37:48,207 INFO  [00000014] :hxdhiraj - 
+3057  2021-05-05T04:37:48,208 INFO  [00000044] :hxdhiraj - MPRINT(ETLS_VALIDATE):   proc datasets library=work memtype=(data view) nolist nowarn;
+3058  2021-05-05T04:37:48,209 INFO  [00000044] :hxdhiraj - MPRINT(ETLS_VALIDATE):   delete etls_Source;
+3059  2021-05-05T04:37:48,209 INFO  [00000044] :hxdhiraj - MPRINT(ETLS_VALIDATE):   quit;
+3060  2021-05-05T04:37:48,209 INFO  [00000044] :hxdhiraj - 
+3061  2021-05-05T04:37:48,210 INFO  [00000044] :hxdhiraj - NOTE: PROCEDURE DATASETS used (Total process time):
+3062  2021-05-05T04:37:48,210 INFO  [00000044] :hxdhiraj -       real time           0.00 seconds
+3063  2021-05-05T04:37:48,210 INFO  [00000044] :hxdhiraj -       cpu time            0.00 
+"""
+
+
+# 2124.log
+@fixture(scope='function')
+def input_case23():
+    return """
+3285  2021-05-05T04:37:48,276 INFO  [00000014] :hxdhiraj - 
+3286  2021-05-05T04:37:48,276 INFO  [00000014] :hxdhiraj - NOTE: Mapping columns ...
+3287  2021-05-05T04:37:48,277 INFO  [00000046] :hxdhiraj - MPRINT(ETLS_LOADER):   proc sql;
+3288  2021-05-05T04:37:48,278 INFO  [00000046] :hxdhiraj - MPRINT(ETLS_LOADER):   create view work.WUTZHY5 as select MarketCountryCd as Country_Code length = 32 format = $32. informat = $32., (SUBSTR(TrademarkBrandFamilyName,1,32)) as Brand_Family 
+3289  2021-05-05T04:37:48,278 INFO  [00000046] :hxdhiraj - length = 32 format = $32. informat = $32., GeoBrandSup_ID, GeoBrandSupplier from WORK.WA6LR3AU ;
+3290  2021-05-05T04:37:48,279 INFO  [00000046] :hxdhiraj - NOTE: SQL view WORK.WUTZHY5 has been defined.
+3291  2021-05-05T04:37:48,280 INFO  [00000046] :hxdhiraj - MPRINT(ETLS_LOADER):   quit;
+3292  2021-05-05T04:37:48,280 INFO  [00000046] :hxdhiraj - NOTE: PROCEDURE SQL used (Total process time):
+3293  2021-05-05T04:37:48,280 INFO  [00000046] :hxdhiraj -       real time           0.00 seconds
+3294  2021-05-05T04:37:48,281 INFO  [00000046] :hxdhiraj -       cpu time            0.00 
+"""
+
+
+# 2124.log
+@fixture(scope='function')
+def input_case24():
+    return """
+3507  2021-05-05T04:37:48,396 INFO  [00000014] :hxdhiraj - 
+3508  2021-05-05T04:37:48,396 INFO  [00000014] :hxdhiraj -                                                                                           The SAS System
+3509  2021-05-05T04:37:48,397 INFO  [00000014] :hxdhiraj - 
+3510  2021-05-05T04:37:48,397 INFO  [00000014] :hxdhiraj - MPRINT(MAILCHK):  ;
+3511  2021-05-05T04:37:48,397 INFO  [00000014] :hxdhiraj - 1351      +
+3512  2021-05-05T04:37:48,398 INFO  [00000014] :hxdhiraj - 1352      +/*append us records to DmdMgt.GEOBRANDSUPPLIERMAP*/
+3513  2021-05-05T04:37:48,401 INFO  [00000061] :hxdhiraj - 1353      +data work.USGEOBRANDSUPADDS;
+3514  2021-05-05T04:37:48,401 INFO  [00000061] :hxdhiraj - 1354      +set DmdMgt.GEOBRANDSUPADDS(where=(country_code='US'));
+3515  2021-05-05T04:37:48,401 INFO  [00000061] :hxdhiraj - 1355      +run;
+3516  2021-05-05T04:37:48,401 INFO  [00000061] :hxdhiraj - 
+3517  2021-05-05T04:37:48,402 INFO  [00000061] :hxdhiraj - NOTE: The data set WORK.USGEOBRANDSUPADDS has 0 observations and 4 variables.
+3518  2021-05-05T04:37:48,403 INFO  [00000061] :hxdhiraj - NOTE: DATA statement used (Total process time):
+3519  2021-05-05T04:37:48,403 INFO  [00000061] :hxdhiraj -       real time           0.00 seconds
+3520  2021-05-05T04:37:48,404 INFO  [00000061] :hxdhiraj -       cpu time            0.01 
+"""

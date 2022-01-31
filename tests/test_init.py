@@ -1,15 +1,15 @@
 from pytest import mark
-from readlogs.read_logs import get_user_name
-from readlogs.read_logs import get_input_file_name
-from readlogs.read_logs import get_output_library_table
-from readlogs.read_logs import get_input_library_table
-from readlogs.read_logs import get_sas_step_name
-from readlogs.read_logs import proc_sql_parsing
-from readlogs.read_logs import data_step_parsing
-from readlogs.read_logs import get_ext_db
-from readlogs.read_logs import get_time_info
-from readlogs.read_logs import get_process_time
-from readlogs.read_logs import get_migration_disp
+from readlogs.D_CLDASST_Reader import get_user_name
+from readlogs.D_CLDASST_Reader import get_input_file_name
+from readlogs.D_CLDASST_Reader import get_output_library_table
+from readlogs.D_CLDASST_Reader import get_input_library_table
+from readlogs.D_CLDASST_Reader import get_sas_step_name
+from readlogs.D_CLDASST_Reader import proc_sql_parsing
+from readlogs.D_CLDASST_Reader import data_step_parsing
+from readlogs.D_CLDASST_Reader import get_ext_db
+from readlogs.D_CLDASST_Reader import get_time_info
+from readlogs.D_CLDASST_Reader import get_process_time
+from readlogs.D_CLDASST_Reader import get_migration_disp
 
 from input_contents import input_case1
 from input_contents import input_case2
@@ -23,7 +23,18 @@ from input_contents import input_case9
 from input_contents import input_case10
 from input_contents import input_case11
 from input_contents import input_case12
-
+from input_contents import input_case13
+from input_contents import input_case14
+from input_contents import input_case15
+from input_contents import input_case16
+from input_contents import input_case17
+from input_contents import input_case18
+from input_contents import input_case19
+from input_contents import input_case20
+from input_contents import input_case21
+from input_contents import input_case22
+from input_contents import input_case23
+from input_contents import input_case24
 
 @mark.case1
 def test_get_user_name_1(input_case1):
@@ -851,4 +862,72 @@ def test_get_migration_disp_12(input_case12):
     rule_id, migration_disp = get_migration_disp(0.02, 0.03, 'DATA statement', 'DATA', input_case12)
     assert rule_id == '20' and migration_disp == "Code Change", rule_id + " " + migration_disp
 
+
+@mark.case13
+def test_get_user_name_13(input_case13):
+    user_name = get_user_name(input_case13)
+    assert user_name == "Bank2BU"
+
+
+@mark.case13
+def test_get_input_file_name_13(input_case13):
+    input_file = get_input_file_name(input_case13)
+    assert input_file == "", input_file
+
+
+@mark.case13
+def test_get_output_library_table_13(input_case13):
+    output_library, output_table = get_output_library_table(input_case13)
+    assert output_library == "DB_KC" and output_table == "FSK_JOB_CALENDAR", output_library + output_table
+
+
+@mark.case13
+def test_get_input_library_table_13(input_case13):
+    input_lib, input_table = get_input_library_table(input_case13)
+    assert input_lib == "" and input_table == "", input_lib + input_table
+
+
+@mark.case13
+def test_get_sas_step_name_13(input_case13):
+    step, step_name = get_sas_step_name(input_case13)
+    assert step == "DATA statement" and step_name == "DATA", step + step_name
+
+
+@mark.case13
+def test_proc_sql_parsing_13(input_case13):
+    input_lib, input_table, output_lib, output_table = proc_sql_parsing(input_case13)
+    assert input_lib == [] and input_table == [] and output_lib == [] and \
+           output_table == [], str(input_lib) + str(input_table) + str(output_lib) + str(output_table)
+
+
+@mark.case13
+def test_data_step_parsing_13(input_case13):
+    input_lib, input_table, output_lib, output_table = data_step_parsing(input_case13)
+    assert input_lib == [] and input_table == [] and output_lib == [] \
+           and output_table == [], \
+           str(input_lib) + str(input_table) + str(output_lib) + str(output_table)
+
+
+@mark.case13
+def test_get_ext_db_13(input_case13):
+    ext_db_list = get_ext_db(input_case13)
+    assert ext_db_list == []
+
+
+@mark.case13
+def test_get_time_info_13(input_case13):
+    exe_date, exe_time = get_time_info(input_case13)
+    assert exe_date == '2021-05-14' and exe_time == '06:45:24'
+
+
+@mark.case13
+def test_get_process_time_13(input_case13):
+    cpu_time, real_time = get_process_time(input_case13)
+    assert real_time == 0.02 and cpu_time == 0.03, str(cpu_time) + " " + str(real_time)
+
+
+@mark.case13
+def test_get_migration_disp_13(input_case13):
+    rule_id, migration_disp = get_migration_disp(0.02, 0.03, 'DATA statement', 'DATA', input_case13)
+    assert rule_id == '20' and migration_disp == "Code Change", rule_id + " " + migration_disp
 
