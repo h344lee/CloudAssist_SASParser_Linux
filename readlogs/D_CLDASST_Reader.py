@@ -682,19 +682,25 @@ def get_input_library_table(sas_file_content):
 
 
 def get_sas_row_read(record_content):
-    input_lib_table_regex_case_one = re.compile(r"NOTE: (\d+) rows were updated in (.*)\.(.*).")
+    input_lib_table_regex_case_one = re.compile(r"NOTE: (\d+) rows were updated in (.*\..*).")
     input_lib_table_list_case_one = input_lib_table_regex_case_one.findall(record_content)
 
     input_row = ''
     input_lib = ''
     input_table = ''
 
-    if len(input_lib_table_list_case_one) != 0:
-        for record in input_lib_table_list_case_one:
+    lib_dict = dict()
 
-            input_row += ';' + str(record[0])
-            input_lib += ';' + record[1]
-            input_table += ';' + record[2]
+    if len(input_lib_table_list_case_one) != 0:
+        for rows, lib_table in input_lib_table_list_case_one:
+            lib_dict[lib_table] = rows
+
+    if len(lib_dict) != 0:
+        for lib_table, rows in lib_dict.items():
+            lib_table_list = lib_table.split('.')
+            input_row += ';' + rows
+            input_lib += ';' + lib_table_list[0]
+            input_table += ';' + lib_table_list[1]
 
     if input_row == '':
         return None, None, None
