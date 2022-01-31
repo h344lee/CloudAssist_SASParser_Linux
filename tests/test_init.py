@@ -10,7 +10,7 @@ from readlogs.D_CLDASST_Reader import get_ext_db
 from readlogs.D_CLDASST_Reader import get_time_info
 from readlogs.D_CLDASST_Reader import get_process_time
 from readlogs.D_CLDASST_Reader import get_migration_disp
-from readlogs.D_CLDASST_Reader import get_sas_row_read
+
 
 from input_contents import input_case1
 from input_contents import input_case2
@@ -45,8 +45,8 @@ def test_get_user_name_1(input_case1):
 
 @mark.case1
 def test_get_input_file_name_1(input_case1):
-    input_file = get_input_file_name(input_case1)
-    assert input_file == "/sasdata/adhoc/Projects/Canada/flat_files/province_weekly_gap.csv"
+    rows, input_file = get_input_file_name(input_case1)
+    assert rows == '2' and input_file == "/sasdata/adhoc/Projects/Canada/flat_files/province_weekly_gap.csv"
 
 
 @mark.case1
@@ -113,8 +113,8 @@ def test_get_user_name_2(input_case2):
 
 @mark.case2
 def test_get_input_file_name_2(input_case2):
-    input_file = get_input_file_name(input_case2)
-    assert input_file == "/sasdata/adhoc/Projects/Canada/flat_files/product_weekly_gap.csv"
+    rows, input_file = get_input_file_name(input_case2)
+    assert rows == '2' and input_file == "/sasdata/adhoc/Projects/Canada/flat_files/product_weekly_gap.csv"
 
 
 @mark.case2
@@ -181,7 +181,7 @@ def test_get_user_name_3(input_case3):
 
 @mark.case3
 def test_get_input_file_name_3(input_case3):
-    input_file = get_input_file_name(input_case3)
+    rows, input_file = get_input_file_name(input_case3)
     assert input_file == "", input_file
 
 
@@ -250,7 +250,7 @@ def test_get_user_name_4(input_case4):
 
 @mark.case4
 def test_get_input_file_name_4(input_case4):
-    input_file = get_input_file_name(input_case4)
+    rows, input_file = get_input_file_name(input_case4)
     assert input_file == "", input_file
 
 
@@ -319,7 +319,7 @@ def test_get_user_name_5(input_case5):
 
 @mark.case5
 def test_get_input_file_name_5(input_case5):
-    input_file = get_input_file_name(input_case5)
+    rows, input_file = get_input_file_name(input_case5)
     assert input_file == "", input_file
 
 
@@ -389,7 +389,7 @@ def test_get_user_name_6(input_case6):
 
 @mark.case6
 def test_get_input_file_name_6(input_case6):
-    input_file = get_input_file_name(input_case6)
+    rows, input_file = get_input_file_name(input_case6)
     assert input_file == "", input_file
 
 
@@ -458,7 +458,7 @@ def test_get_user_name_7(input_case7):
 
 @mark.case7
 def test_get_input_file_name_7(input_case7):
-    input_file = get_input_file_name(input_case7)
+    rows, input_file = get_input_file_name(input_case7)
     assert input_file == "", input_file
 
 
@@ -527,7 +527,7 @@ def test_get_user_name_8(input_case8):
 
 @mark.case8
 def test_get_input_file_name_8(input_case8):
-    input_file = get_input_file_name(input_case8)
+    rows, input_file = get_input_file_name(input_case8)
     assert input_file == "", input_file
 
 
@@ -596,7 +596,7 @@ def test_get_user_name_9(input_case9):
 
 @mark.case9
 def test_get_input_file_name_9(input_case9):
-    input_file = get_input_file_name(input_case9)
+    rows, input_file = get_input_file_name(input_case9)
     assert input_file == "", input_file
 
 
@@ -665,7 +665,7 @@ def test_get_user_name_10(input_case10):
 
 @mark.case10
 def test_get_input_file_name_10(input_case10):
-    input_file = get_input_file_name(input_case10)
+    rows, input_file = get_input_file_name(input_case10)
     assert input_file == "", input_file
 
 
@@ -734,7 +734,7 @@ def test_get_user_name_11(input_case11):
 
 @mark.case11
 def test_get_input_file_name_11(input_case11):
-    input_file = get_input_file_name(input_case11)
+    rows, input_file = get_input_file_name(input_case11)
     assert input_file == "", input_file
 
 
@@ -803,7 +803,7 @@ def test_get_user_name_12(input_case12):
 
 @mark.case12
 def test_get_input_file_name_12(input_case12):
-    input_file = get_input_file_name(input_case12)
+    rows, input_file = get_input_file_name(input_case12)
     assert input_file == "", input_file
 
 
@@ -872,7 +872,7 @@ def test_get_user_name_13(input_case13):
 
 @mark.case13
 def test_get_input_file_name_13(input_case13):
-    input_file = get_input_file_name(input_case13)
+    rows, input_file = get_input_file_name(input_case13)
     assert input_file == "", input_file
 
 
@@ -885,7 +885,7 @@ def test_get_output_library_table_13(input_case13):
 @mark.case13
 def test_get_input_library_table_13(input_case13):
     input_lib, input_table = get_input_library_table(input_case13)
-    assert input_lib == "" and input_table == "", input_lib + input_table
+    assert input_lib == "DB_KC" and input_table == "FSK_JOB_CALENDAR", input_lib + input_table
 
 
 @mark.case13
@@ -933,8 +933,4 @@ def test_get_migration_disp_13(input_case13):
     assert rule_id == '9' and migration_disp == "Code Change", rule_id + " " + migration_disp
 
 
-@mark.case13
-def test_get_sas_row_read_13(input_case13):
-    lib, table = get_sas_row_read(input_case13)
-    assert lib == 'DB_KC' and table == 'FSK_JOB_CALENDAR'
 

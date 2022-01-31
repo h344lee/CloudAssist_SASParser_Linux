@@ -499,6 +499,7 @@ def get_user_log_content(user, log_content):
 def get_sas_files(user_log_content):
     sas_file_regex = re.compile(r"_SASPROGRAMFILE='(.*)';")
     sas_file_list = sas_file_regex.findall(user_log_content)
+    print(sas_file_list)
     sas_file_list.insert(0, '')
 
     sas_content_list = user_log_content.split("%LET _SASPROGRAMFILE='")
@@ -685,7 +686,7 @@ def get_input_library_table(sas_file_content):
     input_lib_table_list = input_lib_table_regex_case_one.findall(sas_file_content)
 
     input_lib_table_regex_case_two = re.compile(r"NOTE: \d+ rows were updated in (.*)\.(.*).")
-    input_lib_table_list += input_lib_table_regex_case_two.findall(record_content)
+    input_lib_table_list += input_lib_table_regex_case_two.findall(sas_file_content)
 
     input_lib = ''
     input_table = ''
