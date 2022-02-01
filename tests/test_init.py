@@ -934,3 +934,147 @@ def test_get_migration_disp_13(input_case13):
 
 
 
+
+@mark.case14
+def test_get_user_name_14(input_case14):
+    user_name = get_user_name(input_case14)
+    assert user_name == "Bank2BU"
+
+
+@mark.case14
+def test_get_input_file_name_14(input_case14):
+    rows, input_file = get_input_file_name(input_case14)
+    assert input_file == "", input_file
+
+
+@mark.case14
+def test_get_output_library_table_14(input_case14):
+    output_library, output_table = get_output_library_table(input_case14)
+    assert output_library == "" and output_table == "", output_library + output_table
+
+
+@mark.case14
+def test_get_input_library_table_14(input_case14):
+    input_lib, input_table = get_input_library_table(input_case14)
+    assert input_lib == "DB_KC" and input_table == "FSK_CASH_FLOW_ALERT", input_lib + input_table
+
+
+@mark.case14
+def test_get_sas_step_name_14(input_case14):
+    step, step_name = get_sas_step_name(input_case14)
+    assert step == "PROCEDURE Statement" and step_name == "SQL", step + step_name
+
+
+@mark.case14
+def test_proc_sql_parsing_14(input_case14):
+    input_lib, input_table, output_lib, output_table = proc_sql_parsing(input_case14)
+    assert input_lib == ['db_kc'] and input_table == ['FSK_CASH_FLOW_ALERT'] and output_lib == [] and \
+           output_table == [], str(input_lib) + str(input_table) + str(output_lib) + str(output_table)
+
+
+@mark.case14
+def test_data_step_parsing_14(input_case14):
+    input_lib, input_table, output_lib, output_table = data_step_parsing(input_case14)
+    assert input_lib == [] and input_table == [] and output_lib == [] \
+           and output_table == [], \
+           str(input_lib) + str(input_table) + str(output_lib) + str(output_table)
+
+
+@mark.case14
+def test_get_ext_db_14(input_case14):
+    ext_db_list = get_ext_db(input_case14)
+    assert ext_db_list == []
+
+
+@mark.case14
+def test_get_time_info_14(input_case14):
+    exe_date, exe_time = get_time_info(input_case14)
+    assert exe_date == '2021-05-14' and exe_time == '07:50:09'
+
+
+@mark.case14
+def test_get_process_time_14(input_case14):
+    cpu_time, real_time = get_process_time(input_case14)
+    assert real_time == 0.1 and cpu_time == 0.03, str(cpu_time) + " " + str(real_time)
+
+
+@mark.case14
+def test_get_migration_disp_14(input_case14):
+    rule_id, migration_disp = get_migration_disp(0.03, 0.1, 'PROCEDURE Statement', 'SQL', input_case14)
+    assert rule_id == '9' and migration_disp == "Code Change", rule_id + " " + migration_disp
+
+
+
+
+
+@mark.case15
+def test_get_user_name_15(input_case15):
+    user_name = get_user_name(input_case15)
+    assert user_name == "hxdhiraj"
+
+
+@mark.case15
+def test_get_input_file_name_15(input_case15):
+    rows, input_file = get_input_file_name(input_case15)
+    assert input_file == "", input_file
+
+
+@mark.case15
+def test_get_output_library_table_15(input_case15):
+    output_library, output_table = get_output_library_table(input_case15)
+    assert output_library == "WORK" and output_table == "STRHISTORYWEEKLY", output_library + output_table
+
+
+@mark.case15
+def test_get_input_library_table_15(input_case15):
+    input_lib, input_table = get_input_library_table(input_case15)
+    assert input_lib == "" and input_table == "", input_lib + input_table
+
+
+@mark.case15
+def test_get_sas_step_name_15(input_case15):
+    step, step_name = get_sas_step_name(input_case15)
+    assert step == "PROCEDURE Statement" and step_name == "SQL", step + step_name
+
+
+@mark.case15
+def test_proc_sql_parsing_15(input_case15):
+    input_lib, input_table, output_lib, output_table = proc_sql_parsing(input_case15)
+    assert input_lib == ['indata'] and input_table == ['&SASDATASET'] and output_lib == ['work'] and \
+           output_table == ['&SASDATASET'], str(input_lib) + str(input_table) + str(output_lib) + str(output_table)
+
+
+@mark.case15
+def test_data_step_parsing_15(input_case15):
+    input_lib, input_table, output_lib, output_table = data_step_parsing(input_case15)
+    assert input_lib == [] and input_table == [] and output_lib == [] \
+           and output_table == [], \
+           str(input_lib) + str(input_table) + str(output_lib) + str(output_table)
+
+
+@mark.case15
+def test_get_ext_db_15(input_case15):
+    ext_db_list = get_ext_db(input_case15)
+    assert ext_db_list == []
+
+
+@mark.case15
+def test_get_time_info_15(input_case15):
+    exe_date, exe_time = get_time_info(input_case15)
+    assert exe_date == '2021-05-05' and exe_time == '04:37:44'
+
+
+@mark.case15
+def test_get_process_time_15(input_case15):
+    cpu_time, real_time = get_process_time(input_case15)
+    assert real_time == 8.91 and cpu_time == 5.5, str(cpu_time) + " " + str(real_time)
+
+
+@mark.case15
+def test_get_migration_disp_15(input_case15):
+    rule_id, migration_disp = get_migration_disp(5.5, 8.91, 'PROCEDURE Statement', 'SQL', input_case15)
+    assert rule_id == '9' and migration_disp == "Code Change", rule_id + " " + migration_disp
+
+
+
+

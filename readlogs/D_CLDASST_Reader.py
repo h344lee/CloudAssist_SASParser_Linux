@@ -497,13 +497,29 @@ def get_user_log_content(user, log_content):
 # make a list of pair of SAS file name and the SAS file's log content
 # comment: need to implement SAS file line number part here (1/14)
 def get_sas_files(user_log_content):
-    sas_file_regex = re.compile(r"_SASPROGRAMFILE='(.*)';")
-    sas_file_list = sas_file_regex.findall(user_log_content)
-    print(sas_file_list)
-    sas_file_list.insert(0, '')
+    sas_content_list = user_log_content.split("%LET _CLIENTPROJECTPATH=")
 
-    sas_content_list = user_log_content.split("%LET _SASPROGRAMFILE='")
     sas_content_numbered_list = sas_line_number_counter(sas_content_list)
+    sas_file_list = []
+    # print(len(sas_content_numbered_list))
+
+    for sas_content in sas_content_numbered_list:
+        # print(sas_content[:890])
+        program_file_regex = re.compile(r" _SASPROGRAMFILE=(.*);")
+        program_file_list = program_file_regex.findall(sas_content)
+        # print(program_file_list)
+
+        project_path_regex = re.compile(r" _CLIENTPROJECTPATH=(.*);")
+        project_path_list = project_path_regex.findall(sas_content)
+        # print(project_path_list)
+
+        if len(program_file_list) != 0 and len(program_file_list[0]) > 3:
+            sas_file_list.append(program_file_list[0][1:-1])
+        elif len(project_path_list) != 0 and len(project_path_list[0]) > 3:
+            sas_file_list.append(project_path_list[0][1:-1])
+        else:
+            sas_file_list.append("")
+        # print("^^^^^^^^")
 
     zipped_sas_file_content_list = tuple(zip(sas_file_list, sas_content_numbered_list))
 
@@ -512,18 +528,25 @@ def get_sas_files(user_log_content):
 
 def sas_line_number_counter(sas_content_list):
     temp_chunk = ""
+
     sas_content_numbered_list = []
-    for line_num, line in enumerate(sas_content_list[0].splitlines(True)):
+    sas_full_content_list = []
+    # recover the lost part when log file is split
+    for count, content in enumerate(sas_content_list):
+        if count != 0:
+            content = "%LET _CLIENTPROJECTPATH=" + content
+        sas_full_content_list.append(content)
+
+    # line number counting for the first part of the sas log file (usually SAS initialization)
+    for line_num, line in enumerate(sas_full_content_list[0].splitlines(True)):
         temp_chunk += str(line_num + 1) + "  " + line
 
     sas_content_numbered_list.append(temp_chunk)
 
-    # with open("output\\chunk1.txt", 'w') as text_file:
-    #      text_file.write(temp_chunk)
-    # test_counter = 2
-
     temp_chunk = ""
-    for sas_content in sas_content_list[1:]:
+    # line number counting for the remaining parts
+    for sas_content in sas_full_content_list[1:]:
+
         line_number_regex = re.compile(r"\n\d\d\d\d-\d\d-.* - (\d+) ")
         line_number_regex_obj = line_number_regex.search(sas_content)
         start_line_number = int(line_number_regex_obj.group(1))
@@ -532,11 +555,6 @@ def sas_line_number_counter(sas_content_list):
             temp_chunk += str(start_line_number - 1) + "  " + line
             start_line_number += 1
         sas_content_numbered_list.append(temp_chunk)
-
-        # with open('output\\chunk' + str(test_counter) + '.txt', 'w') as text_file:
-        #     text_file.write(temp_chunk)
-        # test_counter += 1
-
         temp_chunk = ""
 
     return sas_content_numbered_list
@@ -681,12 +699,14 @@ def get_output_library_table(sas_file_content):
 # return input_lib, input_table as string
 # Need to enhance to process actual query based process.
 def get_input_library_table(sas_file_content):
-
     input_lib_table_regex_case_one = re.compile(r"NOTE: There were \d+ observations read from the data set (.*)\.(.*).")
     input_lib_table_list = input_lib_table_regex_case_one.findall(sas_file_content)
 
     input_lib_table_regex_case_two = re.compile(r"NOTE: \d+ rows were updated in (.*)\.(.*).")
     input_lib_table_list += input_lib_table_regex_case_two.findall(sas_file_content)
+
+    input_lib_table_regex_case_three = re.compile(r"NOTE: .*? rows were deleted from (.*)\.(.*).")
+    input_lib_table_list += input_lib_table_regex_case_three.findall(sas_file_content)
 
     input_lib = ''
     input_table = ''
@@ -697,7 +717,6 @@ def get_input_library_table(sas_file_content):
 
     if len(input_lib_table_list) != 0:
         for record in input_lib_table_list:
-
             input_lib += ';' + record[0]
             input_table += ';' + record[1]
 
@@ -778,7 +797,6 @@ def proc_sql_parsing(record_content):
 
         output_library, output_table = get_output_table_from_sql(proc_sql)
 
-
     return input_library, input_table, output_library, output_table
 
 
@@ -846,6 +864,7 @@ def get_proc_sql(sql_block):
 
 
 def get_input_table_from_sql(proc_sql):
+    print(proc_sql)
 
     input_library = []
     input_table = []
@@ -868,11 +887,20 @@ def get_input_table_from_sql(proc_sql):
         sql_join_list = sql_join_regex.findall(proc_sql)
         lib_table_list += sql_join_list
 
-    # case 1: from ~ where
     sql_from_where_regex = re.compile(r"from (.*?) where ", re.IGNORECASE)
     sql_from_where_list = sql_from_where_regex.findall(proc_sql)
-    if len(sql_from_where_list) != 0:
-        lib_table_list += sql_from_where_list[0].split(',')
+
+    sql_from_order_regex = re.compile(r"from (.*?) order", re.IGNORECASE)
+    sql_from_order_list = sql_from_order_regex.findall(proc_sql)
+
+    sql_from_semi_regex = re.compile(r"from (.*?)(;| )")
+    sql_from_semi_list = sql_from_semi_regex.findall(proc_sql)
+
+    sql_from_quit_regex = re.compile(r"from (.*?) quit;")
+    sql_from_quit_list = sql_from_quit_regex.findall(proc_sql)
+
+    # case 1: "from (.*?) where "
+    if len(sql_from_where_list) != 0 and len(lib_table_list) == 0:
 
         # check1 whether from is in values
         is_from_in_bracket_regex = re.compile(r'(.*)from')
@@ -880,40 +908,42 @@ def get_input_table_from_sql(proc_sql):
         if from_in_bracket is not None:
             former_part = from_in_bracket.group(1)
             if former_part.count('(') != former_part.count(')'):
-                lib_table_list = []
+                sql_from_where_list = []
 
-    # case 2: from ~ order by
-    elif len(lib_table_list) == 0:
-        sql_from_order_regex = re.compile(r"from (.*?) order", re.IGNORECASE)
-        sql_from_order_list = sql_from_where_regex.findall(proc_sql)
+        if len(sql_from_where_list) != 0:
+            lib_table_list += sql_from_where_list[0].split(',')
+
+    # case 2: "from (.*?) order"
+    elif len(sql_from_order_list) != 0 and len(lib_table_list) == 0:
+
+        # check1 whether from is in brackets
+        is_from_in_values_regex = re.compile(r'\(.*from.*\)')
+        if re.search(is_from_in_values_regex, proc_sql) is not None:
+            sql_from_order_list = []
+
         if len(sql_from_order_list) != 0:
             lib_table_list += sql_from_order_list[0].split(',')
 
-            # check1 whether from is in brackets
-            is_from_in_values_regex = re.compile(r'\(.*from.*\)')
-            if re.search(is_from_in_values_regex, proc_sql) is not None:
-                lib_table_list = []
+    # case 3: "from (.*?)(;| )"
+    elif len(sql_from_semi_list) != 0 and len(lib_table_list) == 0:
 
-    # case LAST: from ~ ;
-    elif len(lib_table_list) == 0:
-        sql_from_where_regex = re.compile(r"from (.*?)(;| )")
-        lib_table_list += sql_from_where_regex.findall(proc_sql)
+        # check1 whether from is in values
+        is_from_in_values_regex = re.compile(r' values\(.*? from .*?\)')
+        if re.search(is_from_in_values_regex, proc_sql) is not None:
+            sql_from_semi_list = []
+
+        lib_table_list += sql_from_semi_list
         lib_table_list = [element[0] for element in lib_table_list if element[0] != ""]
 
-        # check1 whether from is in values
-        is_from_in_values_regex = re.compile(r' values\(.*? from .*?\)')
-        if re.search(is_from_in_values_regex, proc_sql) is not None:
-            lib_table_list = []
-
-    # case LAST: from ~ \n
-    elif len(lib_table_list) == 0:
-        sql_from_where_regex = re.compile(r"from (.*?) quit;")
-        lib_table_list = sql_from_where_regex.findall(proc_sql)
+    # case4: "from (.*?) quit;"
+    elif len(sql_from_quit_list) != 0 and len(lib_table_list) == 0:
 
         # check1 whether from is in values
         is_from_in_values_regex = re.compile(r' values\(.*? from .*?\)')
         if re.search(is_from_in_values_regex, proc_sql) is not None:
-            lib_table_list = []
+            sql_from_quit_list = []
+
+        lib_table_list += sql_from_quit_list
 
     if len(lib_table_list) != 0:
         each_lib_table_list = []
@@ -1248,7 +1278,7 @@ def get_ext_db(record_content):
     if len(proc_sql_regex_list) != 0:
         sql_block = proc_sql_regex_list[0][0] + proc_sql_regex_list[0][2] + proc_sql_regex_list[0][3]
         proc_sql = get_proc_sql(sql_block)
-        #print(proc_sql)
+        # print(proc_sql)
         if "connect to" in proc_sql:
             ext_db_regex = re.compile(r"connect to (.*?)(\(| )")
             ext_db_obj = ext_db_regex.search(proc_sql)
@@ -1260,8 +1290,7 @@ def get_ext_db(record_content):
     ext_db_name_list += db_name_list
     ext_db_name_list = list(set(ext_db_name_list))
 
-
-    #print(ext_db_name_list)
+    # print(ext_db_name_list)
 
     return ext_db_name_list
 
