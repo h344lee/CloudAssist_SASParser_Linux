@@ -710,3 +710,43 @@ def input_case24():
 3519  2021-05-05T04:37:48,403 INFO  [00000061] :hxdhiraj -       real time           0.00 seconds
 3520  2021-05-05T04:37:48,404 INFO  [00000061] :hxdhiraj -       cpu time            0.01 
 """
+
+
+# 30420.log
+# @fixture(scope='function')
+# def input_case25():
+#     return """2021-05-25T01:57:14,284 INFO  [00000011] :Bank2BU@SASBAP - MLOGIC(FCF_RCSET):  Beginning execution.
+# 2021-05-25T01:57:14,284 INFO  [00000011] :Bank2BU@SASBAP - MLOGIC(FCF_RCSET):  Stored compiled macro in libref SOURCE compiled 26AUG20:02:44:49 with V9.4.
+# 2021-05-25T01:57:14,284 INFO  [00000011] :Bank2BU@SASBAP - SYMBOLGEN:  Macro variable SQLRC resolves to 0
+# 2021-05-25T01:57:14,284 INFO  [00000011] :Bank2BU@SASBAP - MLOGIC(FCF_RCSET):  Parameter ERROR has value 0
+# 2021-05-25T01:57:14,284 INFO  [00000011] :Bank2BU@SASBAP - SYMBOLGEN:  Macro variable ERROR resolves to 0
+# 2021-05-25T01:57:14,284 INFO  [00000011] :Bank2BU@SASBAP - SYMBOLGEN:  Macro variable TRANS_RC resolves to 0
+# 2021-05-25T01:57:14,284 INFO  [00000011] :Bank2BU@SASBAP - MLOGIC(FCF_RCSET):  %IF condition (&error gt &trans_rc) is FALSE
+# 2021-05-25T01:57:14,284 INFO  [00000011] :Bank2BU@SASBAP - SYMBOLGEN:  Macro variable ERROR resolves to 0
+# 2021-05-25T01:57:14,284 INFO  [00000011] :Bank2BU@SASBAP - SYMBOLGEN:  Macro variable JOB_RC resolves to 4
+# 2021-05-25T01:57:14,284 INFO  [00000011] :Bank2BU@SASBAP - MLOGIC(FCF_RCSET):  %IF condition (&error gt &job_rc) is FALSE
+# 2021-05-25T01:57:14,284 INFO  [00000011] :Bank2BU@SASBAP - MLOGIC(FCF_RCSET):  Ending execution.
+# 2021-05-25T01:57:14,284 INFO  [00000011] :Bank2BU@SASBAP - MPRINT(FCF_MAIN_PROCESS.FCF_AGP.FCF_ENT_LOAD_DM_PROCESS):  ;
+# 2021-05-25T01:57:14,284 INFO  [00000011] :Bank2BU@SASBAP - SYMBOLGEN:  Macro variable TRANS_RC resolves to 0
+# 2021-05-25T01:57:14,284 INFO  [00000011] :Bank2BU@SASBAP - SYMBOLGEN:  Macro variable TRANS_RC resolves to 0
+# 2021-05-25T01:57:14,284 INFO  [00000011] :Bank2BU@SASBAP - MLOGIC(FCF_ENT_LOAD_DM_PROCESS):  %IF condition &trans_rc eq 3 or &trans_rc ge 5 is FALSE
+# 2021-05-25T01:57:14,284 INFO  [00000011] :Bank2BU@SASBAP - MLOGIC(FCF_ENT_LOAD_DM_PROCESS):  %PUT NOTE: FCF: Loading Entities with alerts
+# 2021-05-25T01:57:14,285 INFO  [00000011] :Bank2BU@SASBAP - NOTE: FCF: Loading Entities with alerts
+# 2021-05-25T01:57:14,288 INFO  [00000011] :Bank2BU@SASBAP - MLOGIC(FCF_ENT_LOAD_DM_PROCESS):  Beginning compilation of FCF_ENT_LOAD_ALERTED_ENTITIES using the autocall file D:\opt\sasinside\SASHome\SASFoundation\9.4\antimnycmn\ucmacros\fcf_ent_load_alerted_entities.sas.
+# 2021-05-25T01:57:14,291 INFO  [00000011] :Bank2BU@SASBAP - MLOGIC(FCF_ENT_LOAD_DM_PROCESS):  Ending compilation of FCF_ENT_LOAD_ALERTED_ENTITIES.
+# 2021-05-25T01:57:14,291 INFO  [00000011] :Bank2BU@SASBAP - MLOGIC(FCF_ENT_LOAD_ALERTED_ENTITIES):  Beginning execution.
+# 2021-05-25T01:57:14,291 INFO  [00000011] :Bank2BU@SASBAP - MLOGIC(FCF_ENT_LOAD_ALERTED_ENTITIES):  This macro was compiled from the autocall file D:\opt\sasinside\SASHome\SASFoundation\9.4\antimnycmn\ucmacros\fcf_ent_load_alerted_entities.sas
+# 2021-05-25T01:57:14,291 INFO  [00000011] :Bank2BU@SASBAP - MLOGIC(FCF_ENT_LOAD_ALERTED_ENTITIES):  %LET (variable name is TRANS_RC)
+# 2021-05-25T01:57:14,291 INFO  [00000011] :Bank2BU@SASBAP - MLOGIC(FCF_ENT_LOAD_ALERTED_ENTITIES):  %LET (variable name is _FCFMSG_)
+# 2021-05-25T01:57:14,291 INFO  [00000011] :Bank2BU@SASBAP - MLOGIC(FCF_ENT_LOAD_ALERTED_ENTITIES):  %PUT NOTE: FCF: Saving current routing information prior to rebuilding the alerted_entity table
+# 2021-05-25T01:57:14,291 INFO  [00000011] :Bank2BU@SASBAP - NOTE: FCF: Saving current routing information prior to rebuilding the alerted_entity table
+# 2021-05-25T01:57:14,293 INFO  [00001714] :Bank2BU@SASBAP - MPRINT(FCF_MAIN_PROCESS.FCF_AGP.FCF_ENT_LOAD_DM_PROCESS.FCF_ENT_LOAD_ALERTED_ENTITIES):   proc sql ;
+# 2021-05-25T01:57:14,293 INFO  [00001714] :Bank2BU@SASBAP - SYMBOLGEN:  Macro variable SEG_KC_LIBNAME resolves to seg_kc
+# 2021-05-25T01:57:14,293 INFO  [00001714] :Bank2BU@SASBAP - SYMBOLGEN:  Macro variable SEG_KC_LIBNAME resolves to seg_kc
+# 2021-05-25T01:57:14,295 INFO  [00001714] :Bank2BU@SASBAP - MPRINT(FCF_MAIN_PROCESS.FCF_AGP.FCF_ENT_LOAD_DM_PROCESS.FCF_ENT_LOAD_ALERTED_ENTITIES):   delete from seg_kc.fsk_entity_queue where alerted_entity_number in (select alerted_entity_number from seg_kc.fsk_alerted_entity where not ALERTS_CNT);
+# 2021-05-25T01:57:14,340 INFO  [00001714] :Bank2BU@SASBAP - NOTE: No rows were deleted from SEG_KC.FSK_ENTITY_QUEUE.
+# 2021-05-25T01:57:14,340 INFO  [00001714] :Bank2BU@SASBAP -
+# 2021-05-25T01:57:14,345 INFO  [00001714] :Bank2BU@SASBAP - MPRINT(FCF_MAIN_PROCESS.FCF_AGP.FCF_ENT_LOAD_DM_PROCESS.FCF_ENT_LOAD_ALERTED_ENTITIES):   quit;
+# 2021-05-25T01:57:14,345 INFO  [00001714] :Bank2BU@SASBAP - NOTE: PROCEDURE SQL used (Total process time):
+# 2021-05-25T01:57:14,345 INFO  [00001714] :Bank2BU@SASBAP -       real time           0.05 seconds
+# 2021-05-25T01:57:14,345 INFO  [00001714] :Bank2BU@SASBAP -       cpu time            0.01 seconds"""

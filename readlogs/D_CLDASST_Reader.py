@@ -648,11 +648,11 @@ def get_time_info(sas_file_content):
 # return cpu time and real time as second
 # comment: need to update the SAS System time part (1/14)
 def get_process_time(sas_file_content):
-    cpu_time_regex = re.compile(r"cpu time \s+(\d+.\d+) ")
+    cpu_time_regex = re.compile(r"cpu time \s+(\d+.\d+)")
     cpu_time_regex_obj = cpu_time_regex.search(sas_file_content)
     cpu_time = cpu_time_regex_obj.group(1)
 
-    real_time_regex = re.compile(r"real time \s+(\d+.\d+) ")
+    real_time_regex = re.compile(r"real time \s+(\d+.\d+)")
     real_time_regex_obj = real_time_regex.search(sas_file_content)
     if real_time_regex_obj is None:
         real_time_regex_ver2 = re.compile(r"real time \s+(\d+:\d+).")
@@ -864,7 +864,6 @@ def get_proc_sql(sql_block):
 
 
 def get_input_table_from_sql(proc_sql):
-    print(proc_sql)
 
     input_library = []
     input_table = []
@@ -1006,7 +1005,7 @@ def get_output_table_from_sql(proc_sql):
 
 
 def data_step_parsing(record_content):
-    data_step_regex = re.compile(r"(.* INFO .* data)(.+?)((?:\n.+)+)(run)", re.IGNORECASE)
+    data_step_regex = re.compile(r"(.* INFO .*data)(.+?)((?:\n.+)+)(run)", re.IGNORECASE)
     data_step_regex_list = data_step_regex.findall(record_content)
 
     input_library = []
@@ -1123,11 +1122,15 @@ def get_input_table_from_data_sql(data_step_sql):
     merge_lib_table_list = []
     update_lib_table_list = []
 
+
+
     # get input library and table from set
     set_between_quote_regex = re.compile(r"\".*? set .*\"")
+
     if re.search(set_between_quote_regex, data_step_sql) is None:
         set_regex = re.compile(r"[;| ]set (.*?)(;|\(| )")
         set_lib_table_list = set_regex.findall(data_step_sql)
+
         set_lib_table_list = [element[0] for element in set_lib_table_list if element[0] != ""]
 
     # get input library and table from merge
@@ -1325,6 +1328,7 @@ def ext_db_checker(record_content):
 
 def get_migration_disp(FILE_SAS_EXC_CPU_TM, FILE_SAS_EXC_RL_TM, FILE_SAS_STP, FILE_SAS_STP_NM, record_content):
     RULE_ID = ""
+    REC_ACT = ""
     recommendation = "Lift and Shift"
 
     FILE_SAS_EXC_CPU_TM = float(FILE_SAS_EXC_CPU_TM)
@@ -1351,65 +1355,85 @@ def get_migration_disp(FILE_SAS_EXC_CPU_TM, FILE_SAS_EXC_RL_TM, FILE_SAS_STP, FI
     if FILE_SAS_EXC_CPU_TM >= 30.00:
         recommendation = "Code Change"
         RULE_ID = '1'
+        REC_ACT = 'Consider reducing real time'
     elif FILE_SAS_EXC_CPU_TM >= FILE_SAS_EXC_RL_TM and FILE_SAS_EXC_CPU_TM != 0:
         recommendation = "Code Change"
         RULE_ID = '2'
+        REC_ACT = 'Consider reducing cpu time so that it is less then real time'
     elif FILE_SAS_STP == 'PROCEDURE Statement' and FILE_SAS_STP_NM == 'LOGISTIC':
         recommendation = "Code Change"
         RULE_ID = '4'
+        REC_ACT = 'Consider using PROC LOGSELECT (CAS) instead of Logistic'
     elif FILE_SAS_STP == 'PROCEDURE Statement' and FILE_SAS_STP_NM == 'MIXED':
         recommendation = "Code Change"
         RULE_ID = '5'
+        REC_ACT = 'Consider using PROC LMIXED (CAS) instead of Mixed'
     elif FILE_SAS_STP == 'PROCEDURE Statement' and FILE_SAS_STP_NM == 'REG':
         recommendation = "Code Change"
         RULE_ID = '6'
+        REC_ACT = 'Consider using PROC REGSELECT (CAS) instead of Reg'
     elif FILE_SAS_STP == 'PROCEDURE Statement' and FILE_SAS_STP_NM == 'SQL':
         recommendation = "Code Change"
         RULE_ID = '9'
+        REC_ACT = 'Push Down whenever possible.'
     elif FILE_SAS_STP == 'PROCEDURE Statement' and FILE_SAS_STP_NM == 'SORT':
         recommendation = "Code Change"
         RULE_ID = '10'
+        REC_ACT = 'Push Down whenever possible. (To save memory use partioning)'
     elif FILE_SAS_STP == 'PROCEDURE Statement' and FILE_SAS_STP_NM == 'TRANSPOSE':
         recommendation = "Code Change"
         RULE_ID = '11'
+        REC_ACT = 'Depending on ther data source stays as DB2 or moves to native cloud data base.'
     elif FILE_SAS_STP == 'PROCEDURE Statement' and FILE_SAS_STP_NM == 'FORMAT':
         recommendation = "Code Change"
         RULE_ID = '12'
+        REC_ACT = 'Depending on ther data source stays as DB2 or moves to native cloud data base.'
     elif FILE_SAS_STP == 'PROCEDURE Statement' and FILE_SAS_STP_NM == 'FEDSQL':
         recommendation = "Code Change"
         RULE_ID = '13'
+        REC_ACT = 'Code Change because PROC FedSQL is ANSI 99 SQL compliant'
     elif FILE_SAS_STP == 'PROCEDURE Statement' and FILE_SAS_STP_NM == 'APPEND':
         recommendation = "Code Change"
         RULE_ID = '14'
+        REC_ACT = 'Neglect if target CAS table exists prior to the PROC APPEND.'
     elif FILE_SAS_STP == 'DATA statement' and 'index' in data_statement.lower():
         recommendation = "Code Change"
         RULE_ID = '15'
+        REC_ACT = 'Neglect INDEX in DATA STATEMENT because its Obsoleted since there are no more pointers available to indicate specific rows due to data allocated to different cores and threads.'
     elif FILE_SAS_STP == 'DATA statement' and 'firstobs' in data_statement.lower():
         recommendation = "Code Change"
         RULE_ID = '16'
+        REC_ACT = 'Neglect FIRSTOBS in DATA STATEMENT because its Obsoleted since there are no more pointers available to indicate specific rows due to data allocated to different cores and threads.'
     elif FILE_SAS_STP == 'DATA statement' and 'obs' in data_statement.lower():
         recommendation = "Code Change"
         RULE_ID = '17'
+        REC_ACT = 'Neglect OBS in DATA STATEMENT because its Obsoleted since there are no more pointers available to indicate specific rows due to data allocated to different cores and threads.'
     elif FILE_SAS_STP == 'DATA statement' and 'pointobs' in data_statement.lower():
         recommendation = "Code Change"
         RULE_ID = '18'
+        REC_ACT = 'Neglect POINTOBS in DATA STATEMENT because its Obsoleted since there are no more pointers available to indicate specific rows due to data allocated to different cores and threads.'
     elif FILE_SAS_STP == 'DATA statement' and 'infile' in data_statement.lower():
         recommendation = "Code Change"
         RULE_ID = '19'
+        REC_ACT = 'Replace with SET statements, with the new SET statements pointing to the correct in-memory tables.'
     elif FILE_SAS_STP == 'DATA statement' and 'input' in data_statement.lower():
         recommendation = "Code Change"
         RULE_ID = '20'
+        REC_ACT = 'Replace with SET statements, with the new SET statements pointing to the correct in-memory tables.'
     elif FILE_SAS_STP == 'DATA statement' and 'datalines' in data_statement.lower():
         recommendation = "Code Change"
         RULE_ID = '21'
+        REC_ACT = 'Replace with SET statements, with the new SET statements pointing to the correct in-memory tables.'
     elif FILE_SAS_STP == 'DATA statement' and 'varfmt' in data_statement.lower():
         recommendation = "Code Change"
         RULE_ID = '22'
+        REC_ACT = ''
     elif FILE_SAS_STP == 'PROCEDURE Statement' and 'varfmt' in proc_sql.lower():
         recommendation = "Code Change"
         RULE_ID = '22'
+        REC_ACT = 'Neglect VARFMT function because it is Obsolete.'
 
-    return RULE_ID, recommendation
+    return REC_ACT, RULE_ID, recommendation
 
 
 def get_migr_rule(FILE_SAS_MIGR_RUL_ID):
@@ -1578,6 +1602,10 @@ if __name__ == "__main__":
                 if FILE_SAS_STP == 'SAS Initialization' or FILE_SAS_STP == 'SAS System':
                     continue
 
+                # Check if the FILE_SAS_STP is DATA and if it is not, initialize FILE_SAS_INP_ROW_RD and Input file
+                if FILE_SAS_STP == 'PROCEDURE Statement':
+                    FILE_SAS_INP_ROW_RD = FILE_SAS_INP_FIL_NM = ""
+
                 FILE_EXC_DT, FILE_SAS_EXC_TM = get_time_info(record_content)
                 FILE_SAS_EXC_CPU_TM, FILE_SAS_EXC_RL_TM = get_process_time(record_content)
 
@@ -1628,7 +1656,7 @@ if __name__ == "__main__":
                     FILE_SAS_INP_MUL_FLG = 0
                     FILE_SAS_INP_MUL_TBLS = 0
 
-                FILE_SAS_MIGR_RUL_ID, FILE_SAS_MIGR_DISP = get_migration_disp(FILE_SAS_EXC_CPU_TM, FILE_SAS_EXC_RL_TM,
+                FILE_SAS_MIGR_REC_ACT, FILE_SAS_MIGR_RUL_ID, FILE_SAS_MIGR_DISP = get_migration_disp(FILE_SAS_EXC_CPU_TM, FILE_SAS_EXC_RL_TM,
                                                                               FILE_SAS_STP, FILE_SAS_STP_NM,
                                                                               record_content)
 
