@@ -713,40 +713,77 @@ def input_case24():
 
 
 # 30420.log
-# @fixture(scope='function')
-# def input_case25():
-#     return """2021-05-25T01:57:14,284 INFO  [00000011] :Bank2BU@SASBAP - MLOGIC(FCF_RCSET):  Beginning execution.
-# 2021-05-25T01:57:14,284 INFO  [00000011] :Bank2BU@SASBAP - MLOGIC(FCF_RCSET):  Stored compiled macro in libref SOURCE compiled 26AUG20:02:44:49 with V9.4.
-# 2021-05-25T01:57:14,284 INFO  [00000011] :Bank2BU@SASBAP - SYMBOLGEN:  Macro variable SQLRC resolves to 0
-# 2021-05-25T01:57:14,284 INFO  [00000011] :Bank2BU@SASBAP - MLOGIC(FCF_RCSET):  Parameter ERROR has value 0
-# 2021-05-25T01:57:14,284 INFO  [00000011] :Bank2BU@SASBAP - SYMBOLGEN:  Macro variable ERROR resolves to 0
-# 2021-05-25T01:57:14,284 INFO  [00000011] :Bank2BU@SASBAP - SYMBOLGEN:  Macro variable TRANS_RC resolves to 0
-# 2021-05-25T01:57:14,284 INFO  [00000011] :Bank2BU@SASBAP - MLOGIC(FCF_RCSET):  %IF condition (&error gt &trans_rc) is FALSE
-# 2021-05-25T01:57:14,284 INFO  [00000011] :Bank2BU@SASBAP - SYMBOLGEN:  Macro variable ERROR resolves to 0
-# 2021-05-25T01:57:14,284 INFO  [00000011] :Bank2BU@SASBAP - SYMBOLGEN:  Macro variable JOB_RC resolves to 4
-# 2021-05-25T01:57:14,284 INFO  [00000011] :Bank2BU@SASBAP - MLOGIC(FCF_RCSET):  %IF condition (&error gt &job_rc) is FALSE
-# 2021-05-25T01:57:14,284 INFO  [00000011] :Bank2BU@SASBAP - MLOGIC(FCF_RCSET):  Ending execution.
-# 2021-05-25T01:57:14,284 INFO  [00000011] :Bank2BU@SASBAP - MPRINT(FCF_MAIN_PROCESS.FCF_AGP.FCF_ENT_LOAD_DM_PROCESS):  ;
-# 2021-05-25T01:57:14,284 INFO  [00000011] :Bank2BU@SASBAP - SYMBOLGEN:  Macro variable TRANS_RC resolves to 0
-# 2021-05-25T01:57:14,284 INFO  [00000011] :Bank2BU@SASBAP - SYMBOLGEN:  Macro variable TRANS_RC resolves to 0
-# 2021-05-25T01:57:14,284 INFO  [00000011] :Bank2BU@SASBAP - MLOGIC(FCF_ENT_LOAD_DM_PROCESS):  %IF condition &trans_rc eq 3 or &trans_rc ge 5 is FALSE
-# 2021-05-25T01:57:14,284 INFO  [00000011] :Bank2BU@SASBAP - MLOGIC(FCF_ENT_LOAD_DM_PROCESS):  %PUT NOTE: FCF: Loading Entities with alerts
-# 2021-05-25T01:57:14,285 INFO  [00000011] :Bank2BU@SASBAP - NOTE: FCF: Loading Entities with alerts
-# 2021-05-25T01:57:14,288 INFO  [00000011] :Bank2BU@SASBAP - MLOGIC(FCF_ENT_LOAD_DM_PROCESS):  Beginning compilation of FCF_ENT_LOAD_ALERTED_ENTITIES using the autocall file D:\opt\sasinside\SASHome\SASFoundation\9.4\antimnycmn\ucmacros\fcf_ent_load_alerted_entities.sas.
-# 2021-05-25T01:57:14,291 INFO  [00000011] :Bank2BU@SASBAP - MLOGIC(FCF_ENT_LOAD_DM_PROCESS):  Ending compilation of FCF_ENT_LOAD_ALERTED_ENTITIES.
-# 2021-05-25T01:57:14,291 INFO  [00000011] :Bank2BU@SASBAP - MLOGIC(FCF_ENT_LOAD_ALERTED_ENTITIES):  Beginning execution.
-# 2021-05-25T01:57:14,291 INFO  [00000011] :Bank2BU@SASBAP - MLOGIC(FCF_ENT_LOAD_ALERTED_ENTITIES):  This macro was compiled from the autocall file D:\opt\sasinside\SASHome\SASFoundation\9.4\antimnycmn\ucmacros\fcf_ent_load_alerted_entities.sas
-# 2021-05-25T01:57:14,291 INFO  [00000011] :Bank2BU@SASBAP - MLOGIC(FCF_ENT_LOAD_ALERTED_ENTITIES):  %LET (variable name is TRANS_RC)
-# 2021-05-25T01:57:14,291 INFO  [00000011] :Bank2BU@SASBAP - MLOGIC(FCF_ENT_LOAD_ALERTED_ENTITIES):  %LET (variable name is _FCFMSG_)
-# 2021-05-25T01:57:14,291 INFO  [00000011] :Bank2BU@SASBAP - MLOGIC(FCF_ENT_LOAD_ALERTED_ENTITIES):  %PUT NOTE: FCF: Saving current routing information prior to rebuilding the alerted_entity table
-# 2021-05-25T01:57:14,291 INFO  [00000011] :Bank2BU@SASBAP - NOTE: FCF: Saving current routing information prior to rebuilding the alerted_entity table
-# 2021-05-25T01:57:14,293 INFO  [00001714] :Bank2BU@SASBAP - MPRINT(FCF_MAIN_PROCESS.FCF_AGP.FCF_ENT_LOAD_DM_PROCESS.FCF_ENT_LOAD_ALERTED_ENTITIES):   proc sql ;
-# 2021-05-25T01:57:14,293 INFO  [00001714] :Bank2BU@SASBAP - SYMBOLGEN:  Macro variable SEG_KC_LIBNAME resolves to seg_kc
-# 2021-05-25T01:57:14,293 INFO  [00001714] :Bank2BU@SASBAP - SYMBOLGEN:  Macro variable SEG_KC_LIBNAME resolves to seg_kc
-# 2021-05-25T01:57:14,295 INFO  [00001714] :Bank2BU@SASBAP - MPRINT(FCF_MAIN_PROCESS.FCF_AGP.FCF_ENT_LOAD_DM_PROCESS.FCF_ENT_LOAD_ALERTED_ENTITIES):   delete from seg_kc.fsk_entity_queue where alerted_entity_number in (select alerted_entity_number from seg_kc.fsk_alerted_entity where not ALERTS_CNT);
-# 2021-05-25T01:57:14,340 INFO  [00001714] :Bank2BU@SASBAP - NOTE: No rows were deleted from SEG_KC.FSK_ENTITY_QUEUE.
-# 2021-05-25T01:57:14,340 INFO  [00001714] :Bank2BU@SASBAP -
-# 2021-05-25T01:57:14,345 INFO  [00001714] :Bank2BU@SASBAP - MPRINT(FCF_MAIN_PROCESS.FCF_AGP.FCF_ENT_LOAD_DM_PROCESS.FCF_ENT_LOAD_ALERTED_ENTITIES):   quit;
-# 2021-05-25T01:57:14,345 INFO  [00001714] :Bank2BU@SASBAP - NOTE: PROCEDURE SQL used (Total process time):
-# 2021-05-25T01:57:14,345 INFO  [00001714] :Bank2BU@SASBAP -       real time           0.05 seconds
-# 2021-05-25T01:57:14,345 INFO  [00001714] :Bank2BU@SASBAP -       cpu time            0.01 seconds"""
+@fixture(scope='function')
+def input_case25():
+    return """
+28900  2021-05-25T01:57:14,293 INFO  [00001714] :Bank2BU@SASBAP - MPRINT(FCF_MAIN_PROCESS.FCF_AGP.FCF_ENT_LOAD_DM_PROCESS.FCF_ENT_LOAD_ALERTED_ENTITIES):   proc sql ;
+28901  2021-05-25T01:57:14,293 INFO  [00001714] :Bank2BU@SASBAP - SYMBOLGEN:  Macro variable SEG_KC_LIBNAME resolves to seg_kc
+28902  2021-05-25T01:57:14,293 INFO  [00001714] :Bank2BU@SASBAP - SYMBOLGEN:  Macro variable SEG_KC_LIBNAME resolves to seg_kc
+28903  2021-05-25T01:57:14,295 INFO  [00001714] :Bank2BU@SASBAP - MPRINT(FCF_MAIN_PROCESS.FCF_AGP.FCF_ENT_LOAD_DM_PROCESS.FCF_ENT_LOAD_ALERTED_ENTITIES):   delete from seg_kc.fsk_entity_queue where alerted_entity_number in (select alerted_entity_number from seg_kc.fsk_alerted_entity where not ALERTS_CNT);
+28904  2021-05-25T01:57:14,340 INFO  [00001714] :Bank2BU@SASBAP - NOTE: No rows were deleted from SEG_KC.FSK_ENTITY_QUEUE.
+28905  2021-05-25T01:57:14,340 INFO  [00001714] :Bank2BU@SASBAP -
+28906  2021-05-25T01:57:14,345 INFO  [00001714] :Bank2BU@SASBAP - MPRINT(FCF_MAIN_PROCESS.FCF_AGP.FCF_ENT_LOAD_DM_PROCESS.FCF_ENT_LOAD_ALERTED_ENTITIES):   quit;
+28907  2021-05-25T01:57:14,345 INFO  [00001714] :Bank2BU@SASBAP - NOTE: PROCEDURE SQL used (Total process time):
+28908  2021-05-25T01:57:14,345 INFO  [00001714] :Bank2BU@SASBAP -       real time           0.05 seconds
+28909  2021-05-25T01:57:14,345 INFO  [00001714] :Bank2BU@SASBAP -       cpu time            0.01 """
+
+
+# 30420.log
+@fixture(scope='function')
+def input_case26():
+    return """
+30404  2021-05-25T01:57:16,215 INFO  [00000011] :Bank2BU@SASBAP - 
+30405  2021-05-25T01:57:16,218 INFO  [00001787] :Bank2BU@SASBAP - MPRINT(FCF_MAIN_PROCESS.FCF_AGP.FCF_ENT_LOAD_DM_PROCESS.FCF_ENT_LOAD_ALERTED_ENTITIES.FCF_ROUTE_ENTITY_ALERT):   proc sql noprint;
+30406  2021-05-25T01:57:16,218 INFO  [00001787] :Bank2BU@SASBAP - SYMBOLGEN:  Macro variable INLIB resolves to work
+30407  2021-05-25T01:57:16,218 INFO  [00001787] :Bank2BU@SASBAP - SYMBOLGEN:  Macro variable INDS resolves to fsk_alerted_entity
+30408  2021-05-25T01:57:16,218 INFO  [00001787] :Bank2BU@SASBAP - MPRINT(FCF_MAIN_PROCESS.FCF_AGP.FCF_ENT_LOAD_DM_PROCESS.FCF_ENT_LOAD_ALERTED_ENTITIES.FCF_ROUTE_ENTITY_ALERT):   create table need_to_route as select t.*, d.routed_flag from work.fsk_alerted_entity(
+30409  2021-05-25T01:57:16,218 INFO  [00001787] :Bank2BU@SASBAP - SYMBOLGEN:  Macro variable SEG_KC_LIBNAME resolves to seg_kc
+30410  2021-05-25T01:57:16,218 INFO  [00001787] :Bank2BU@SASBAP - MPRINT(FCF_MAIN_PROCESS.FCF_AGP.FCF_ENT_LOAD_DM_PROCESS.FCF_ENT_LOAD_ALERTED_ENTITIES.FCF_ROUTE_ENTITY_ALERT):  ) t left join (select distinct alerted_entity_number, 1 as routed_flag from seg_kc.fsk_entity_queue(
+30411  2021-05-25T01:57:16,218 INFO  [00001787] :Bank2BU@SASBAP - MPRINT(FCF_MAIN_PROCESS.FCF_AGP.FCF_ENT_LOAD_DM_PROCESS.FCF_ENT_LOAD_ALERTED_ENTITIES.FCF_ROUTE_ENTITY_ALERT):  )) d on t.alerted_entity_number=d.alerted_entity_number;
+30412  2021-05-25T01:57:16,239 INFO  [00001787] :Bank2BU@SASBAP - NOTE: Table WORK.NEED_TO_ROUTE created, with 5 rows and 15 columns.
+30413  2021-05-25T01:57:16,239 INFO  [00001787] :Bank2BU@SASBAP - 
+30414  2021-05-25T01:57:16,239 INFO  [00001787] :Bank2BU@SASBAP - MPRINT(FCF_MAIN_PROCESS.FCF_AGP.FCF_ENT_LOAD_DM_PROCESS.FCF_ENT_LOAD_ALERTED_ENTITIES.FCF_ROUTE_ENTITY_ALERT):   quit;
+30415  2021-05-25T01:57:16,239 INFO  [00001787] :Bank2BU@SASBAP - NOTE: PROCEDURE SQL used (Total process time):
+30416  2021-05-25T01:57:16,239 INFO  [00001787] :Bank2BU@SASBAP -       real time           0.02 seconds
+30417  2021-05-25T01:57:16,239 INFO  [00001787] :Bank2BU@SASBAP -       cpu time            0.01 """
+
+
+
+# 30420.log
+@fixture(scope='function')
+def input_case27():
+    return """2021-05-25T01:57:16,312 INFO  [00000011] :Bank2BU@SASBAP - MLOGIC(FCF_ROUTE_ENTITY_ALERT):  %IF condition &trans_rc eq 3 or &trans_rc ge 5 is FALSE
+2021-05-25T01:57:16,312 INFO  [00001791] :Bank2BU@SASBAP - MPRINT(FCF_MAIN_PROCESS.FCF_AGP.FCF_ENT_LOAD_DM_PROCESS.FCF_ENT_LOAD_ALERTED_ENTITIES.FCF_ROUTE_ENTITY_ALERT):   proc sql;
+2021-05-25T01:57:16,313 INFO  [00001791] :Bank2BU@SASBAP - MPRINT(FCF_MAIN_PROCESS.FCF_AGP.FCF_ENT_LOAD_DM_PROCESS.FCF_ENT_LOAD_ALERTED_ENTITIES.FCF_ROUTE_ENTITY_ALERT):   delete from stg_ctrl.route_last_assignment(
+2021-05-25T01:57:16,313 INFO  [00001791] :Bank2BU@SASBAP - SYMBOLGEN:  Macro variable INDS resolves to fsk_alerted_entity
+2021-05-25T01:57:16,313 INFO  [00001791] :Bank2BU@SASBAP - MPRINT(FCF_MAIN_PROCESS.FCF_AGP.FCF_ENT_LOAD_DM_PROCESS.FCF_ENT_LOAD_ALERTED_ENTITIES.FCF_ROUTE_ENTITY_ALERT):  ) where upcase(table_name)=upcase("fsk_alerted_entity");
+2021-05-25T01:57:16,315 INFO  [00001791] :Bank2BU@SASBAP - NOTE: 1 row was deleted from STG_CTRL.ROUTE_LAST_ASSIGNMENT.
+2021-05-25T01:57:16,315 INFO  [00001791] :Bank2BU@SASBAP - 
+2021-05-25T01:57:16,319 INFO  [00001791] :Bank2BU@SASBAP - MPRINT(FCF_MAIN_PROCESS.FCF_AGP.FCF_ENT_LOAD_DM_PROCESS.FCF_ENT_LOAD_ALERTED_ENTITIES.FCF_ROUTE_ENTITY_ALERT):   insert into stg_ctrl.route_last_assignment
+2021-05-25T01:57:16,319 INFO  [00001791] :Bank2BU@SASBAP - SYMBOLGEN:  Macro variable INDS resolves to fsk_alerted_entity
+2021-05-25T01:57:16,319 INFO  [00001791] :Bank2BU@SASBAP - MPRINT(FCF_MAIN_PROCESS.FCF_AGP.FCF_ENT_LOAD_DM_PROCESS.FCF_ENT_LOAD_ALERTED_ENTITIES.FCF_ROUTE_ENTITY_ALERT):   set table_name=upcase("fsk_alerted_entity");
+2021-05-25T01:57:16,319 INFO  [00001791] :Bank2BU@SASBAP - NOTE: 1 row was inserted into STG_CTRL.ROUTE_LAST_ASSIGNMENT.
+2021-05-25T01:57:16,319 INFO  [00001791] :Bank2BU@SASBAP - 
+2021-05-25T01:57:16,320 INFO  [00001791] :Bank2BU@SASBAP - MPRINT(FCF_MAIN_PROCESS.FCF_AGP.FCF_ENT_LOAD_DM_PROCESS.FCF_ENT_LOAD_ALERTED_ENTITIES.FCF_ROUTE_ENTITY_ALERT):   update stg_ctrl.route_last_assignment(
+2021-05-25T01:57:16,320 INFO  [00001791] :Bank2BU@SASBAP - SYMBOLGEN:  Macro variable INDS resolves to fsk_alerted_entity
+2021-05-25T01:57:16,320 INFO  [00001791] :Bank2BU@SASBAP - MPRINT(FCF_MAIN_PROCESS.FCF_AGP.FCF_ENT_LOAD_DM_PROCESS.FCF_ENT_LOAD_ALERTED_ENTITIES.FCF_ROUTE_ENTITY_ALERT):  ) set last_user_assigned=(select investigator_name from route_last_assignment a join investigator_numbers b on 
+2021-05-25T01:57:16,320 INFO  [00001791] :Bank2BU@SASBAP - a.investigator_num=b.investigator_num) where upcase(table_name)=upcase("fsk_alerted_entity");
+2021-05-25T01:57:16,323 INFO  [00001791] :Bank2BU@SASBAP - NOTE: 1 row was updated in STG_CTRL.ROUTE_LAST_ASSIGNMENT.
+2021-05-25T01:57:16,323 INFO  [00001791] :Bank2BU@SASBAP - 
+2021-05-25T01:57:16,324 INFO  [00001791] :Bank2BU@SASBAP - MPRINT(FCF_MAIN_PROCESS.FCF_AGP.FCF_ENT_LOAD_DM_PROCESS.FCF_ENT_LOAD_ALERTED_ENTITIES.FCF_ROUTE_ENTITY_ALERT):   quit;
+2021-05-25T01:57:16,324 INFO  [00001791] :Bank2BU@SASBAP - NOTE: PROCEDURE SQL used (Total process time):
+2021-05-25T01:57:16,324 INFO  [00001791] :Bank2BU@SASBAP -       real time           0.01 seconds
+2021-05-25T01:57:16,324 INFO  [00001791] :Bank2BU@SASBAP -       cpu time            0.01 seconds"""
+
+
+
+# proc sql delete
+# from stg_ctrl.route_last_assignment()
+# where upcase(table_name)=upcase("fsk_alerted_entity");
+# insert into stg_ctrl.route_last_assignmentset table_name=upcase("fsk_alerted_entity");
+# update stg_ctrl.route_last_assignment()
+# set last_user_assigned=(select investigator_name from route_last_assignment a join investigator_numbers b on a.investigator_num=b.investigator_num)
+# where upcase(table_name)=upcase("fsk_alerted_entity");
+# quit;
+
+# need validation

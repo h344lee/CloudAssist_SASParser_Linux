@@ -708,6 +708,10 @@ def get_input_library_table(sas_file_content):
     input_lib_table_regex_case_three = re.compile(r"NOTE: .*? rows were deleted from (.*)\.(.*).")
     input_lib_table_list += input_lib_table_regex_case_three.findall(sas_file_content)
 
+    input_lib_table_regex_case_four = re.compile(r"NOTE: 1 row was updated in (.*)\.(.*).")
+    input_lib_table_list += input_lib_table_regex_case_four.findall(sas_file_content)
+
+
     input_lib = ''
     input_table = ''
 
@@ -790,9 +794,13 @@ def proc_sql_parsing(record_content):
     output_library = []
     output_table = []
 
+
     if len(proc_sql_regex_list) != 0:
         sql_block = proc_sql_regex_list[0][0] + proc_sql_regex_list[0][2] + proc_sql_regex_list[0][3]
         proc_sql = get_proc_sql(sql_block)
+
+        print(proc_sql)
+
         input_library, input_table = get_input_table_from_sql(proc_sql)
 
         output_library, output_table = get_output_table_from_sql(proc_sql)
@@ -882,8 +890,15 @@ def get_input_table_from_sql(proc_sql):
         sql_from_list = sql_from_regex.findall(proc_sql)
         lib_table_list.append(sql_from_list[0])
         # part 2: xxx join ~
-        sql_join_regex = re.compile(r"join (.*?) ")
-        sql_join_list = sql_join_regex.findall(proc_sql)
+
+        if 'join (' in proc_sql:
+            sql_join_regex = re.compile(r"join \(.* from (.*?\..*?)\) ")
+            sql_join_list = sql_join_regex.findall(proc_sql)
+
+        else:
+            sql_join_regex = re.compile(r"join (.*?) ")
+            sql_join_list = sql_join_regex.findall(proc_sql)
+
         lib_table_list += sql_join_list
 
     sql_from_where_regex = re.compile(r"from (.*?) where ", re.IGNORECASE)
@@ -902,15 +917,19 @@ def get_input_table_from_sql(proc_sql):
     if len(sql_from_where_list) != 0 and len(lib_table_list) == 0:
 
         # check1 whether from is in values
-        is_from_in_bracket_regex = re.compile(r'(.*)from')
-        from_in_bracket = is_from_in_bracket_regex.search(proc_sql)
-        if from_in_bracket is not None:
-            former_part = from_in_bracket.group(1)
-            if former_part.count('(') != former_part.count(')'):
-                sql_from_where_list = []
+        is_from_in_bracket_regex = re.compile(r'(.*?)from ', re.DOTALL)
+        from_in_bracket_list = is_from_in_bracket_regex.findall(proc_sql)
 
-        if len(sql_from_where_list) != 0:
-            lib_table_list += sql_from_where_list[0].split(',')
+        prior_from = from_in_bracket_list[0]
+        sql_from_where_list_filtered = []
+
+        if prior_from.count('(') == prior_from.count(')'):
+            sql_from_where_list_filtered.append(sql_from_where_list[0])
+
+        if len(sql_from_where_list_filtered) != 0:
+            lib_table_list += sql_from_where_list_filtered
+
+            # lib_table_list += sql_from_where_list[0].split(',')
 
     # case 2: "from (.*?) order"
     elif len(sql_from_order_list) != 0 and len(lib_table_list) == 0:
@@ -944,6 +963,9 @@ def get_input_table_from_sql(proc_sql):
 
         lib_table_list += sql_from_quit_list
 
+
+    # print(lib_table_list)
+    # print("**********")
     if len(lib_table_list) != 0:
         each_lib_table_list = []
         for lib_table in lib_table_list:
@@ -1182,8 +1204,6 @@ def get_input_table_from_data_sql(data_step_sql):
 
 
 def get_output_table_from_data_sql(data_step_sql):
-    # if 'index' in data_step_sql and 'compress=yes' in data_step_sql:
-    #     print(data_step_sql)
 
     output_lib = []
     output_table = []

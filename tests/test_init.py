@@ -11,7 +11,6 @@ from readlogs.D_CLDASST_Reader import get_time_info
 from readlogs.D_CLDASST_Reader import get_process_time
 from readlogs.D_CLDASST_Reader import get_migration_disp
 
-
 from input_contents import input_case1
 from input_contents import input_case2
 from input_contents import input_case3
@@ -36,6 +35,10 @@ from input_contents import input_case21
 from input_contents import input_case22
 from input_contents import input_case23
 from input_contents import input_case24
+from input_contents import input_case25
+from input_contents import input_case26
+from input_contents import input_case27
+
 
 @mark.case1
 def test_get_user_name_1(input_case1):
@@ -423,7 +426,7 @@ def test_data_step_parsing_6(input_case6):
     input_lib, input_table, output_lib, output_table = data_step_parsing(input_case6)
     assert input_lib == ['work'] and input_table == ['bev_type_weekly_gap_local'] and output_lib == ['work'] \
            and output_table == ['bev_type_weekly_gap_local'], \
-           str(input_lib) + str(input_table) + str(output_lib) + str(output_table)
+        str(input_lib) + str(input_table) + str(output_lib) + str(output_table)
 
 
 @mark.case6
@@ -492,7 +495,7 @@ def test_data_step_parsing_7(input_case7):
     input_lib, input_table, output_lib, output_table = data_step_parsing(input_case7)
     assert input_lib == [] and input_table == [] and output_lib == [] \
            and output_table == [], \
-           str(input_lib) + str(input_table) + str(output_lib) + str(output_table)
+        str(input_lib) + str(input_table) + str(output_lib) + str(output_table)
 
 
 @mark.case7
@@ -559,9 +562,14 @@ def test_proc_sql_parsing_8(input_case8):
 @mark.case8
 def test_data_step_parsing_8(input_case8):
     input_lib, input_table, output_lib, output_table = data_step_parsing(input_case8)
-    assert input_lib == ['seg_kc'] and input_table == ['fsc_entity_watch_list_dim'] and output_lib == ['stg_wtch', 'stg_wtch', 'stg_wtch', 'stg_wtch', 'stg_wtch'] \
-           and output_table == ['fsc_entity_watch_list_dim', 'wl_ind_name', 'wl_ind_match', 'wl_org_name', 'wl_org_match'], \
-           str(input_lib) + str(input_table) + str(output_lib) + str(output_table)
+    assert input_lib == ['seg_kc'] and input_table == ['fsc_entity_watch_list_dim'] and output_lib == ['stg_wtch',
+                                                                                                       'stg_wtch',
+                                                                                                       'stg_wtch',
+                                                                                                       'stg_wtch',
+                                                                                                       'stg_wtch'] \
+           and output_table == ['fsc_entity_watch_list_dim', 'wl_ind_name', 'wl_ind_match', 'wl_org_name',
+                                'wl_org_match'], \
+        str(input_lib) + str(input_table) + str(output_lib) + str(output_table)
 
 
 @mark.case8
@@ -622,7 +630,8 @@ def test_get_sas_step_name_9(input_case9):
 def test_proc_sql_parsing_9(input_case9):
     input_lib, input_table, output_lib, output_table = proc_sql_parsing(input_case9)
     assert input_lib == [] and input_table == [] and output_lib == ['mst_prep'] and \
-           output_table == ['DORMANT_ACCOUNT_TRANSACTIONS'], str(input_lib) + str(input_table) + str(output_lib) + str(output_table)
+           output_table == ['DORMANT_ACCOUNT_TRANSACTIONS'], str(input_lib) + str(input_table) + str(output_lib) + str(
+        output_table)
 
 
 @mark.case9
@@ -630,7 +639,7 @@ def test_data_step_parsing_9(input_case9):
     input_lib, input_table, output_lib, output_table = data_step_parsing(input_case9)
     assert input_lib == [] and input_table == [] and output_lib == [] \
            and output_table == [], \
-           str(input_lib) + str(input_table) + str(output_lib) + str(output_table)
+        str(input_lib) + str(input_table) + str(output_lib) + str(output_table)
 
 
 @mark.case9
@@ -691,7 +700,8 @@ def test_get_sas_step_name_10(input_case10):
 def test_proc_sql_parsing_10(input_case10):
     input_lib, input_table, output_lib, output_table = proc_sql_parsing(input_case10)
     assert input_lib == [] and input_table == [] and output_lib == ['mst_prep'] and \
-           output_table == ['account_trans20181102'], str(input_lib) + str(input_table) + str(output_lib) + str(output_table)
+           output_table == ['account_trans20181102'], str(input_lib) + str(input_table) + str(output_lib) + str(
+        output_table)
 
 
 @mark.case10
@@ -699,7 +709,7 @@ def test_data_step_parsing_10(input_case10):
     input_lib, input_table, output_lib, output_table = data_step_parsing(input_case10)
     assert input_lib == [] and input_table == [] and output_lib == [] \
            and output_table == [], \
-           str(input_lib) + str(input_table) + str(output_lib) + str(output_table)
+        str(input_lib) + str(input_table) + str(output_lib) + str(output_table)
 
 
 @mark.case10
@@ -759,7 +769,8 @@ def test_get_sas_step_name_11(input_case11):
 @mark.case11
 def test_proc_sql_parsing_11(input_case11):
     input_lib, input_table, output_lib, output_table = proc_sql_parsing(input_case11)
-    assert input_lib == ['seg_kc','seg_kc','seg_kc'] and input_table == ['fsk_header', 'fsk_scenario', 'fsk_scenario_parameter'] and output_lib == [] and \
+    assert input_lib == ['seg_kc', 'seg_kc', 'seg_kc'] and input_table == ['fsk_header', 'fsk_scenario',
+                                                                           'fsk_scenario_parameter'] and output_lib == [] and \
            output_table == [], str(input_lib) + str(input_table) + str(output_lib) + str(output_table)
 
 
@@ -768,7 +779,7 @@ def test_data_step_parsing_11(input_case11):
     input_lib, input_table, output_lib, output_table = data_step_parsing(input_case11)
     assert input_lib == [] and input_table == [] and output_lib == [] \
            and output_table == [], \
-           str(input_lib) + str(input_table) + str(output_lib) + str(output_table)
+        str(input_lib) + str(input_table) + str(output_lib) + str(output_table)
 
 
 @mark.case11
@@ -837,7 +848,7 @@ def test_data_step_parsing_12(input_case12):
     input_lib, input_table, output_lib, output_table = data_step_parsing(input_case12)
     assert input_lib == [] and input_table == [] and output_lib == [] \
            and output_table == [], \
-           str(input_lib) + str(input_table) + str(output_lib) + str(output_table)
+        str(input_lib) + str(input_table) + str(output_lib) + str(output_table)
 
 
 @mark.case12
@@ -906,7 +917,7 @@ def test_data_step_parsing_13(input_case13):
     input_lib, input_table, output_lib, output_table = data_step_parsing(input_case13)
     assert input_lib == [] and input_table == [] and output_lib == [] \
            and output_table == [], \
-           str(input_lib) + str(input_table) + str(output_lib) + str(output_table)
+        str(input_lib) + str(input_table) + str(output_lib) + str(output_table)
 
 
 @mark.case13
@@ -931,8 +942,6 @@ def test_get_process_time_13(input_case13):
 def test_get_migration_disp_13(input_case13):
     rec_act, rule_id, migration_disp = get_migration_disp(0.73, 2.03, 'PROCEDURE Statement', 'SQL', input_case13)
     assert rule_id == '9' and migration_disp == "Code Change", rule_id + " " + migration_disp
-
-
 
 
 @mark.case14
@@ -977,7 +986,7 @@ def test_data_step_parsing_14(input_case14):
     input_lib, input_table, output_lib, output_table = data_step_parsing(input_case14)
     assert input_lib == [] and input_table == [] and output_lib == [] \
            and output_table == [], \
-           str(input_lib) + str(input_table) + str(output_lib) + str(output_table)
+        str(input_lib) + str(input_table) + str(output_lib) + str(output_table)
 
 
 @mark.case14
@@ -1046,7 +1055,7 @@ def test_data_step_parsing_15(input_case15):
     input_lib, input_table, output_lib, output_table = data_step_parsing(input_case15)
     assert input_lib == [] and input_table == [] and output_lib == [] \
            and output_table == [], \
-           str(input_lib) + str(input_table) + str(output_lib) + str(output_table)
+        str(input_lib) + str(input_table) + str(output_lib) + str(output_table)
 
 
 @mark.case15
@@ -1071,7 +1080,6 @@ def test_get_process_time_15(input_case15):
 def test_get_migration_disp_15(input_case15):
     rec_act, rule_id, migration_disp = get_migration_disp(5.5, 8.91, 'PROCEDURE Statement', 'SQL', input_case15)
     assert rule_id == '9' and migration_disp == "Code Change", rule_id + " " + migration_disp
-
 
 
 @mark.case16
@@ -1116,7 +1124,7 @@ def test_data_step_parsing_16(input_case16):
     input_lib, input_table, output_lib, output_table = data_step_parsing(input_case16)
     assert input_lib == ['work'] and input_table == ['&SASDATASET'] and output_lib == ['work'] \
            and output_table == ['&_OUTPUT0'], \
-           str(input_lib) + str(input_table) + str(output_lib) + str(output_table)
+        str(input_lib) + str(input_table) + str(output_lib) + str(output_table)
 
 
 @mark.case16
@@ -1185,7 +1193,7 @@ def test_data_step_parsing_17(input_case17):
     input_lib, input_table, output_lib, output_table = data_step_parsing(input_case17)
     assert input_lib == [] and input_table == [] and output_lib == [] \
            and output_table == [], \
-           str(input_lib) + str(input_table) + str(output_lib) + str(output_table)
+        str(input_lib) + str(input_table) + str(output_lib) + str(output_table)
 
 
 @mark.case17
@@ -1210,8 +1218,6 @@ def test_get_process_time_17(input_case17):
 def test_get_migration_disp_17(input_case17):
     rec_act, rule_id, migration_disp = get_migration_disp(0.01, 0.01, 'PROCEDURE Statement', 'SQL', input_case17)
     assert rule_id == '2' and migration_disp == "Code Change", rule_id + " " + migration_disp
-
-
 
 
 @mark.case18
@@ -1256,7 +1262,7 @@ def test_data_step_parsing_18(input_case18):
     input_lib, input_table, output_lib, output_table = data_step_parsing(input_case18)
     assert input_lib == [] and input_table == [] and output_lib == [] \
            and output_table == [], \
-           str(input_lib) + str(input_table) + str(output_lib) + str(output_table)
+        str(input_lib) + str(input_table) + str(output_lib) + str(output_table)
 
 
 @mark.case18
@@ -1325,7 +1331,7 @@ def test_data_step_parsing_19(input_case19):
     input_lib, input_table, output_lib, output_table = data_step_parsing(input_case19)
     assert input_lib == [] and input_table == [] and output_lib == [] \
            and output_table == [], \
-           str(input_lib) + str(input_table) + str(output_lib) + str(output_table)
+        str(input_lib) + str(input_table) + str(output_lib) + str(output_table)
 
 
 @mark.case19
@@ -1394,7 +1400,7 @@ def test_data_step_parsing_20(input_case20):
     input_lib, input_table, output_lib, output_table = data_step_parsing(input_case20)
     assert input_lib == [] and input_table == [] and output_lib == [] \
            and output_table == [], \
-           str(input_lib) + str(input_table) + str(output_lib) + str(output_table)
+        str(input_lib) + str(input_table) + str(output_lib) + str(output_table)
 
 
 @mark.case20
@@ -1419,7 +1425,6 @@ def test_get_process_time_20(input_case20):
 def test_get_migration_disp_20(input_case20):
     rec_act, rule_id, migration_disp = get_migration_disp(0.02, 0, 'DATA statement', 'DATA', input_case20)
     assert rule_id == '2' and migration_disp == "Code Change", rule_id + " " + migration_disp
-
 
 
 @mark.case21
@@ -1464,7 +1469,7 @@ def test_data_step_parsing_21(input_case21):
     input_lib, input_table, output_lib, output_table = data_step_parsing(input_case21)
     assert input_lib == [] and input_table == [] and output_lib == [] \
            and output_table == [], \
-           str(input_lib) + str(input_table) + str(output_lib) + str(output_table)
+        str(input_lib) + str(input_table) + str(output_lib) + str(output_table)
 
 
 @mark.case21
@@ -1489,8 +1494,6 @@ def test_get_process_time_21(input_case21):
 def test_get_migration_disp_21(input_case21):
     rec_act, rule_id, migration_disp = get_migration_disp(0, 0, 'PROCEDURE Statement', 'APPEND', input_case21)
     assert rule_id == '14' and migration_disp == "Code Change", rule_id + " " + migration_disp
-
-
 
 
 @mark.case22
@@ -1535,7 +1538,7 @@ def test_data_step_parsing_22(input_case22):
     input_lib, input_table, output_lib, output_table = data_step_parsing(input_case22)
     assert input_lib == [] and input_table == [] and output_lib == [] \
            and output_table == [], \
-           str(input_lib) + str(input_table) + str(output_lib) + str(output_table)
+        str(input_lib) + str(input_table) + str(output_lib) + str(output_table)
 
 
 @mark.case22
@@ -1560,7 +1563,6 @@ def test_get_process_time_22(input_case22):
 def test_get_migration_disp_22(input_case22):
     rec_act, rule_id, migration_disp = get_migration_disp(0, 0, 'PROCEDURE Statement', 'DATASETS', input_case22)
     assert rule_id == '' and migration_disp == "Lift and Shift", rule_id + " " + migration_disp
-
 
 
 @mark.case23
@@ -1605,7 +1607,7 @@ def test_data_step_parsing_23(input_case23):
     input_lib, input_table, output_lib, output_table = data_step_parsing(input_case23)
     assert input_lib == [] and input_table == [] and output_lib == [] \
            and output_table == [], \
-           str(input_lib) + str(input_table) + str(output_lib) + str(output_table)
+        str(input_lib) + str(input_table) + str(output_lib) + str(output_table)
 
 
 @mark.case23
@@ -1630,8 +1632,6 @@ def test_get_process_time_23(input_case23):
 def test_get_migration_disp_23(input_case23):
     rec_act, rule_id, migration_disp = get_migration_disp(0, 0, 'PROCEDURE Statement', 'SQL', input_case23)
     assert rule_id == '9' and migration_disp == "Code Change", rule_id + " " + migration_disp
-
-
 
 
 @mark.case24
@@ -1676,7 +1676,7 @@ def test_data_step_parsing_24(input_case24):
     input_lib, input_table, output_lib, output_table = data_step_parsing(input_case24)
     assert input_lib == ['DmdMgt'] and input_table == ['GEOBRANDSUPADDS'] and output_lib == ['work'] \
            and output_table == ['USGEOBRANDSUPADDS'], \
-           str(input_lib) + str(input_table) + str(output_lib) + str(output_table)
+        str(input_lib) + str(input_table) + str(output_lib) + str(output_table)
 
 
 @mark.case24
@@ -1700,4 +1700,212 @@ def test_get_process_time_24(input_case24):
 @mark.case24
 def test_get_migration_disp_24(input_case24):
     rec_act, rule_id, migration_disp = get_migration_disp(0.01, 0, 'DATA statement', 'DATA', input_case24)
+    assert rule_id == '2' and migration_disp == "Code Change", rule_id + " " + migration_disp
+
+
+@mark.case25
+def test_get_user_name_25(input_case25):
+    user_name = get_user_name(input_case25)
+    assert user_name == "Bank2BU"
+
+
+@mark.case25
+def test_get_input_file_name_25(input_case25):
+    rows, input_file = get_input_file_name(input_case25)
+    assert input_file == "", input_file
+
+
+@mark.case25
+def test_get_output_library_table_25(input_case25):
+    output_library, output_table = get_output_library_table(input_case25)
+    assert output_library == "" and output_table == "", output_library + output_table
+
+
+@mark.case25
+def test_get_input_library_table_25(input_case25):
+    input_lib, input_table = get_input_library_table(input_case25)
+    assert input_lib == "SEG_KC" and input_table == "FSK_ENTITY_QUEUE", input_lib + input_table
+
+
+@mark.case25
+def test_get_sas_step_name_25(input_case25):
+    step, step_name = get_sas_step_name(input_case25)
+    assert step == "PROCEDURE Statement" and step_name == "SQL", step + step_name
+
+
+@mark.case25
+def test_proc_sql_parsing_25(input_case25):
+    input_lib, input_table, output_lib, output_table = proc_sql_parsing(input_case25)
+    assert input_lib == ['seg_kc'] and input_table == ['fsk_entity_queue'] and output_lib == [] and \
+           output_table == [], str(input_lib) + str(input_table) + str(output_lib) + str(output_table)
+
+
+@mark.case25
+def test_data_step_parsing_25(input_case25):
+    input_lib, input_table, output_lib, output_table = data_step_parsing(input_case25)
+    assert input_lib == [] and input_table == [] and output_lib == [] \
+           and output_table == [], \
+        str(input_lib) + str(input_table) + str(output_lib) + str(output_table)
+
+
+@mark.case25
+def test_get_ext_db_25(input_case25):
+    ext_db_list = get_ext_db(input_case25)
+    assert ext_db_list == []
+
+
+@mark.case25
+def test_get_time_info_25(input_case25):
+    exe_date, exe_time = get_time_info(input_case25)
+    assert exe_date == '2021-05-25' and exe_time == '01:57:14'
+
+
+@mark.case25
+def test_get_process_time_25(input_case25):
+    cpu_time, real_time = get_process_time(input_case25)
+    assert real_time == 0.05 and cpu_time == 0.01, str(cpu_time) + " " + str(real_time)
+
+
+@mark.case25
+def test_get_migration_disp_25(input_case25):
+    rec_act, rule_id, migration_disp = get_migration_disp(0.05, 0.01, 'PROCEDURE Statement', 'SQL', input_case25)
+    assert rule_id == '2' and migration_disp == "Code Change", rule_id + " " + migration_disp
+
+
+@mark.case26
+def test_get_user_name_26(input_case26):
+    user_name = get_user_name(input_case26)
+    assert user_name == "Bank2BU"
+
+
+@mark.case26
+def test_get_input_file_name_26(input_case26):
+    rows, input_file = get_input_file_name(input_case26)
+    assert input_file == "", input_file
+
+
+@mark.case26
+def test_get_output_library_table_26(input_case26):
+    output_library, output_table = get_output_library_table(input_case26)
+    assert output_library == "WORK" and output_table == "NEED_TO_ROUTE", output_library + output_table
+
+
+@mark.case26
+def test_get_input_library_table_26(input_case26):
+    input_lib, input_table = get_input_library_table(input_case26)
+    assert input_lib == "" and input_table == "", input_lib + input_table
+
+
+@mark.case26
+def test_get_sas_step_name_26(input_case26):
+    step, step_name = get_sas_step_name(input_case26)
+    assert step == "PROCEDURE Statement" and step_name == "SQL", step + step_name
+
+
+@mark.case26
+def test_proc_sql_parsing_26(input_case26):
+    input_lib, input_table, output_lib, output_table = proc_sql_parsing(input_case26)
+    assert input_lib == ['work', 'seg_kc'] and input_table == ['fsk_alerted_entity()',
+                                                               'fsk_entity_queue()'] and output_lib == ['work'] and \
+           output_table == ['need_to_route'], str(input_lib) + str(input_table) + str(output_lib) + str(output_table)
+
+
+@mark.case26
+def test_data_step_parsing_26(input_case26):
+    input_lib, input_table, output_lib, output_table = data_step_parsing(input_case26)
+    assert input_lib == [] and input_table == [] and output_lib == [] \
+           and output_table == [], \
+        str(input_lib) + str(input_table) + str(output_lib) + str(output_table)
+
+
+@mark.case26
+def test_get_ext_db_26(input_case26):
+    ext_db_list = get_ext_db(input_case26)
+    assert ext_db_list == []
+
+
+@mark.case26
+def test_get_time_info_26(input_case26):
+    exe_date, exe_time = get_time_info(input_case26)
+    assert exe_date == '2021-05-25' and exe_time == '01:57:16'
+
+
+@mark.case26
+def test_get_process_time_26(input_case26):
+    cpu_time, real_time = get_process_time(input_case26)
+    assert real_time == 0.02 and cpu_time == 0.01, str(cpu_time) + " " + str(real_time)
+
+
+@mark.case26
+def test_get_migration_disp_26(input_case26):
+    rec_act, rule_id, migration_disp = get_migration_disp(0.01, 0.02, 'PROCEDURE Statement', 'SQL', input_case26)
+    assert rule_id == '9' and migration_disp == "Code Change", rule_id + " " + migration_disp
+
+
+@mark.case27
+def test_get_user_name_27(input_case27):
+    user_name = get_user_name(input_case27)
+    assert user_name == "Bank2BU"
+
+
+@mark.case27
+def test_get_input_file_name_27(input_case27):
+    rows, input_file = get_input_file_name(input_case27)
+    assert input_file == "", input_file
+
+
+@mark.case27
+def test_get_output_library_table_27(input_case27):
+    output_library, output_table = get_output_library_table(input_case27)
+    assert output_library == "" and output_table == "", output_library + output_table
+
+
+@mark.case27
+def test_get_input_library_table_27(input_case27):
+    input_lib, input_table = get_input_library_table(input_case27)
+    assert input_lib == "STG_CTRL" and input_table == "ROUTE_LAST_ASSIGNMENT", input_lib + input_table
+
+
+@mark.case27
+def test_get_sas_step_name_27(input_case27):
+    step, step_name = get_sas_step_name(input_case27)
+    assert step == "PROCEDURE Statement" and step_name == "SQL", step + step_name
+
+
+@mark.case27
+def test_proc_sql_parsing_27(input_case27):
+    input_lib, input_table, output_lib, output_table = proc_sql_parsing(input_case27)
+    assert input_lib == ['stg_ctrl', 'work'] and input_table == ['route_last_assignment()', 'investigator_numbers'] and\
+           output_lib == [] and output_table == [], str(input_lib) + str(input_table) + str(output_lib) + str(output_table)
+
+
+@mark.case27
+def test_data_step_parsing_27(input_case27):
+    input_lib, input_table, output_lib, output_table = data_step_parsing(input_case27)
+    assert input_lib == [] and input_table == [] and output_lib == [] \
+           and output_table == [], \
+        str(input_lib) + str(input_table) + str(output_lib) + str(output_table)
+
+
+@mark.case27
+def test_get_ext_db_27(input_case27):
+    ext_db_list = get_ext_db(input_case27)
+    assert ext_db_list == []
+
+
+@mark.case27
+def test_get_time_info_27(input_case27):
+    exe_date, exe_time = get_time_info(input_case27)
+    assert exe_date == '2021-05-25' and exe_time == '01:57:16'
+
+
+@mark.case27
+def test_get_process_time_27(input_case27):
+    cpu_time, real_time = get_process_time(input_case27)
+    assert real_time == 0.01 and cpu_time == 0.01, str(cpu_time) + " " + str(real_time)
+
+
+@mark.case27
+def test_get_migration_disp_27(input_case27):
+    rec_act, rule_id, migration_disp = get_migration_disp(0.01, 0.01, 'PROCEDURE Statement', 'SQL', input_case27)
     assert rule_id == '2' and migration_disp == "Code Change", rule_id + " " + migration_disp
