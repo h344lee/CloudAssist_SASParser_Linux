@@ -1267,11 +1267,20 @@ def get_output_table_from_data_sql(data_step_sql):
 
 def lib_table_write_to_variable(library, table, FILE_SAS_LIB, FILE_SAS_TBL):
     if table and len(table) != 0:
+
+        # filter out exceptional cases such as table name ended with ()
+        filtered_table = []
+        for table_name in table:
+            if table_name[-2:] == '()':
+                filtered_table.append(table_name[:-2])
+            else:
+                filtered_table.append(table_name)
+
         if FILE_SAS_TBL == "":
             FILE_SAS_LIB = ';'.join(library)
-            FILE_SAS_TBL = ';'.join(table)
+            FILE_SAS_TBL = ';'.join(filtered_table)
         else:
-            for lib, tbl in zip(library, table):
+            for lib, tbl in zip(library, filtered_table):
                 if tbl.lower() not in FILE_SAS_TBL and tbl.upper() not in FILE_SAS_TBL:
                     FILE_SAS_LIB += ";" + lib
                     FILE_SAS_TBL += ";" + tbl
@@ -1589,10 +1598,10 @@ if __name__ == "__main__":
                 if record_content[-25:-17] != 'cpu time':
                     continue
 
-                print("record content num:" + str(temp_num))
-                temp_num+=1
-                print(record_content)
-                print("********************")
+                # print("record content num:" + str(temp_num))
+                # temp_num+=1
+                # print(record_content)
+                # print("********************")
 
                 # update sas file id and sas file name and path if it is updated.
                 if sas_file_abs_path != '':
