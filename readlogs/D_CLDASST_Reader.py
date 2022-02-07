@@ -797,6 +797,8 @@ def proc_sql_parsing(record_content):
         sql_block = proc_sql_regex_list[0][0] + proc_sql_regex_list[0][2] + proc_sql_regex_list[0][3]
         proc_sql = get_proc_sql(sql_block)
 
+        #print(proc_sql)
+
         input_library, input_table = get_input_table_from_sql(proc_sql)
 
         output_library, output_table = get_output_table_from_sql(proc_sql)
@@ -1496,6 +1498,52 @@ def get_migr_rule(FILE_SAS_MIGR_RUL_ID):
     migration_rule = migr_rule_dict.get(FILE_SAS_MIGR_RUL_ID)
     return migration_rule
 
+#
+def get_proc_inmem(FILE_SAS_STP, FILE_SAS_STP_NM):
+
+    if FILE_SAS_STP == "PROCEDURE Statement" and (FILE_SAS_STP_NM == 'LASR' or FILE_SAS_STP_NM == 'IAMSTAT'):
+        return 1
+    else:
+        return 0
+
+
+def get_proc_etl(FILE_SAS_PROC_CAT, FILE_SAS_STP, FILE_SAS_STP_NM):
+    if FILE_SAS_PROC_CAT == 'Data Management' and FILE_SAS_STP == 'PROCEDURE Statement' and FILE_SAS_STP_NM in ["APPEND", "CONTESTS", "DATASETS", "SORT", "SQL", "IMPORT"]:
+        return 1
+    else:
+        return 0
+
+
+def get_proc_grid(record_content):
+    if "%sysfunc(grdsvc_enable(" in record_content or "%qsysfunc(grdsvc_enable(" in record_content:
+        return 1
+    else:
+        return 0
+
+
+def get_indb(record_content):
+
+    external_database_tuple = (
+        'redshift', 'aster', 'db2' 'bigquery', 'greenplm', 'hadoop', 'hawq', 'impala', 'informix', 'jdbc', 'sqlsvr',
+        'mysql', 'netezza', 'odbc', 'oledb', 'oracle', 'postgres', 'sapase', 'saphana', 'sapiq', 'snow', 'spark',
+        'teradata', 'vertica', 'ybrick', 'mongo', 'sforce'
+    )
+
+    connect_db_regex = re.compile(r"connect to (.*?)[ |\(]", re.IGNORECASE)
+    connect_db_list = connect_db_regex.findall(record_content)
+
+    disconnect_db_regex = re.compile(r"disconnect from (.*?)[;| ]", re.IGNORECASE)
+    disconnect_db_list = disconnect_db_regex.findall(record_content)
+
+    if len(connect_db_list) != 0:
+
+        for conn_db, disconn_db in zip(connect_db_list, disconnect_db_list):
+
+            if conn_db == disconn_db and conn_db in external_database_tuple:
+                return 1
+
+    return 0
+
 
 # update a row of record to the given dataframe 'log_df'
 def save_record_to_df(log_df, extracted_record):
@@ -1691,6 +1739,14 @@ if __name__ == "__main__":
                     record_content)
 
                 FILE_SAS_MIGR_RUL = get_migr_rule(FILE_SAS_MIGR_RUL_ID)
+
+                FILE_SAS_PROC_INMEM_FLG = get_proc_inmem(FILE_SAS_STP, FILE_SAS_STP_NM)
+
+                FILE_SAS_PROC_ELT_FLG = get_proc_etl(FILE_SAS_PROC_CAT, FILE_SAS_STP, FILE_SAS_STP_NM)
+
+                FILE_SAS_PROC_GRID_FLG = get_proc_grid(record_content)
+
+                FILE_SAS_PROC_INDB_FLG = get_indb(record_content)
 
                 FILE_ID = 'LOG_' + str(file_id_counter)
                 file_id_counter += 1
