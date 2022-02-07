@@ -659,7 +659,7 @@ def get_process_time(sas_file_content):
         real_time_regex_obj = real_time_regex_ver2.search(sas_file_content)
     real_time = real_time_regex_obj.group(1)
 
-    return float(cpu_time), float(real_time)
+    return cpu_time, real_time
 
 
 # get output library and output table from regular log message such as NOTE: ~~
@@ -710,7 +710,6 @@ def get_input_library_table(sas_file_content):
 
     input_lib_table_regex_case_four = re.compile(r"NOTE: 1 row was updated in (.*)\.(.*).")
     input_lib_table_list += input_lib_table_regex_case_four.findall(sas_file_content)
-
 
     input_lib = ''
     input_table = ''
@@ -794,12 +793,9 @@ def proc_sql_parsing(record_content):
     output_library = []
     output_table = []
 
-
     if len(proc_sql_regex_list) != 0:
         sql_block = proc_sql_regex_list[0][0] + proc_sql_regex_list[0][2] + proc_sql_regex_list[0][3]
         proc_sql = get_proc_sql(sql_block)
-
-        print(proc_sql)
 
         input_library, input_table = get_input_table_from_sql(proc_sql)
 
@@ -872,12 +868,11 @@ def get_proc_sql(sql_block):
 
 
 def get_input_table_from_sql(proc_sql):
-
     input_library = []
     input_table = []
     lib_table_list = []
 
-    if 'connect to' in proc_sql:
+    if 'connect to' in proc_sql or 'CONNECT TO' in proc_sql:
         return input_library, input_table
 
     if 'union' in proc_sql:
@@ -962,7 +957,6 @@ def get_input_table_from_sql(proc_sql):
             sql_from_quit_list = []
 
         lib_table_list += sql_from_quit_list
-
 
     # print(lib_table_list)
     # print("**********")
@@ -1144,8 +1138,6 @@ def get_input_table_from_data_sql(data_step_sql):
     merge_lib_table_list = []
     update_lib_table_list = []
 
-
-
     # get input library and table from set
     set_between_quote_regex = re.compile(r"\".*? set .*\"")
 
@@ -1204,7 +1196,6 @@ def get_input_table_from_data_sql(data_step_sql):
 
 
 def get_output_table_from_data_sql(data_step_sql):
-
     output_lib = []
     output_table = []
 
@@ -1351,8 +1342,17 @@ def get_migration_disp(FILE_SAS_EXC_CPU_TM, FILE_SAS_EXC_RL_TM, FILE_SAS_STP, FI
     REC_ACT = ""
     recommendation = "Lift and Shift"
 
-    FILE_SAS_EXC_CPU_TM = float(FILE_SAS_EXC_CPU_TM)
-    FILE_SAS_EXC_RL_TM = float(FILE_SAS_EXC_RL_TM)
+    cpu_time_list = FILE_SAS_EXC_CPU_TM.split(':')
+    if len(cpu_time_list) == 2:
+        FILE_SAS_EXC_CPU_TM = float(cpu_time_list[0] * 60) + float(cpu_time_list[1])
+    else:
+        FILE_SAS_EXC_CPU_TM = float(FILE_SAS_EXC_CPU_TM)
+
+    real_time_list = FILE_SAS_EXC_RL_TM.split(':')
+    if len(real_time_list) == 2:
+        FILE_SAS_EXC_RL_TM = float(real_time_list[0] * 60) + float(real_time_list[1])
+    else:
+        FILE_SAS_EXC_RL_TM = float(FILE_SAS_EXC_RL_TM)
 
     data_statement = ""
 
@@ -1589,10 +1589,10 @@ if __name__ == "__main__":
                 if record_content[-25:-17] != 'cpu time':
                     continue
 
-                # print("record content num:" + str(temp_num))
-                # temp_num+=1
-                # print(record_content)
-                # print("********************")
+                print("record content num:" + str(temp_num))
+                temp_num+=1
+                print(record_content)
+                print("********************")
 
                 # update sas file id and sas file name and path if it is updated.
                 if sas_file_abs_path != '':
@@ -1676,9 +1676,10 @@ if __name__ == "__main__":
                     FILE_SAS_INP_MUL_FLG = 0
                     FILE_SAS_INP_MUL_TBLS = 0
 
-                FILE_SAS_MIGR_REC_ACT, FILE_SAS_MIGR_RUL_ID, FILE_SAS_MIGR_DISP = get_migration_disp(FILE_SAS_EXC_CPU_TM, FILE_SAS_EXC_RL_TM,
-                                                                              FILE_SAS_STP, FILE_SAS_STP_NM,
-                                                                              record_content)
+                FILE_SAS_MIGR_REC_ACT, FILE_SAS_MIGR_RUL_ID, FILE_SAS_MIGR_DISP = get_migration_disp(
+                    FILE_SAS_EXC_CPU_TM, FILE_SAS_EXC_RL_TM,
+                    FILE_SAS_STP, FILE_SAS_STP_NM,
+                    record_content)
 
                 FILE_SAS_MIGR_RUL = get_migr_rule(FILE_SAS_MIGR_RUL_ID)
 

@@ -38,6 +38,11 @@ from input_contents import input_case24
 from input_contents import input_case25
 from input_contents import input_case26
 from input_contents import input_case27
+from input_contents import input_case28
+from input_contents import input_case29
+from input_contents import input_case30
+from input_contents import input_case31
+
 
 
 @mark.case1
@@ -99,12 +104,12 @@ def test_get_time_info_1(input_case1):
 @mark.case1
 def test_get_process_time_1(input_case1):
     cpu_time, real_time = get_process_time(input_case1)
-    assert real_time == 0.01 and cpu_time == 0.02
+    assert real_time == '0.01' and cpu_time == '0.02'
 
 
 @mark.case1
 def test_get_migration_disp_1(input_case1):
-    rec_act, rule_id, migration_disp = get_migration_disp(0.02, 0.01, 'DATA statement', 'DATA', input_case1)
+    rec_act, rule_id, migration_disp = get_migration_disp('0.02', '0.01', 'DATA statement', 'DATA', input_case1)
     assert rule_id == '2' and migration_disp == "Code Change", migration_disp
 
 
@@ -167,12 +172,12 @@ def test_get_time_info_2(input_case2):
 @mark.case2
 def test_get_process_time_2(input_case2):
     cpu_time, real_time = get_process_time(input_case2)
-    assert real_time == 0.01 and cpu_time == 0.02
+    assert real_time == '0.01' and cpu_time == '0.02'
 
 
 @mark.case2
 def test_get_migration_disp_2(input_case2):
-    rec_act, rule_id, migration_disp = get_migration_disp(0.02, 0.01, 'DATA statement', 'DATA', input_case2)
+    rec_act, rule_id, migration_disp = get_migration_disp('0.02', '0.01', 'DATA statement', 'DATA', input_case2)
     assert rule_id == '2' and migration_disp == "Code Change", migration_disp
 
 
@@ -236,12 +241,12 @@ def test_get_time_info_3(input_case3):
 @mark.case3
 def test_get_process_time_3(input_case3):
     cpu_time, real_time = get_process_time(input_case3)
-    assert real_time == 0 and cpu_time == 0, str(cpu_time) + " " + str(real_time)
+    assert real_time == '0.00' and cpu_time == '0.00', str(cpu_time) + " " + str(real_time)
 
 
 @mark.case3
 def test_get_migration_disp_3(input_case3):
-    rec_act, rule_id, migration_disp = get_migration_disp(0, 0, 'PROCEDURE Statement', 'SQL', input_case3)
+    rec_act, rule_id, migration_disp = get_migration_disp('0.00', '0.00', 'PROCEDURE Statement', 'SQL', input_case3)
     assert rule_id == '9' and migration_disp == "Code Change", rule_id + " " + migration_disp
 
 
@@ -305,12 +310,12 @@ def test_get_time_info_4(input_case4):
 @mark.case4
 def test_get_process_time_4(input_case4):
     cpu_time, real_time = get_process_time(input_case4)
-    assert real_time == 0 and cpu_time == 0, str(cpu_time) + " " + str(real_time)
+    assert real_time == '0.00' and cpu_time == '0.00', str(cpu_time) + " " + str(real_time)
 
 
 @mark.case4
 def test_get_migration_disp_4(input_case4):
-    rec_act, rule_id, migration_disp = get_migration_disp(0, 0, 'PROCEDURE Statement', 'SQL', input_case4)
+    rec_act, rule_id, migration_disp = get_migration_disp('0.00', '0.00', 'PROCEDURE Statement', 'SQL', input_case4)
     assert rule_id == '9' and migration_disp == "Code Change", rule_id + " " + migration_disp
 
 
@@ -375,12 +380,12 @@ def test_get_time_info_5(input_case5):
 @mark.case5
 def test_get_process_time_5(input_case5):
     cpu_time, real_time = get_process_time(input_case5)
-    assert real_time == 0 and cpu_time == 0.01, str(cpu_time) + " " + str(real_time)
+    assert real_time == '0.00' and cpu_time == '0.01', str(cpu_time) + " " + str(real_time)
 
 
 @mark.case5
 def test_get_migration_disp_5(input_case5):
-    rec_act, rule_id, migration_disp = get_migration_disp(0.01, 0, 'DATA statement', 'DATA', input_case5)
+    rec_act, rule_id, migration_disp = get_migration_disp('0.01', '0.00', 'DATA statement', 'DATA', input_case5)
     assert rule_id == '2' and migration_disp == "Code Change", rule_id + " " + migration_disp
 
 
@@ -444,12 +449,12 @@ def test_get_time_info_6(input_case6):
 @mark.case6
 def test_get_process_time_6(input_case6):
     cpu_time, real_time = get_process_time(input_case6)
-    assert real_time == 0 and cpu_time == 0, str(cpu_time) + " " + str(real_time)
+    assert real_time == '0.00' and cpu_time == '0.00', str(cpu_time) + " " + str(real_time)
 
 
 @mark.case6
 def test_get_migration_disp_6(input_case6):
-    rec_act, rule_id, migration_disp = get_migration_disp(0, 0, 'DATA statement', 'DATA', input_case6)
+    rec_act, rule_id, migration_disp = get_migration_disp('0.00', '0.00', 'DATA statement', 'DATA', input_case6)
     assert rule_id == '' and migration_disp == "Lift and Shift", rule_id + " " + migration_disp
 
 
@@ -513,12 +518,12 @@ def test_get_time_info_7(input_case7):
 @mark.case7
 def test_get_process_time_7(input_case7):
     cpu_time, real_time = get_process_time(input_case7)
-    assert real_time == 0.08 and cpu_time == 0.09, str(cpu_time) + " " + str(real_time)
+    assert real_time == '0.08' and cpu_time == '0.09', str(cpu_time) + " " + str(real_time)
 
 
 @mark.case7
 def test_get_migration_disp_7(input_case7):
-    rec_act, rule_id, migration_disp = get_migration_disp(0.09, 0.08, 'PROCEDURE Statement', 'SQL', input_case7)
+    rec_act, rule_id, migration_disp = get_migration_disp('0.09', '0.08', 'PROCEDURE Statement', 'SQL', input_case7)
     assert rule_id == '2' and migration_disp == "Code Change", rule_id + " " + migration_disp
 
 
@@ -587,12 +592,12 @@ def test_get_time_info_8(input_case8):
 @mark.case8
 def test_get_process_time_8(input_case8):
     cpu_time, real_time = get_process_time(input_case8)
-    assert real_time == 0.13 and cpu_time == 0.06, str(cpu_time) + " " + str(real_time)
+    assert real_time == '0.13' and cpu_time == '0.06', str(cpu_time) + " " + str(real_time)
 
 
 @mark.case8
 def test_get_migration_disp_8(input_case8):
-    rec_act, rule_id, migration_disp = get_migration_disp(0.06, 0.13, 'DATA statement', 'DATA', input_case8)
+    rec_act, rule_id, migration_disp = get_migration_disp('0.06', '0.13', 'DATA statement', 'DATA', input_case8)
     assert rule_id == '15' and migration_disp == "Code Change", rule_id + " " + migration_disp
 
 
@@ -657,12 +662,12 @@ def test_get_time_info_9(input_case9):
 @mark.case9
 def test_get_process_time_9(input_case9):
     cpu_time, real_time = get_process_time(input_case9)
-    assert real_time == 1 and cpu_time == 0.03, str(cpu_time) + " " + str(real_time)
+    assert real_time == '1.00' and cpu_time == '0.03', str(cpu_time) + " " + str(real_time)
 
 
 @mark.case9
 def test_get_migration_disp_9(input_case9):
-    rec_act, rule_id, migration_disp = get_migration_disp(0.03, 1, 'PROCEDURE Statement', 'SQL', input_case9)
+    rec_act, rule_id, migration_disp = get_migration_disp('0.03', '1.00', 'PROCEDURE Statement', 'SQL', input_case9)
     assert rule_id == '9' and migration_disp == "Code Change", rule_id + " " + migration_disp
 
 
@@ -727,12 +732,12 @@ def test_get_time_info_10(input_case10):
 @mark.case10
 def test_get_process_time_10(input_case10):
     cpu_time, real_time = get_process_time(input_case10)
-    assert real_time == 0.68 and cpu_time == 0.01, str(cpu_time) + " " + str(real_time)
+    assert real_time == '0.68' and cpu_time == '0.01', str(cpu_time) + " " + str(real_time)
 
 
 @mark.case10
 def test_get_migration_disp_10(input_case10):
-    rec_act, rule_id, migration_disp = get_migration_disp(0.01, 0.68, 'PROCEDURE Statement', 'SQL', input_case10)
+    rec_act, rule_id, migration_disp = get_migration_disp('0.01', '0.68', 'PROCEDURE Statement', 'SQL', input_case10)
     assert rule_id == '9' and migration_disp == "Code Change", rule_id + " " + migration_disp
 
 
@@ -797,12 +802,12 @@ def test_get_time_info_11(input_case11):
 @mark.case11
 def test_get_process_time_11(input_case11):
     cpu_time, real_time = get_process_time(input_case11)
-    assert real_time == 0.24 and cpu_time == 0.04, str(cpu_time) + " " + str(real_time)
+    assert real_time == '0.24' and cpu_time == '0.04', str(cpu_time) + " " + str(real_time)
 
 
 @mark.case11
 def test_get_migration_disp_11(input_case11):
-    rec_act, rule_id, migration_disp = get_migration_disp(0.04, 0.24, 'PROCEDURE Statement', 'SQL', input_case11)
+    rec_act, rule_id, migration_disp = get_migration_disp('0.04', '0.24', 'PROCEDURE Statement', 'SQL', input_case11)
     assert rule_id == '9' and migration_disp == "Code Change", rule_id + " " + migration_disp
 
 
@@ -866,12 +871,12 @@ def test_get_time_info_12(input_case12):
 @mark.case12
 def test_get_process_time_12(input_case12):
     cpu_time, real_time = get_process_time(input_case12)
-    assert real_time == 0.02 and cpu_time == 0.03, str(cpu_time) + " " + str(real_time)
+    assert real_time == '0.02' and cpu_time == '0.03', str(cpu_time) + " " + str(real_time)
 
 
 @mark.case12
 def test_get_migration_disp_12(input_case12):
-    rec_act, rule_id, migration_disp = get_migration_disp(0.02, 0.03, 'DATA statement', 'DATA', input_case12)
+    rec_act, rule_id, migration_disp = get_migration_disp('0.02', '0.03', 'DATA statement', 'DATA', input_case12)
     assert rule_id == '20' and migration_disp == "Code Change", rule_id + " " + migration_disp
 
 
@@ -935,12 +940,12 @@ def test_get_time_info_13(input_case13):
 @mark.case13
 def test_get_process_time_13(input_case13):
     cpu_time, real_time = get_process_time(input_case13)
-    assert real_time == 2.03 and cpu_time == 0.73, str(cpu_time) + " " + str(real_time)
+    assert real_time == '2.03' and cpu_time == '0.73', str(cpu_time) + " " + str(real_time)
 
 
 @mark.case13
 def test_get_migration_disp_13(input_case13):
-    rec_act, rule_id, migration_disp = get_migration_disp(0.73, 2.03, 'PROCEDURE Statement', 'SQL', input_case13)
+    rec_act, rule_id, migration_disp = get_migration_disp('0.73', '2.03', 'PROCEDURE Statement', 'SQL', input_case13)
     assert rule_id == '9' and migration_disp == "Code Change", rule_id + " " + migration_disp
 
 
@@ -1004,12 +1009,12 @@ def test_get_time_info_14(input_case14):
 @mark.case14
 def test_get_process_time_14(input_case14):
     cpu_time, real_time = get_process_time(input_case14)
-    assert real_time == 0.1 and cpu_time == 0.03, str(cpu_time) + " " + str(real_time)
+    assert real_time =='0.10' and cpu_time == '0.03', str(cpu_time) + " " + str(real_time)
 
 
 @mark.case14
 def test_get_migration_disp_14(input_case14):
-    rec_act, rule_id, migration_disp = get_migration_disp(0.03, 0.1, 'PROCEDURE Statement', 'SQL', input_case14)
+    rec_act, rule_id, migration_disp = get_migration_disp('0.03', '0.10', 'PROCEDURE Statement', 'SQL', input_case14)
     assert rule_id == '9' and migration_disp == "Code Change", rule_id + " " + migration_disp
 
 
@@ -1073,12 +1078,12 @@ def test_get_time_info_15(input_case15):
 @mark.case15
 def test_get_process_time_15(input_case15):
     cpu_time, real_time = get_process_time(input_case15)
-    assert real_time == 8.91 and cpu_time == 5.5, str(cpu_time) + " " + str(real_time)
+    assert real_time == '8.91' and cpu_time == '5.50', str(cpu_time) + " " + str(real_time)
 
 
 @mark.case15
 def test_get_migration_disp_15(input_case15):
-    rec_act, rule_id, migration_disp = get_migration_disp(5.5, 8.91, 'PROCEDURE Statement', 'SQL', input_case15)
+    rec_act, rule_id, migration_disp = get_migration_disp('5.50', '8.91', 'PROCEDURE Statement', 'SQL', input_case15)
     assert rule_id == '9' and migration_disp == "Code Change", rule_id + " " + migration_disp
 
 
@@ -1142,12 +1147,12 @@ def test_get_time_info_16(input_case16):
 @mark.case16
 def test_get_process_time_16(input_case16):
     cpu_time, real_time = get_process_time(input_case16)
-    assert real_time == 2.11 and cpu_time == 2.11, str(cpu_time) + " " + str(real_time)
+    assert real_time == '2.11' and cpu_time == '2.11', str(cpu_time) + " " + str(real_time)
 
 
 @mark.case16
 def test_get_migration_disp_16(input_case16):
-    rec_act, rule_id, migration_disp = get_migration_disp(2.11, 2.11, 'DATA statement', 'DATA', input_case16)
+    rec_act, rule_id, migration_disp = get_migration_disp('2.11', '2.11', 'DATA statement', 'DATA', input_case16)
     assert rule_id == '2' and migration_disp == "Code Change", rule_id + " " + migration_disp
 
 
@@ -1211,12 +1216,12 @@ def test_get_time_info_17(input_case17):
 @mark.case17
 def test_get_process_time_17(input_case17):
     cpu_time, real_time = get_process_time(input_case17)
-    assert real_time == 0.01 and cpu_time == 0.01, str(cpu_time) + " " + str(real_time)
+    assert real_time == '0.01' and cpu_time == '0.01', str(cpu_time) + " " + str(real_time)
 
 
 @mark.case17
 def test_get_migration_disp_17(input_case17):
-    rec_act, rule_id, migration_disp = get_migration_disp(0.01, 0.01, 'PROCEDURE Statement', 'SQL', input_case17)
+    rec_act, rule_id, migration_disp = get_migration_disp('0.01', '0.01', 'PROCEDURE Statement', 'SQL', input_case17)
     assert rule_id == '2' and migration_disp == "Code Change", rule_id + " " + migration_disp
 
 
@@ -1280,12 +1285,12 @@ def test_get_time_info_18(input_case18):
 @mark.case18
 def test_get_process_time_18(input_case18):
     cpu_time, real_time = get_process_time(input_case18)
-    assert real_time == 0 and cpu_time == 0.01, str(cpu_time) + " " + str(real_time)
+    assert real_time == '0.00' and cpu_time == '0.01', str(cpu_time) + " " + str(real_time)
 
 
 @mark.case18
 def test_get_migration_disp_18(input_case18):
-    rec_act, rule_id, migration_disp = get_migration_disp(0.01, 0, 'PROCEDURE Statement', 'SQL', input_case18)
+    rec_act, rule_id, migration_disp = get_migration_disp('0.01', '0.00', 'PROCEDURE Statement', 'SQL', input_case18)
     assert rule_id == '2' and migration_disp == "Code Change", rule_id + " " + migration_disp
 
 
@@ -1349,12 +1354,12 @@ def test_get_time_info_19(input_case19):
 @mark.case19
 def test_get_process_time_19(input_case19):
     cpu_time, real_time = get_process_time(input_case19)
-    assert real_time == 0 and cpu_time == 0, str(cpu_time) + " " + str(real_time)
+    assert real_time == '0.00' and cpu_time == '0.00', str(cpu_time) + " " + str(real_time)
 
 
 @mark.case19
 def test_get_migration_disp_19(input_case19):
-    rec_act, rule_id, migration_disp = get_migration_disp(0, 0, 'DATA statement', 'DATA', input_case19)
+    rec_act, rule_id, migration_disp = get_migration_disp('0.00', '0.00', 'DATA statement', 'DATA', input_case19)
     assert rule_id == '' and migration_disp == "Lift and Shift", rule_id + " " + migration_disp
 
 
@@ -1418,12 +1423,12 @@ def test_get_time_info_20(input_case20):
 @mark.case20
 def test_get_process_time_20(input_case20):
     cpu_time, real_time = get_process_time(input_case20)
-    assert real_time == 0 and cpu_time == 0.02, str(cpu_time) + " " + str(real_time)
+    assert real_time == '0.00' and cpu_time == '0.02', str(cpu_time) + " " + str(real_time)
 
 
 @mark.case20
 def test_get_migration_disp_20(input_case20):
-    rec_act, rule_id, migration_disp = get_migration_disp(0.02, 0, 'DATA statement', 'DATA', input_case20)
+    rec_act, rule_id, migration_disp = get_migration_disp('0.02', '0.00', 'DATA statement', 'DATA', input_case20)
     assert rule_id == '2' and migration_disp == "Code Change", rule_id + " " + migration_disp
 
 
@@ -1487,12 +1492,12 @@ def test_get_time_info_21(input_case21):
 @mark.case21
 def test_get_process_time_21(input_case21):
     cpu_time, real_time = get_process_time(input_case21)
-    assert real_time == 0 and cpu_time == 0, str(cpu_time) + " " + str(real_time)
+    assert real_time == '0.00' and cpu_time == '0.00', str(cpu_time) + " " + str(real_time)
 
 
 @mark.case21
 def test_get_migration_disp_21(input_case21):
-    rec_act, rule_id, migration_disp = get_migration_disp(0, 0, 'PROCEDURE Statement', 'APPEND', input_case21)
+    rec_act, rule_id, migration_disp = get_migration_disp('0.00', '0.00', 'PROCEDURE Statement', 'APPEND', input_case21)
     assert rule_id == '14' and migration_disp == "Code Change", rule_id + " " + migration_disp
 
 
@@ -1556,12 +1561,12 @@ def test_get_time_info_22(input_case22):
 @mark.case22
 def test_get_process_time_22(input_case22):
     cpu_time, real_time = get_process_time(input_case22)
-    assert real_time == 0 and cpu_time == 0, str(cpu_time) + " " + str(real_time)
+    assert real_time == '0.00' and cpu_time == '0.00', str(cpu_time) + " " + str(real_time)
 
 
 @mark.case22
 def test_get_migration_disp_22(input_case22):
-    rec_act, rule_id, migration_disp = get_migration_disp(0, 0, 'PROCEDURE Statement', 'DATASETS', input_case22)
+    rec_act, rule_id, migration_disp = get_migration_disp('0.00', '0.00', 'PROCEDURE Statement', 'DATASETS', input_case22)
     assert rule_id == '' and migration_disp == "Lift and Shift", rule_id + " " + migration_disp
 
 
@@ -1625,12 +1630,12 @@ def test_get_time_info_23(input_case23):
 @mark.case23
 def test_get_process_time_23(input_case23):
     cpu_time, real_time = get_process_time(input_case23)
-    assert real_time == 0 and cpu_time == 0, str(cpu_time) + " " + str(real_time)
+    assert real_time == '0.00' and cpu_time == '0.00', str(cpu_time) + " " + str(real_time)
 
 
 @mark.case23
 def test_get_migration_disp_23(input_case23):
-    rec_act, rule_id, migration_disp = get_migration_disp(0, 0, 'PROCEDURE Statement', 'SQL', input_case23)
+    rec_act, rule_id, migration_disp = get_migration_disp('0.00', '0.00', 'PROCEDURE Statement', 'SQL', input_case23)
     assert rule_id == '9' and migration_disp == "Code Change", rule_id + " " + migration_disp
 
 
@@ -1694,12 +1699,12 @@ def test_get_time_info_24(input_case24):
 @mark.case24
 def test_get_process_time_24(input_case24):
     cpu_time, real_time = get_process_time(input_case24)
-    assert real_time == 0 and cpu_time == 0.01, str(cpu_time) + " " + str(real_time)
+    assert real_time == '0.00' and cpu_time == '0.01', str(cpu_time) + " " + str(real_time)
 
 
 @mark.case24
 def test_get_migration_disp_24(input_case24):
-    rec_act, rule_id, migration_disp = get_migration_disp(0.01, 0, 'DATA statement', 'DATA', input_case24)
+    rec_act, rule_id, migration_disp = get_migration_disp('0.01', '0.00', 'DATA statement', 'DATA', input_case24)
     assert rule_id == '2' and migration_disp == "Code Change", rule_id + " " + migration_disp
 
 
@@ -1763,12 +1768,12 @@ def test_get_time_info_25(input_case25):
 @mark.case25
 def test_get_process_time_25(input_case25):
     cpu_time, real_time = get_process_time(input_case25)
-    assert real_time == 0.05 and cpu_time == 0.01, str(cpu_time) + " " + str(real_time)
+    assert real_time == '0.05' and cpu_time == '0.01', str(cpu_time) + " " + str(real_time)
 
 
 @mark.case25
 def test_get_migration_disp_25(input_case25):
-    rec_act, rule_id, migration_disp = get_migration_disp(0.05, 0.01, 'PROCEDURE Statement', 'SQL', input_case25)
+    rec_act, rule_id, migration_disp = get_migration_disp('0.05', '0.01', 'PROCEDURE Statement', 'SQL', input_case25)
     assert rule_id == '2' and migration_disp == "Code Change", rule_id + " " + migration_disp
 
 
@@ -1833,12 +1838,12 @@ def test_get_time_info_26(input_case26):
 @mark.case26
 def test_get_process_time_26(input_case26):
     cpu_time, real_time = get_process_time(input_case26)
-    assert real_time == 0.02 and cpu_time == 0.01, str(cpu_time) + " " + str(real_time)
+    assert real_time == '0.02' and cpu_time == '0.01', str(cpu_time) + " " + str(real_time)
 
 
 @mark.case26
 def test_get_migration_disp_26(input_case26):
-    rec_act, rule_id, migration_disp = get_migration_disp(0.01, 0.02, 'PROCEDURE Statement', 'SQL', input_case26)
+    rec_act, rule_id, migration_disp = get_migration_disp('0.01', '0.02', 'PROCEDURE Statement', 'SQL', input_case26)
     assert rule_id == '9' and migration_disp == "Code Change", rule_id + " " + migration_disp
 
 
@@ -1902,10 +1907,220 @@ def test_get_time_info_27(input_case27):
 @mark.case27
 def test_get_process_time_27(input_case27):
     cpu_time, real_time = get_process_time(input_case27)
-    assert real_time == 0.01 and cpu_time == 0.01, str(cpu_time) + " " + str(real_time)
+    assert real_time == '0.01' and cpu_time == '0.01', str(cpu_time) + " " + str(real_time)
 
 
 @mark.case27
 def test_get_migration_disp_27(input_case27):
-    rec_act, rule_id, migration_disp = get_migration_disp(0.01, 0.01, 'PROCEDURE Statement', 'SQL', input_case27)
+    rec_act, rule_id, migration_disp = get_migration_disp('0.01', '0.01', 'PROCEDURE Statement', 'SQL', input_case27)
     assert rule_id == '2' and migration_disp == "Code Change", rule_id + " " + migration_disp
+
+
+@mark.case28
+def test_get_user_name_28(input_case28):
+    user_name = get_user_name(input_case28)
+    assert user_name == "Bank2User"
+
+
+@mark.case28
+def test_get_input_file_name_28(input_case28):
+    rows, input_file = get_input_file_name(input_case28)
+    assert input_file == "", input_file
+
+
+@mark.case28
+def test_get_output_library_table_28(input_case28):
+    output_library, output_table = get_output_library_table(input_case28)
+    assert output_library == "" and output_table == "", output_library + output_table
+
+
+@mark.case28
+def test_get_input_library_table_28(input_case28):
+    input_lib, input_table = get_input_library_table(input_case28)
+    assert input_lib == "" and input_table == "", input_lib + input_table
+
+
+@mark.case28
+def test_get_sas_step_name_28(input_case28):
+    step, step_name = get_sas_step_name(input_case28)
+    assert step == "PROCEDURE Statement" and step_name == "SQL", step + step_name
+
+
+@mark.case28
+def test_proc_sql_parsing_28(input_case28):
+    input_lib, input_table, output_lib, output_table = proc_sql_parsing(input_case28)
+    assert input_lib == [] and input_table == [] and\
+           output_lib == [] and output_table == [], str(input_lib) + str(input_table) + str(output_lib) + str(output_table)
+
+
+@mark.case28
+def test_data_step_parsing_28(input_case28):
+    input_lib, input_table, output_lib, output_table = data_step_parsing(input_case28)
+    assert input_lib == [] and input_table == [] and output_lib == [] \
+           and output_table == [], \
+        str(input_lib) + str(input_table) + str(output_lib) + str(output_table)
+
+
+@mark.case28
+def test_get_ext_db_28(input_case28):
+    ext_db_list = get_ext_db(input_case28)
+    assert ext_db_list == []
+
+
+@mark.case28
+def test_get_time_info_28(input_case28):
+    exe_date, exe_time = get_time_info(input_case28)
+    assert exe_date == '2021-05-25' and exe_time == '01:21:51'
+
+
+@mark.case28
+def test_get_process_time_28(input_case28):
+    cpu_time, real_time = get_process_time(input_case28)
+    assert real_time == '0.00' and cpu_time == '0.00', str(cpu_time) + " " + str(real_time)
+
+
+@mark.case28
+def test_get_migration_disp_28(input_case28):
+    rec_act, rule_id, migration_disp = get_migration_disp('0.00', '0.00', 'PROCEDURE Statement', 'SQL', input_case28)
+    assert rule_id == '9' and migration_disp == "Code Change", rule_id + " " + migration_disp
+
+
+
+
+@mark.case29
+def test_get_user_name_29(input_case29):
+    user_name = get_user_name(input_case29)
+    assert user_name == "Bank2User"
+
+
+@mark.case29
+def test_get_input_file_name_29(input_case29):
+    rows, input_file = get_input_file_name(input_case29)
+    assert input_file == "", input_file
+
+
+@mark.case29
+def test_get_output_library_table_29(input_case29):
+    output_library, output_table = get_output_library_table(input_case29)
+    assert output_library == "WORK" and output_table == "ETLS_SOURCE", output_library + output_table
+
+
+@mark.case29
+def test_get_input_library_table_29(input_case29):
+    input_lib, input_table = get_input_library_table(input_case29)
+    assert input_lib == "" and input_table == "", input_lib + input_table
+
+
+@mark.case29
+def test_get_sas_step_name_29(input_case29):
+    step, step_name = get_sas_step_name(input_case29)
+    assert step == "PROCEDURE Statement" and step_name == "SQL", step + step_name
+
+
+@mark.case29
+def test_proc_sql_parsing_29(input_case29):
+    input_lib, input_table, output_lib, output_table = proc_sql_parsing(input_case29)
+    assert input_lib == ['work'] and input_table == ['Ext_Associate_Stg'] and\
+           output_lib == ['work'] and output_table == ['etls_Source'], str(input_lib) + str(input_table) + str(output_lib) + str(output_table)
+
+
+@mark.case29
+def test_data_step_parsing_29(input_case29):
+    input_lib, input_table, output_lib, output_table = data_step_parsing(input_case29)
+    assert input_lib == [] and input_table == [] and output_lib == [] \
+           and output_table == [], \
+        str(input_lib) + str(input_table) + str(output_lib) + str(output_table)
+
+
+@mark.case29
+def test_get_ext_db_29(input_case29):
+    ext_db_list = get_ext_db(input_case29)
+    assert ext_db_list == []
+
+
+@mark.case29
+def test_get_time_info_29(input_case29):
+    exe_date, exe_time = get_time_info(input_case29)
+    assert exe_date == '2021-05-25' and exe_time == '01:21:51'
+
+
+@mark.case29
+def test_get_process_time_29(input_case29):
+    cpu_time, real_time = get_process_time(input_case29)
+    assert real_time == '0.01' and cpu_time == '0.01', str(cpu_time) + " " + str(real_time)
+
+
+@mark.case29
+def test_get_migration_disp_29(input_case29):
+    rec_act, rule_id, migration_disp = get_migration_disp('0.01', '0.01', 'PROCEDURE Statement', 'SQL', input_case29)
+    assert rule_id == '2' and migration_disp == "Code Change", rule_id + " " + migration_disp
+
+
+@mark.case30
+def test_get_user_name_30(input_case30):
+    user_name = get_user_name(input_case30)
+    assert user_name == "Bank2User"
+
+
+@mark.case30
+def test_get_input_file_name_30(input_case30):
+    rows, input_file = get_input_file_name(input_case30)
+    assert input_file == "", input_file
+
+
+@mark.case30
+def test_get_output_library_table_30(input_case30):
+    output_library, output_table = get_output_library_table(input_case30)
+    assert output_library == "" and output_table == "", output_library + output_table
+
+
+@mark.case30
+def test_get_input_library_table_30(input_case30):
+    input_lib, input_table = get_input_library_table(input_case30)
+    assert input_lib == "" and input_table == "", input_lib + input_table
+
+
+@mark.case30
+def test_get_sas_step_name_30(input_case30):
+    step, step_name = get_sas_step_name(input_case30)
+    assert step == "PROCEDURE Statement" and step_name == "SQL", step + step_name
+
+
+@mark.case30
+def test_proc_sql_parsing_30(input_case30):
+    input_lib, input_table, output_lib, output_table = proc_sql_parsing(input_case30)
+    assert input_lib == [] and input_table == [] and\
+           output_lib == [] and output_table == [], str(input_lib) + str(input_table) + str(output_lib) + str(output_table)
+
+
+@mark.case30
+def test_data_step_parsing_30(input_case30):
+    input_lib, input_table, output_lib, output_table = data_step_parsing(input_case30)
+    assert input_lib == [] and input_table == [] and output_lib == [] \
+           and output_table == [], \
+        str(input_lib) + str(input_table) + str(output_lib) + str(output_table)
+
+
+@mark.case30
+def test_get_ext_db_30(input_case30):
+    ext_db_list = get_ext_db(input_case30)
+    assert ext_db_list == []
+
+
+@mark.case30
+def test_get_time_info_30(input_case30):
+    exe_date, exe_time = get_time_info(input_case30)
+    assert exe_date == '2021-05-25' and exe_time == '01:22:08'
+
+
+@mark.case30
+def test_get_process_time_30(input_case30):
+    cpu_time, real_time = get_process_time(input_case30)
+    assert real_time == '0.00' and cpu_time == '0.00', str(cpu_time) + " " + str(real_time)
+
+
+@mark.case30
+def test_get_migration_disp_30(input_case30):
+    rec_act, rule_id, migration_disp = get_migration_disp('0.00', '0.00', 'PROCEDURE Statement', 'SQL', input_case30)
+    assert rule_id == '9' and migration_disp == "Code Change", rule_id + " " + migration_disp
+
