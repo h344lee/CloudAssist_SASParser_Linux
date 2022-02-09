@@ -1,9 +1,9 @@
 from distutils.core import setup
 
-setup(name='Read Log',
+setup(name='SAS File Parser',
       version='0.1',
-      description='SAS Log file Reader',
+      description='SAS file Reader',
       author='Harry Lee',
       author_email='harrlee@deloitte.ca',
-      packages=['readlogs']
+      packages=['01-Adapter']
      )

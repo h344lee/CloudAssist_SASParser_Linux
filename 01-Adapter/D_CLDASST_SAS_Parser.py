@@ -3,6 +3,9 @@ import re
 import logging
 import pandas as pd
 import warnings
+import time
+import datetime
+import platform
 
 warnings.simplefilter(action='ignore', category=FutureWarning)
 
@@ -434,13 +437,6 @@ def init_proc_cat_prod(cat_prod_dict):
     cat_prod_dict["X13"] = ("SAS/ETS", "Advanced Analytics")
     cat_prod_dict["XSL"] = ("Base SAS", "Data Management")
 
-    # proc_df = pd.read_excel('proc.xls')
-    # proc_list = proc_df.values.tolist()
-    #
-    # for step, proc, prod in proc_list:
-    #     print('cat_prod_dict["' + step.encode('utf-8', 'ignore').strip() + '"]=("' + proc.encode('utf-8',
-    #     'ignore').strip() + '", "' + prod.encode('utf-8', 'ignore').strip() + '")')
-
     return cat_prod_dict
 
 
@@ -469,404 +465,124 @@ def getInventory(current_path, current_folder, visited, file_list):
 # read log contents from given file_path
 # return log file as a big string
 # completed
-def get_log_content(file_path):
+def get_sas_content(file_path):
     file_object = open(file_path)
     file_content = file_object.read()
     file_object.close()
     return file_content
 
 
-# get all the user name of the given log file
-# return a list of usernames
-# comment: need to implement multi-user cases (1/14)
-def get_user_name(log_content):
-    user_name_regex = re.compile(r".*?].*?:(.*) - ")
-    user_name_obj = user_name_regex.search(log_content[:1000])
-    user_name = user_name_obj.group(1).split('@')
-    return user_name[0]
+# input data: whole line-numbered sas file content
+# split the sas content based on SAS statement
+def get_sas_statement(sas_content):
+    sas_statement_list = []
+
+    proc_temp_list = re.split(r"          proc ", sas_content)
+
+    if 'data' in proc_temp_list[0][:20]:
+        proc_temp_list = proc_temp_list[1:]
+
+    proc_temp_list = ["proc "+ statement for statement in proc_temp_list]
+
+    for proc_temp in proc_temp_list:
+        if "quit" in proc_temp or "run" in proc_temp:
+            proc_temp_statement = re.split(r"(quit?|run?);", proc_temp)[0] +"quit;"
+            proc_statement = ""
+            line_number = -1
+            for line in proc_temp_statement.splitlines(True):
+                line_list = line.split("          ")
+
+                if len(line_list) == 2 and line_number == -1:
+                    line_number = int(line_list[0]) - 1
+
+                if proc_statement == "":
+                    proc_statement = line_list[-1].strip()
+                else:
+                    proc_statement += " " + line_list[-1].strip()
+            sas_statement_list.append((line_number, proc_statement))
+
+    data_temp_list = re.split(r"          data ", sas_content)
+    if 'proc' in data_temp_list[0][:20]:
+        data_temp_list = data_temp_list[1:]
+
+    data_temp_list = ["data " + statement for statement in data_temp_list]
+
+    for data_temp in data_temp_list:
+        if "run" in data_temp:
+            data_temp_statement = re.split(r"(run?);", data_temp)[0] + "run;"
+            data_statement = ""
+            line_number = -1
+            for line in data_temp_statement.splitlines(True):
+                line_list = line.split("          ")
+
+                if len(line_list) == 2 and line_number == -1:
+                    line_number = int(line_list[0]) - 1
+
+                if data_statement == "":
+                    data_statement = line_list[-1].strip()
+                else:
+                    data_statement += " " + line_list[-1].strip()
+            sas_statement_list.append((line_number, data_statement))
+
+    return sas_statement_list
 
 
-# provide a user's log file content given username and log_content
-# comment: need to implement split the log content based on the given user name (1/14)
-def get_user_log_content(user, log_content):
-    return log_content
-
-
-# input data: user's log content
-# split the user's log content based on SAS file
-# make a list of pair of SAS file name and the SAS file's log content
-# comment: need to implement SAS file line number part here (1/14)
-def get_sas_files(user_log_content):
-    sas_content_list = user_log_content.split("%LET _CLIENTPROJECTPATH=")
-
-    sas_content_numbered_list = sas_line_number_counter(sas_content_list)
-    sas_file_list = []
-    # print(len(sas_content_numbered_list))
-
-    for sas_content in sas_content_numbered_list:
-        # print(sas_content[:890])
-        program_file_regex = re.compile(r" _SASPROGRAMFILE=(.*);")
-        program_file_list = program_file_regex.findall(sas_content)
-        # print(program_file_list)
-
-        project_path_regex = re.compile(r" _CLIENTPROJECTPATH=(.*);")
-        project_path_list = project_path_regex.findall(sas_content)
-        # print(project_path_list)
-
-        if len(program_file_list) != 0 and len(program_file_list[0]) > 3:
-            sas_file_list.append(program_file_list[0][1:-1])
-        elif len(project_path_list) != 0 and len(project_path_list[0]) > 3:
-            sas_file_list.append(project_path_list[0][1:-1])
-        else:
-            sas_file_list.append("")
-        # print("^^^^^^^^")
-
-    zipped_sas_file_content_list = tuple(zip(sas_file_list, sas_content_numbered_list))
-
-    return zipped_sas_file_content_list
-
-
-def sas_line_number_counter(sas_content_list):
-    temp_chunk = ""
-
-    sas_content_numbered_list = []
-    sas_full_content_list = []
-    # recover the lost part when log file is split
-    for count, content in enumerate(sas_content_list):
-        if count != 0:
-            content = "%LET _CLIENTPROJECTPATH=" + content
-        sas_full_content_list.append(content)
+def sas_line_number_counter(sas_content):
+    numbered_sas_content = ""
 
     # line number counting for the first part of the sas log file (usually SAS initialization)
-    for line_num, line in enumerate(sas_full_content_list[0].splitlines(True)):
-        temp_chunk += str(line_num + 1) + "  " + line
+    for line_num, line in enumerate(sas_content.splitlines(True)):
+        numbered_sas_content += str(line_num + 1) + "          " + line
 
-    sas_content_numbered_list.append(temp_chunk)
-
-    temp_chunk = ""
-    # line number counting for the remaining parts
-    for sas_content in sas_full_content_list[1:]:
-
-        line_number_regex = re.compile(r"\n\d\d\d\d-\d\d-.* - (\d+) ")
-        line_number_regex_obj = line_number_regex.search(sas_content)
-        start_line_number = int(line_number_regex_obj.group(1))
-
-        for line in sas_content.splitlines(True):
-            temp_chunk += str(start_line_number - 1) + "  " + line
-            start_line_number += 1
-        sas_content_numbered_list.append(temp_chunk)
-        temp_chunk = ""
-
-    return sas_content_numbered_list
-
-
-def get_sas_file_line_number(record_content):
-    sas_file_line_regex = re.compile(r"(.*)  \d\d\d\d-\d\d-\d\d.*\(Total process time\):")
-    sas_file_line_obj = sas_file_line_regex.search(record_content)
-    if sas_file_line_obj is None:
-        return ""
-    else:
-        return float(sas_file_line_obj.group(1))
+    return numbered_sas_content
 
 
 # get input file such as *.csv
 # if there is not an input file, then return ""
 # completed
-def get_input_file_name(sas_file_content):
-    input_file_name_regex = re.compile(r"NOTE: The infile \'(.*)\' is:")
-    input_file_list = input_file_name_regex.findall(sas_file_content)
+def get_input_file_name(sas_statement):
 
-    input_file_dict = dict()
-
-    for input_file in input_file_list:
-        if not input_file_dict.get(input_file):
-            input_file_dict[input_file] = '0'
-
-    input_row_file_name_regex = re.compile(r"NOTE: (.*) records were read from the infile \'(.*)\'.")
-    input_row_file_list = input_row_file_name_regex.findall(sas_file_content)
-
-    for row, input_file in input_row_file_list:
-        input_file_dict[input_file] = row
-
-    rows = ''
-    input_files = ''
-    if len(input_file_dict) != 0:
-        for input_file, row in input_file_dict.items():
-            rows += ';' + row
-            input_files += ';' + input_file
-
-    return rows[1:], input_files[1:]
+    print(sas_statement)
+    print("^^^^^")
+    input_file = ""
+    if 'infile' in sas_statement:
+        print("here")
+    input_file_name_regex = re.compile(r"data.*?infile '(.*?)' ")
+    input_file_list = input_file_name_regex.findall(sas_statement)
+    if len(input_file_list) != 0:
+        input_file = input_file_list[0]
+        print("hi")
+    return input_file
 
 
 # get SAS Step names such as DATA statement, Procedure SQL, SAS Initialization
 # return SAS STEP (such as DATA statement) and SAS Step name (ex)sql, Data
 # Completed but need to check if there is any other case regarding SAS Step (1/14)
-def get_sas_step_name(sas_file_content):
-    sas_step_name_regex = re.compile(r"NOTE: (.*) (.*) used")
-    sas_step_name_regex_obj = sas_step_name_regex.search(sas_file_content)
+def get_sas_step_name(sas_statement):
+    sas_step = ""
+    sas_step_name = ""
 
-    if sas_step_name_regex_obj is None:
-        sas_step = ''
-        sas_step_name = ''
-    elif sas_step_name_regex_obj.group(1) == 'DATA':
-        sas_step = sas_step_name_regex_obj.group(1) + ' ' + sas_step_name_regex_obj.group(2)
-        sas_step_name = sas_step_name_regex_obj.group(1)
-    elif sas_step_name_regex_obj.group(1) == 'PROCEDURE':
-        sas_step = 'PROCEDURE Statement'
-        sas_step_name = sas_step_name_regex_obj.group(2)
-    elif sas_step_name_regex_obj.group(1) == 'SAS':
-        sas_step = 'SAS Initialization'
-        sas_step_name = ''
-    elif sas_step_name_regex_obj.group(1) == 'The SAS':
-        sas_step = 'SAS System'
-        sas_step_name = ''
+    if sas_statement[:4] == 'proc':
+        sas_step = "PROCEDURE Statement"
+        sas_statement_split = sas_statement.split(" ")
+        sas_step_name = sas_statement_split[1].upper()
+        if sas_step_name[-1] == ';':
+            sas_step_name = sas_step_name[:-1]
     else:
-        sas_step = ''
-        sas_step_name = ''
+        sas_step = "DATA statement"
+        sas_step_name = "DATA"
+
     return sas_step, sas_step_name
 
 
-# get time infomation
-# return execution date and execution time
-# completed
-def get_time_info(sas_file_content):
-    time_info_regex = re.compile(r"(\d\d\d\d-\d\d-\d\d)T(\d\d:\d\d:\d\d).*real time")
-    time_info_regex_obj = time_info_regex.search(sas_file_content)
+def proc_sql_parsing(sas_statement):
+    proc_sql = sas_statement
 
-    if time_info_regex_obj is None:
-        print("time info cannot get regex object")
-        exc_date = "error"
-        exc_time = "error"
-    else:
-        exc_date = time_info_regex_obj.group(1)
-        exc_time = time_info_regex_obj.group(2)
+    input_library, input_table = get_input_table_from_sql(proc_sql)
 
-    return exc_date, exc_time
-
-
-# get process time for cpu time and real time
-# return cpu time and real time as second
-# comment: need to update the SAS System time part (1/14)
-def get_process_time(sas_file_content):
-    cpu_time_regex = re.compile(r"cpu time \s+(\d+.\d+)")
-    cpu_time_regex_obj = cpu_time_regex.search(sas_file_content)
-    cpu_time = cpu_time_regex_obj.group(1)
-
-    real_time_regex = re.compile(r"real time \s+(\d+.\d+)")
-    real_time_regex_obj = real_time_regex.search(sas_file_content)
-    if real_time_regex_obj is None:
-        real_time_regex_ver2 = re.compile(r"real time \s+(\d+:\d+).")
-        real_time_regex_obj = real_time_regex_ver2.search(sas_file_content)
-    real_time = real_time_regex_obj.group(1)
-
-    return cpu_time, real_time
-
-
-# get output library and output table from regular log message such as NOTE: ~~
-# return output library and output table
-# completed for the regular log message
-# comment: need to enhance to get information from actual sql query
-def get_output_library_table(sas_file_content):
-    output_lib_table_regex_1 = re.compile(r"NOTE: The data set (.*)\.(.*) has \d+ observations and \d+ "
-                                          r"variables.")
-    output_lib_table_list_1 = output_lib_table_regex_1.findall(sas_file_content)
-
-    output_lib_table_regex_2 = re.compile(r"NOTE: SQL view (.*)\.(.*) has been defined.")
-    output_lib_table_list_2 = output_lib_table_regex_2.findall(sas_file_content)
-
-    output_lib_table_regex_3 = re.compile(r"NOTE: Table (.*?)\.(.*?) created, with \d+ rows and \d+ columns.")
-    output_lib_table_list_3 = output_lib_table_regex_3.findall(sas_file_content)
-
-    output_lib_table_list = output_lib_table_list_1 + output_lib_table_list_2 + output_lib_table_list_3
-
-    output_lib = ''
-    output_table = ''
-    # print(output_lib_table_list)
-    if len(output_lib_table_list) != 0:
-        for idx, record in enumerate(output_lib_table_list):
-            if idx == 0:
-                # print(record)
-                output_lib += record[0]
-                output_table += record[1]
-            else:
-                output_lib += ';' + record[0]
-                output_table += ';' + record[1]
-
-    return output_lib, output_table
-
-
-# get input library and input table from regular log output such as NOTE: ~
-# return input_lib, input_table as string
-# Need to enhance to process actual query based process.
-def get_input_library_table(sas_file_content):
-    input_lib_table_regex_case_one = re.compile(r"NOTE: There were \d+ observations read from the data set (.*)\.(.*).")
-    input_lib_table_list = input_lib_table_regex_case_one.findall(sas_file_content)
-
-    input_lib_table_regex_case_two = re.compile(r"NOTE: \d+ rows were updated in (.*)\.(.*).")
-    input_lib_table_list += input_lib_table_regex_case_two.findall(sas_file_content)
-
-    input_lib_table_regex_case_three = re.compile(r"NOTE: .*? rows were deleted from (.*)\.(.*).")
-    input_lib_table_list += input_lib_table_regex_case_three.findall(sas_file_content)
-
-    input_lib_table_regex_case_four = re.compile(r"NOTE: 1 row was updated in (.*)\.(.*).")
-    input_lib_table_list += input_lib_table_regex_case_four.findall(sas_file_content)
-
-    input_lib = ''
-    input_table = ''
-
-    seen = set()
-    seen_add = seen.add
-    input_lib_table_list = [x for x in input_lib_table_list if not (x in seen or seen_add(x))]
-
-    if len(input_lib_table_list) != 0:
-        for record in input_lib_table_list:
-            input_lib += ';' + record[0]
-            input_table += ';' + record[1]
-
-    return input_lib[1:], input_table[1:]
-
-
-#
-# def get_sas_row_read(record_content):
-#     input_lib_table_regex_case_one = re.compile(r"NOTE: \d+ rows were updated in (.*\..*).")
-#     input_lib_table_list_case_one = input_lib_table_regex_case_one.findall(record_content)
-#
-#     input_lib = ''
-#     input_table = ''
-#
-#     seen = set()
-#     seen_add = seen.add
-#     input_lib_table_list_case_one = [x for x in input_lib_table_list_case_one if not (x in seen or seen_add(x))]
-#
-#     if len(input_lib_table_list_case_one) != 0:
-#         for lib_table in input_lib_table_list_case_one:
-#
-#             lib_table_list = lib_table.split('.')
-#             input_lib += ';' + lib_table_list[0]
-#             input_table += ';' + lib_table_list[1]
-#
-#     if input_lib == '':
-#         return None, None
-#     else:
-#         return input_lib[1:], input_table[1:]
-#     return None, None
-
-
-# get number of rows write and output library and output table.
-# got the information from three regular log output
-# return a list of [rows, libs, tbls] ex) [row1;row2, lib1;lib2, table1; table2]
-def get_sas_row_write(record_content):
-    rows = libs = tbls = ""
-
-    sas_row_write_regex_case_one = re.compile(r"NOTE: Table (.*)\.(.*) created, with (\d+) rows")
-    sas_row_write_regex_case_one_list = sas_row_write_regex_case_one.findall(record_content)
-    sas_row_write_regex_case_one_list = [(record[2], record[0], record[1]) for record in
-                                         sas_row_write_regex_case_one_list]
-
-    sas_row_write_regex_case_two = re.compile(r"NOTE: (\d+) rows were deleted from (.*)\.(.*).")
-    sas_row_write_regex_case_two_list = sas_row_write_regex_case_two.findall(record_content)
-    if len(sas_row_write_regex_case_two_list) != 0:
-        for record in sas_row_write_regex_case_two_list:
-            if record[0] == 'No':
-                record[0] = '0'
-            rows = ';'.join([rows, str(record[0])])
-            libs = ';'.join([libs, str(record[1])])
-            tbls = ';'.join([tbls, str(record[2])])
-
-    for record in sas_row_write_regex_case_one_list:
-        rows = ';'.join([rows, str(record[0])])
-        libs = ';'.join([libs, str(record[1])])
-        tbls = ';'.join([tbls, str(record[2])])
-
-    if rows == "":
-        return None, None, None
-    else:
-        return rows[1:], libs[1:], tbls[1:]
-
-
-def proc_sql_parsing(record_content):
-    proc_sql_regex = re.compile(r"(.* INFO .*proc sql)(.+)((?:\n.+)+)(quit?|run?)", re.IGNORECASE)
-    proc_sql_regex_list = proc_sql_regex.findall(record_content)
-
-    input_library = []
-    input_table = []
-    output_library = []
-    output_table = []
-
-    if len(proc_sql_regex_list) != 0:
-        sql_block = proc_sql_regex_list[0][0] + proc_sql_regex_list[0][2] + proc_sql_regex_list[0][3]
-        proc_sql = get_proc_sql(sql_block)
-
-        #print(proc_sql)
-
-        input_library, input_table = get_input_table_from_sql(proc_sql)
-
-        output_library, output_table = get_output_table_from_sql(proc_sql)
+    output_library, output_table = get_output_table_from_sql(proc_sql)
 
     return input_library, input_table, output_library, output_table
-
-
-def get_proc_sql(sql_block):
-    sql_lines = ""
-
-    # MPRINT proc sql case: MPRINT(FCF_MAIN_PROCESS.FCF_PREP.FCF_CREATE_ASC_TRANS_VIEW):   proc sql noprint;
-    if sql_lines == "":
-        proc_sql_mprint_regex = re.compile(r"(MPRINT\(.*\)\:)(.+)((?:\n.+)+)(NOTE|quit)", re.IGNORECASE)
-        proc_sql_mprint_regex_list = proc_sql_mprint_regex.findall(sql_block)
-        if len(proc_sql_mprint_regex_list) >= 1:
-            sql_lines = proc_sql_mprint_regex_list[0][1].strip() + " "
-
-            mprint_regex = re.compile(r".* - MPRINT\(.*\)\:\s+(.*)")
-            general_regex = re.compile(r".* - (.*)")
-
-            mprint_block = proc_sql_mprint_regex_list[0][2]
-            for mprint_block_line in mprint_block.splitlines():
-
-                # if 'connect to' in mprint_block_line:
-                #     sql_lines = 'pass through'
-                #     break
-                if '/*' in mprint_block_line or '/**' in mprint_block_line:
-                    continue
-
-                if re.match(mprint_regex, mprint_block_line) is not None:
-                    mprint_block_line_list = mprint_regex.findall(mprint_block_line)
-                else:
-                    mprint_block_line_list = general_regex.findall(mprint_block_line)
-                # print(mprint_block_line_list)
-                if len(mprint_block_line_list) == 1 and mprint_block_line_list != '' and mprint_block_line_list[0][
-                                                                                         :4] != 'NOTE' and \
-                        mprint_block_line_list[0][:4] != 'SYMB':
-                    sql_lines += mprint_block_line_list[0]
-
-    # +proc sql case: hiragana - 874       +proc sql;
-    if sql_lines == "":
-        sql_block_regex = re.compile(r"(.* - \d+ \s+\+)(.*)")
-        for sql_block_line in sql_block.splitlines():
-            # if 'connect to' in sql_block_line:
-            #     sql_lines = 'pass through'
-            #     break
-            if '/*' in sql_block_line or '/**' in sql_block_line:
-                continue
-            filtered_line = sql_block_regex.findall(sql_block_line)
-            # print(filtered_line)
-            if len(filtered_line) == 1 and len(filtered_line[0]) == 2 and filtered_line[0][1] != '':
-                sql_lines += filtered_line[0][1].strip() + " "
-
-    # number proc sql case: Bank2BU@SASBAP - 31         proc sql
-    if sql_lines == "":
-        proc_sql_num_regex = re.compile(r".* - \d+\s+(.*)")
-        for sql_block_line in sql_block.splitlines():
-            # if 'connect to' in sql_block_line:
-            #     sql_lines = 'pass through'
-            #     break
-            if '/*' in sql_block_line or '/**' in sql_block_line:
-                continue
-            filtered_line = proc_sql_num_regex.findall(sql_block_line)
-
-            if len(filtered_line) == 1 and filtered_line[0] != '':
-                sql_lines += filtered_line[0].strip() + " "
-
-    return sql_lines + ' quit;'
 
 
 def get_input_table_from_sql(proc_sql):
@@ -1022,22 +738,11 @@ def get_output_table_from_sql(proc_sql):
     return output_library, output_table
 
 
-def data_step_parsing(record_content):
-    data_step_regex = re.compile(r"(.* INFO .*data)(.+?)((?:\n.+)+)(run)", re.IGNORECASE)
-    data_step_regex_list = data_step_regex.findall(record_content)
+def data_step_parsing(sas_statement):
 
-    input_library = []
-    input_table = []
-    output_library = []
-    output_table = []
-
-    if len(data_step_regex_list) != 0:
-        sql_block = data_step_regex_list[0][0] + data_step_regex_list[0][1] + data_step_regex_list[0][2] + \
-                    data_step_regex_list[0][3]
-
-        data_step_sql = get_data_step_sql(sql_block)
-        input_library, input_table = get_input_table_from_data_sql(data_step_sql)
-        output_library, output_table = get_output_table_from_data_sql(data_step_sql)
+    data_step_sql = sas_statement
+    input_library, input_table = get_input_table_from_data_sql(data_step_sql)
+    output_library, output_table = get_output_table_from_data_sql(data_step_sql)
 
     return input_library, input_table, output_library, output_table
 
@@ -1290,34 +995,34 @@ def lib_table_write_to_variable(library, table, FILE_SAS_LIB, FILE_SAS_TBL):
     return FILE_SAS_LIB, FILE_SAS_TBL
 
 
+def get_macro_flag(FILE_SAS_INP_LIB, FILE_SAS_INP_TBL, FILE_SAS_OUT_LIB, FILE_SAS_OUT_TBL):
+
+    lib_tbl_str = FILE_SAS_INP_LIB +';'+ FILE_SAS_INP_TBL +';'+ FILE_SAS_OUT_LIB +';'+ FILE_SAS_OUT_TBL
+    lib_tbl_list = lib_tbl_str.split(';')
+
+    for lib_or_tbl in lib_tbl_list:
+
+        if "&" in lib_or_tbl:
+            return 1
+
+    return 0
+
+
 # 1. check the record_contest has a libname ABC oracle/db2/hadoop/etc
 # 2. if the database type is not base or V9 save it to ext_db_lib_ref_list
 # 3.     ext_db_ref_list is created based on each file as empty list
 #        return the name of the database name
 # 4. on main function, check proc sql in / out part before save it to pandas.
-def get_ext_db(record_content):
-    ext_db_name_list = []
+def get_ext_db(sas_statement):
+    ext_db_name = ""
     # Check with proc sql statement
-    proc_sql_regex = re.compile(r"(.* INFO .*proc sql)(.+)((?:\n.+)+)(quit?|run?)", re.IGNORECASE)
-    proc_sql_regex_list = proc_sql_regex.findall(record_content)
-    if len(proc_sql_regex_list) != 0:
-        sql_block = proc_sql_regex_list[0][0] + proc_sql_regex_list[0][2] + proc_sql_regex_list[0][3]
-        proc_sql = get_proc_sql(sql_block)
-        # print(proc_sql)
-        if "connect to" in proc_sql:
-            ext_db_regex = re.compile(r"connect to (.*?)(\(| )")
-            ext_db_obj = ext_db_regex.search(proc_sql)
-            ext_db_name = ext_db_obj.group(1)
-            ext_db_name_list.append(ext_db_name.lower())
+    proc_sql = sas_statement
+    if proc_sql[:4] == "proc" and "connect to" in proc_sql:
+        ext_db_regex = re.compile(r"connect to (.*?)(\(| )")
+        ext_db_obj = ext_db_regex.search(proc_sql)
+        ext_db_name = ext_db_obj.group(1)
 
-    lib_name_list, db_name_list = ext_db_checker(record_content)
-
-    ext_db_name_list += db_name_list
-    ext_db_name_list = list(set(ext_db_name_list))
-
-    # print(ext_db_name_list)
-
-    return ext_db_name_list
+    return ext_db_name.lower()
 
 
 def ext_db_checker(record_content):
@@ -1348,50 +1053,20 @@ def ext_db_checker(record_content):
     return library_name_list, database_name_list
 
 
-def get_migration_disp(FILE_SAS_EXC_CPU_TM, FILE_SAS_EXC_RL_TM, FILE_SAS_STP, FILE_SAS_STP_NM, record_content):
+def get_migration_disp(FILE_SAS_STP, FILE_SAS_STP_NM, sas_statement):
     RULE_ID = ""
     REC_ACT = ""
     recommendation = "Lift and Shift"
 
-    cpu_time_list = FILE_SAS_EXC_CPU_TM.split(':')
-    if len(cpu_time_list) == 2:
-        FILE_SAS_EXC_CPU_TM = float(cpu_time_list[0] * 60) + float(cpu_time_list[1])
-    else:
-        FILE_SAS_EXC_CPU_TM = float(FILE_SAS_EXC_CPU_TM)
-
-    real_time_list = FILE_SAS_EXC_RL_TM.split(':')
-    if len(real_time_list) == 2:
-        FILE_SAS_EXC_RL_TM = float(real_time_list[0] * 60) + float(real_time_list[1])
-    else:
-        FILE_SAS_EXC_RL_TM = float(FILE_SAS_EXC_RL_TM)
-
     data_statement = ""
-
-    data_step_regex = re.compile(r"(.* INFO .* data)(.+?)((?:\n.+)+)(run)", re.IGNORECASE)
-    data_step_regex_list = data_step_regex.findall(record_content)
-
-    if len(data_step_regex_list) != 0:
-        sql_block = data_step_regex_list[0][0] + data_step_regex_list[0][1] + data_step_regex_list[0][2] + \
-                    data_step_regex_list[0][3]
-        data_statement = get_data_step_sql(sql_block)
-
     proc_sql = ""
-    proc_sql_regex = re.compile(r"(.* INFO .*proc sql)(.+)((?:\n.+)+)(quit?|run?)", re.IGNORECASE)
-    proc_sql_regex_list = proc_sql_regex.findall(record_content)
 
-    if len(proc_sql_regex_list) != 0:
-        sql_block = proc_sql_regex_list[0][0] + proc_sql_regex_list[0][2] + proc_sql_regex_list[0][3]
-        proc_sql = get_proc_sql(sql_block)
+    if sas_statement[:4] == "proc":
+        proc_sql = sas_statement
+    else:
+        data_statement = sas_statement
 
-    if FILE_SAS_EXC_CPU_TM >= 30.00:
-        recommendation = "Code Change"
-        RULE_ID = '1'
-        REC_ACT = 'Consider reducing real time'
-    elif FILE_SAS_EXC_CPU_TM >= FILE_SAS_EXC_RL_TM and FILE_SAS_EXC_CPU_TM != 0:
-        recommendation = "Code Change"
-        RULE_ID = '2'
-        REC_ACT = 'Consider reducing cpu time so that it is less then real time'
-    elif FILE_SAS_STP == 'PROCEDURE Statement' and FILE_SAS_STP_NM == 'LOGISTIC':
+    if FILE_SAS_STP == 'PROCEDURE Statement' and FILE_SAS_STP_NM == 'LOGISTIC':
         recommendation = "Code Change"
         RULE_ID = '4'
         REC_ACT = 'Consider using PROC LOGSELECT (CAS) instead of Logistic'
@@ -1498,7 +1173,7 @@ def get_migr_rule(FILE_SAS_MIGR_RUL_ID):
     migration_rule = migr_rule_dict.get(FILE_SAS_MIGR_RUL_ID)
     return migration_rule
 
-#
+
 def get_proc_inmem(FILE_SAS_STP, FILE_SAS_STP_NM):
 
     if FILE_SAS_STP == "PROCEDURE Statement" and (FILE_SAS_STP_NM == 'LASR' or FILE_SAS_STP_NM == 'IAMSTAT'):
@@ -1514,14 +1189,14 @@ def get_proc_etl(FILE_SAS_PROC_CAT, FILE_SAS_STP, FILE_SAS_STP_NM):
         return 0
 
 
-def get_proc_grid(record_content):
-    if "%sysfunc(grdsvc_enable(" in record_content or "%qsysfunc(grdsvc_enable(" in record_content:
+def get_proc_grid(sas_statement):
+    if "%sysfunc(grdsvc_enable(" in sas_statement or "%qsysfunc(grdsvc_enable(" in sas_statement:
         return 1
     else:
         return 0
 
 
-def get_indb(record_content):
+def get_indb(sas_statement):
 
     external_database_tuple = (
         'redshift', 'aster', 'db2' 'bigquery', 'greenplm', 'hadoop', 'hawq', 'impala', 'informix', 'jdbc', 'sqlsvr',
@@ -1530,10 +1205,10 @@ def get_indb(record_content):
     )
 
     connect_db_regex = re.compile(r"connect to (.*?)[ |\(]", re.IGNORECASE)
-    connect_db_list = connect_db_regex.findall(record_content)
+    connect_db_list = connect_db_regex.findall(sas_statement)
 
     disconnect_db_regex = re.compile(r"disconnect from (.*?)[;| ]", re.IGNORECASE)
-    disconnect_db_list = disconnect_db_regex.findall(record_content)
+    disconnect_db_list = disconnect_db_regex.findall(sas_statement)
 
     if len(connect_db_list) != 0:
 
@@ -1543,6 +1218,22 @@ def get_indb(record_content):
                 return 1
 
     return 0
+
+
+def getOwner(filename):
+    username = ""
+    if platform.system() == 'Windows':
+        import win32security
+        f = win32security.GetFileSecurity(filename, win32security.OWNER_SECURITY_INFORMATION)
+        (username, domain, sid_name_use) = win32security.LookupAccountSid(None, f.GetSecurityDescriptorOwner())
+        return username
+    else:
+        import pwd
+        stat_info = os.stat(filename)
+        uid = stat_info.st_uid
+        username = pwd.getpwuid(uid)[0]
+
+    return username
 
 
 # update a row of record to the given dataframe 'log_df'
@@ -1555,38 +1246,33 @@ def save_record_to_df(log_df, extracted_record):
 def save_df_to_xlsx(log_df):
     # check "\output" folder and make it if it is not exist
 
-    if not os.path.isdir('output'):
-        os.makedirs('output')
-    log_df.to_excel("output\\output.xlsx", float_format="%0.2f", index=False)
+    if not os.path.isdir('..\\00-Data Model'):
+        os.makedirs('..\\00-Data Model')
+    log_df.to_excel("..\\00-Data Model\\D_CLDASST_SAS_Parser_Output.xlsx", float_format="%0.2f", index=False)
 
 
 # main function
 if __name__ == "__main__":
 
-    FILE_ID = ""
-    FILE_PTH = ""
-    FILE_NM = ""
-    FILE_USR_NM = ""
     FILE_SAS_F_ID = ""
-    FILE_SAS_F_LOC = ""
+    FILE_PTH = ""
     FILE_SAS_F_NM = ""
+    FILE_USR_NM = ""
+    FILE_SAS_F_LOC = ""
     FILE_SAS_STP = ""
     FILE_SAS_STP_NM = ""
     FILE_LN_NUM = ""
     FILE_SAS_INP_LIB = ""
     FILE_SAS_INP_TBL = ""
     FILE_SAS_INP_FIL_NM = ""
-    FILE_SAS_INP_ROW_RD = ""
     FILE_SAS_OUT_LIB = ""
     FILE_SAS_OUT_TBL = ""
-    FILE_SAS_ROW_WRT = ""
     FILE_SAS_INP_MUL_FLG = ""
     FILE_SAS_INP_MUL_TBLS = ""
+    FILE_SAS_MACRO_FLG = ""
     FILE_SAS_EXT_DB = ""
-    FILE_EXC_DT = ""
-    FILE_SAS_EXC_TM = ""
-    FILE_SAS_EXC_CPU_TM = ""
-    FILE_SAS_EXC_RL_TM = ""
+    FILE_SAS_MOD_DT = ""
+    FILE_SAS_MOD_TM = ""
     # ==========================
     FILE_SAS_PROC_CAT = ""
     FILE_SAS_PROC_PROD = ""
@@ -1599,22 +1285,22 @@ if __name__ == "__main__":
     FILE_SAS_PROC_GRID_FLG = 0
     FILE_SAS_PROC_INDB_FLG = 0
     FILE_SAS_SRC_TYP = "SAS"
+    FILE_SAS_SRC_CR_DT = ""
     FILE_SAS_ENV_NAME = "SAS GRID PROD"
 
-    log_df = pd.DataFrame(columns=['FILE_ID', 'FILE_PTH', 'FILE_NM', 'FILE_USR_NM', 'FILE_SAS_F_ID',
-                                   'FILE_SAS_F_LOC', 'FILE_SAS_F_NM', 'FILE_SAS_STP',
-                                   'FILE_SAS_STP_NM', 'FILE_LN_NUM', 'FILE_SAS_INP_LIB',
-                                   'FILE_SAS_INP_TBL', 'FILE_SAS_INP_FIL_NM', 'FILE_SAS_INP_ROW_RD',
-                                   'FILE_SAS_OUT_LIB', 'FILE_SAS_OUT_TBL', 'FILE_SAS_ROW_WRT',
-                                   'FILE_SAS_INP_MUL_FLG', 'FILE_SAS_INP_MUL_TBLS', 'FILE_SAS_EXT_DB', 'FILE_EXC_DT',
-                                   'FILE_SAS_EXC_TM', 'FILE_SAS_EXC_CPU_TM', 'FILE_SAS_EXC_RL_TM',
-                                   'FILE_SAS_PROC_CAT', 'FILE_SAS_PROC_PROD', 'FILE_SAS_MIGR_DISP',
-                                   'FILE_SAS_MIGR_RUL_ID', 'FILE_SAS_MIGR_RUL', 'FILE_SAS_MIGR_REC_ACT',
-                                   'FILE_SAS_PROC_INMEM_FLG', 'FILE_SAS_PROC_ELT_FLG', 'FILE_SAS_PROC_GRID_FLG',
-                                   'FILE_SAS_PROC_INDB_FLG', 'FILE_SAS_SRC_TYP', 'FILE_SAS_ENV_NAME'])
+    log_df = pd.DataFrame(columns=['FILE_SAS_F_ID', 'FILE_PTH', 'FILE_SAS_F_NM', 'FILE_USR_NM', 'FILE_SAS_F_LOC',
+                                   'FILE_SAS_STP', 'FILE_SAS_STP_NM', 'FILE_LN_NUM', 'FILE_SAS_INP_LIB',
+                                   'FILE_SAS_INP_TBL', 'FILE_SAS_INP_FIL_NM', 'FILE_SAS_OUT_LIB', 'FILE_SAS_OUT_TBL',
+                                   'FILE_SAS_INP_MUL_FLG', 'FILE_SAS_INP_MUL_TBLS', 'FILE_SAS_MACRO_FLG',
+                                   'FILE_SAS_EXT_DB',
+                                   'FILE_SAS_MOD_DT', 'FILE_SAS_MOD_TM', 'FILE_SAS_PROC_CAT', 'FILE_SAS_PROC_PROD',
+                                   'FILE_SAS_MIGR_DISP', 'FILE_SAS_MIGR_RUL_ID', 'FILE_SAS_MIGR_RUL',
+                                   'FILE_SAS_MIGR_REC_ACT', 'FILE_SAS_PROC_INMEM_FLG', 'FILE_SAS_PROC_ELT_FLG',
+                                   'FILE_SAS_PROC_GRID_FLG', 'FILE_SAS_PROC_INDB_FLG', 'FILE_SAS_SRC_TYP',
+                                   'FILE_SAS_SRC_CR_DT', 'FILE_SAS_ENV_NAME'])
 
     current_path = os.getcwd()
-    current_folder = 'logs_test'
+    current_folder = 'sas_file'
     visited = dict()
     file_list = []
     cat_prod_dict = dict()
@@ -1632,140 +1318,97 @@ if __name__ == "__main__":
         ext_db_lib_name_list = []
 
         file_full_path = file_path + '\\' + file_name
-        log_content = get_log_content(file_full_path)
+        sas_content = get_sas_content(file_full_path)
+        FILE_SAS_F_ID = 'SF_' + str(sas_file_id_counter)
+        sas_file_id_counter += 1
+        FILE_SAS_F_LOC = file_full_path
         FILE_PTH = file_full_path
-        FILE_NM = file_name
+        FILE_SAS_F_NM = file_name
+        mod_date = time.ctime(os.path.getctime(FILE_SAS_F_LOC))
+        mod_time = str(datetime.datetime.strptime(mod_date, "%a %b %d %H:%M:%S %Y"))
+        FILE_SAS_MOD_DT = mod_time[:10]
+        FILE_SAS_MOD_TM = mod_time[12:]
 
-        sas_file_content_list = get_sas_files(log_content)
-        for sas_file_abs_path, sas_file_content in sas_file_content_list:
+        creation_datetime = time.ctime(os.path.getmtime(FILE_SAS_F_LOC))
+        creation_datetime_format = str(datetime.datetime.strptime(creation_datetime, "%a %b %d %H:%M:%S %Y"))
+        FILE_SAS_SRC_CR_DT = creation_datetime_format[:10]
+        FILE_USR_NM = getOwner(FILE_SAS_F_LOC)
 
-            temp_num = 1
+        numbered_sas_content = sas_line_number_counter(sas_content)
+        print(numbered_sas_content)
+        sas_statement_list = get_sas_statement(numbered_sas_content)
 
-            record_content_list = re.split(r"seconds\n.* -       \n", sas_file_content)
-            for record_content in record_content_list:
-                if record_content[-25:-17] != 'cpu time':
-                    continue
+        for sas_line_num, sas_statement in sas_statement_list:
 
-                # print("record content num:" + str(temp_num))
-                # temp_num+=1
-                # print(record_content)
-                # print("********************")
+            FILE_LN_NUM = sas_line_num
 
-                # update sas file id and sas file name and path if it is updated.
-                if sas_file_abs_path != '':
-                    if sas_file_dict.get(sas_file_abs_path) is None:
-                        sas_file_dict[sas_file_abs_path] = 'SF_' + str(sas_file_id_counter)
-                        sas_file_id_counter += 1
-                    FILE_SAS_F_ID = sas_file_dict.get(sas_file_abs_path)
-                    sas_file_norm_path = os.path.normpath(sas_file_abs_path)
-                    FILE_SAS_F_NM = sas_file_norm_path.split(os.sep)[-1]
+            FILE_SAS_STP, FILE_SAS_STP_NM = get_sas_step_name(sas_statement)
 
-                FILE_USR_NM = get_user_name(record_content)
-                FILE_SAS_F_LOC = sas_file_abs_path
-                if FILE_SAS_F_LOC == "":
-                    FILE_SAS_F_NM = ""
-                    FILE_SAS_F_ID = ""
-                FILE_SAS_INP_ROW_RD, FILE_SAS_INP_FIL_NM = get_input_file_name(record_content)
-                FILE_SAS_OUT_LIB, FILE_SAS_OUT_TBL = get_output_library_table(record_content)
+            FILE_SAS_INP_FIL_NM = get_input_file_name(sas_statement)
 
-                FILE_SAS_INP_LIB, FILE_SAS_INP_TBL = get_input_library_table(record_content)
-                # FILE_SAS_INP_ROW_RD  # Need to get some example to implement
-                if FILE_SAS_F_LOC == "":
-                    FILE_LN_NUM = ""
-                else:
-                    FILE_LN_NUM = get_sas_file_line_number(record_content)
+            if FILE_SAS_STP == "PROCEDURE Statement":
+                input_lib, input_table, output_lib, output_table = proc_sql_parsing(sas_statement)
+            else:
+                input_lib, input_table, output_lib, output_table = data_step_parsing(sas_statement)
 
-                FILE_SAS_STP, FILE_SAS_STP_NM = get_sas_step_name(record_content)
-                if FILE_SAS_STP == 'SAS Initialization' or FILE_SAS_STP == 'SAS System':
-                    continue
+            FILE_SAS_INP_LIB, FILE_SAS_INP_TBL = lib_table_write_to_variable(input_lib, input_table,
+                                                                             FILE_SAS_INP_LIB,
+                                                                             FILE_SAS_INP_TBL)
 
-                # Check if the FILE_SAS_STP is DATA and if it is not, initialize FILE_SAS_INP_ROW_RD and Input file
-                if FILE_SAS_STP == 'PROCEDURE Statement':
-                    FILE_SAS_INP_ROW_RD = FILE_SAS_INP_FIL_NM = ""
+            FILE_SAS_OUT_LIB, FILE_SAS_OUT_TBL = lib_table_write_to_variable(output_lib, output_table,
+                                                                             FILE_SAS_OUT_LIB,
+                                                                             FILE_SAS_OUT_TBL)
 
-                FILE_EXC_DT, FILE_SAS_EXC_TM = get_time_info(record_content)
-                FILE_SAS_EXC_CPU_TM, FILE_SAS_EXC_RL_TM = get_process_time(record_content)
+            FILE_SAS_EXT_DB = get_ext_db(sas_statement)
 
-                rows, libs, tbls = get_sas_row_write(record_content)
-                if rows is not None:
-                    FILE_SAS_ROW_WRT = rows
-                    if FILE_SAS_OUT_LIB == "":
-                        FILE_SAS_OUT_LIB = libs
-                    else:
-                        FILE_SAS_OUT_LIB = ';'.join([FILE_SAS_OUT_LIB, libs])
-                    if FILE_SAS_OUT_TBL == "":
-                        FILE_SAS_OUT_TBL = tbls
-                    else:
-                        FILE_SAS_OUT_TBL = ';'.join([FILE_SAS_OUT_TBL, tbls])
+            if FILE_SAS_EXT_DB != "":
+                FILE_SAS_OUT_LIB = FILE_SAS_OUT_TBL = FILE_SAS_INP_LIB = FILE_SAS_INP_TBL = ""
+                FILE_SAS_INP_MUL_TBLS = FILE_SAS_INP_MUL_FLG = 0
 
-                # more data extractions needed to be here
+            if FILE_SAS_STP_NM == 'DATA':
+                FILE_SAS_PROC_PROD, FILE_SAS_PROC_CAT = 'Base SAS', 'Data Management'
+            elif FILE_SAS_STP_NM == '':
+                pass
+            else:
+                FILE_SAS_PROC_PROD, FILE_SAS_PROC_CAT = cat_prod_dict[FILE_SAS_STP_NM.upper()]
 
-                if FILE_SAS_STP == "PROCEDURE Statement":
-                    input_lib, input_table, output_lib, output_table = proc_sql_parsing(record_content)
-                else:
-                    input_lib, input_table, output_lib, output_table = data_step_parsing(record_content)
+            if len(FILE_SAS_INP_LIB.split(';')) > 1:
+                FILE_SAS_INP_MUL_FLG = 1
+                FILE_SAS_INP_MUL_TBLS = 1
+            else:
+                FILE_SAS_INP_MUL_FLG = 0
+                FILE_SAS_INP_MUL_TBLS = 0
 
-                FILE_SAS_INP_LIB, FILE_SAS_INP_TBL = lib_table_write_to_variable(input_lib, input_table,
-                                                                                 FILE_SAS_INP_LIB,
-                                                                                 FILE_SAS_INP_TBL)
+            FILE_SAS_MACRO_FLG = get_macro_flag(FILE_SAS_OUT_LIB, FILE_SAS_OUT_TBL, FILE_SAS_INP_LIB, FILE_SAS_INP_TBL)
 
-                FILE_SAS_OUT_LIB, FILE_SAS_OUT_TBL = lib_table_write_to_variable(output_lib, output_table,
-                                                                                 FILE_SAS_OUT_LIB,
-                                                                                 FILE_SAS_OUT_TBL)
+            FILE_SAS_MIGR_REC_ACT, FILE_SAS_MIGR_RUL_ID, FILE_SAS_MIGR_DISP = get_migration_disp(
+                FILE_SAS_STP, FILE_SAS_STP_NM, sas_statement)
 
-                ext_db_list = get_ext_db(record_content)
-                FILE_SAS_EXT_DB = ';'.join(ext_db_list)
-                if FILE_SAS_EXT_DB != "":
-                    FILE_SAS_OUT_LIB = FILE_SAS_OUT_TBL = FILE_SAS_INP_LIB = FILE_SAS_INP_TBL = FILE_SAS_ROW_WRT = ""
-                    FILE_SAS_INP_MUL_TBLS = FILE_SAS_INP_MUL_FLG = 0
+            FILE_SAS_MIGR_RUL = get_migr_rule(FILE_SAS_MIGR_RUL_ID)
 
-                if FILE_SAS_STP_NM == 'DATA':
-                    FILE_SAS_PROC_PROD, FILE_SAS_PROC_CAT = 'Base SAS', 'Data Management'
-                elif FILE_SAS_STP_NM == '':
-                    pass
-                else:
-                    FILE_SAS_PROC_PROD, FILE_SAS_PROC_CAT = cat_prod_dict[FILE_SAS_STP_NM.upper()]
+            FILE_SAS_PROC_INMEM_FLG = get_proc_inmem(FILE_SAS_STP, FILE_SAS_STP_NM)
 
-                if len(FILE_SAS_INP_LIB.split(';')) > 1:
-                    FILE_SAS_INP_MUL_FLG = 1
-                    FILE_SAS_INP_MUL_TBLS = 1
-                else:
-                    FILE_SAS_INP_MUL_FLG = 0
-                    FILE_SAS_INP_MUL_TBLS = 0
+            FILE_SAS_PROC_ELT_FLG = get_proc_etl(FILE_SAS_PROC_CAT, FILE_SAS_STP, FILE_SAS_STP_NM)
 
-                FILE_SAS_MIGR_REC_ACT, FILE_SAS_MIGR_RUL_ID, FILE_SAS_MIGR_DISP = get_migration_disp(
-                    FILE_SAS_EXC_CPU_TM, FILE_SAS_EXC_RL_TM,
-                    FILE_SAS_STP, FILE_SAS_STP_NM,
-                    record_content)
+            FILE_SAS_PROC_GRID_FLG = get_proc_grid(sas_statement)
 
-                FILE_SAS_MIGR_RUL = get_migr_rule(FILE_SAS_MIGR_RUL_ID)
+            FILE_SAS_PROC_INDB_FLG = get_indb(sas_statement)
 
-                FILE_SAS_PROC_INMEM_FLG = get_proc_inmem(FILE_SAS_STP, FILE_SAS_STP_NM)
+            extracted_record = [FILE_SAS_F_ID, FILE_PTH, FILE_SAS_F_NM, FILE_USR_NM, FILE_SAS_F_LOC,
+                                   FILE_SAS_STP, FILE_SAS_STP_NM, FILE_LN_NUM, FILE_SAS_INP_LIB,
+                                   FILE_SAS_INP_TBL, FILE_SAS_INP_FIL_NM, FILE_SAS_OUT_LIB, FILE_SAS_OUT_TBL,
+                                   FILE_SAS_INP_MUL_FLG, FILE_SAS_INP_MUL_TBLS, FILE_SAS_MACRO_FLG, FILE_SAS_EXT_DB,
+                                   FILE_SAS_MOD_DT, FILE_SAS_MOD_TM, FILE_SAS_PROC_CAT, FILE_SAS_PROC_PROD,
+                                   FILE_SAS_MIGR_DISP, FILE_SAS_MIGR_RUL_ID, FILE_SAS_MIGR_RUL,
+                                   FILE_SAS_MIGR_REC_ACT, FILE_SAS_PROC_INMEM_FLG, FILE_SAS_PROC_ELT_FLG,
+                                   FILE_SAS_PROC_GRID_FLG, FILE_SAS_PROC_INDB_FLG, FILE_SAS_SRC_TYP,
+                                   FILE_SAS_SRC_CR_DT, FILE_SAS_ENV_NAME]
 
-                FILE_SAS_PROC_ELT_FLG = get_proc_etl(FILE_SAS_PROC_CAT, FILE_SAS_STP, FILE_SAS_STP_NM)
+            log_df = save_record_to_df(log_df, extracted_record)
 
-                FILE_SAS_PROC_GRID_FLG = get_proc_grid(record_content)
-
-                FILE_SAS_PROC_INDB_FLG = get_indb(record_content)
-
-                FILE_ID = 'LOG_' + str(file_id_counter)
-                file_id_counter += 1
-                extracted_record = [FILE_ID, FILE_PTH, FILE_NM, FILE_USR_NM, FILE_SAS_F_ID, FILE_SAS_F_LOC,
-                                    FILE_SAS_F_NM, FILE_SAS_STP, FILE_SAS_STP_NM, FILE_LN_NUM, FILE_SAS_INP_LIB,
-                                    FILE_SAS_INP_TBL, FILE_SAS_INP_FIL_NM, FILE_SAS_INP_ROW_RD, FILE_SAS_OUT_LIB,
-                                    FILE_SAS_OUT_TBL, FILE_SAS_ROW_WRT, FILE_SAS_INP_MUL_FLG, FILE_SAS_INP_MUL_TBLS,
-                                    FILE_SAS_EXT_DB, FILE_EXC_DT, FILE_SAS_EXC_TM, FILE_SAS_EXC_CPU_TM,
-                                    FILE_SAS_EXC_RL_TM, FILE_SAS_PROC_CAT, FILE_SAS_PROC_PROD, FILE_SAS_MIGR_DISP,
-                                    FILE_SAS_MIGR_RUL_ID, FILE_SAS_MIGR_RUL, FILE_SAS_MIGR_REC_ACT,
-                                    FILE_SAS_PROC_INMEM_FLG,
-                                    FILE_SAS_PROC_ELT_FLG, FILE_SAS_PROC_GRID_FLG, FILE_SAS_PROC_INDB_FLG,
-                                    FILE_SAS_SRC_TYP, FILE_SAS_ENV_NAME]
-
-                log_df = save_record_to_df(log_df, extracted_record)
-
-                # Data initialization
-                FILE_SAS_ROW_WRT = FILE_SAS_OUT_LIB = FILE_SAS_OUT_TBL = ""
-                FILE_SAS_INP_ROW_RD = FILE_SAS_INP_LIB = FILE_SAS_INP_TBL = ""
+            # Data initialization
+            FILE_SAS_ROW_WRT = FILE_SAS_OUT_LIB = FILE_SAS_OUT_TBL = ""
+            FILE_SAS_INP_ROW_RD = FILE_SAS_INP_LIB = FILE_SAS_INP_TBL = ""
 
         save_df_to_xlsx(log_df)
 
