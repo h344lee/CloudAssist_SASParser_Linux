@@ -477,12 +477,29 @@ def get_sas_content(file_path):
 def get_sas_statement(sas_content):
     sas_statement_list = []
 
-    proc_temp_list = re.split(r"          proc ", sas_content)
+    #print(sas_content)
+
+    proc_temp_list = re.split(r'(\d+          proc )',sas_content)
 
     if 'data' in proc_temp_list[0][:20]:
         proc_temp_list = proc_temp_list[1:]
 
-    proc_temp_list = ["proc "+ statement for statement in proc_temp_list]
+    print(proc_temp_list[0])
+    print("-----------")
+    print(proc_temp_list[1])
+    print("-----------")
+    print(proc_temp_list[2])
+    print("-----------")
+    print(proc_temp_list[3])
+    print("-----------")
+    print(proc_temp_list[4])
+
+    proc_num_list = [element.split("          ")[0] for element in proc_temp_list]
+    proc_temp_list = ["proc " + statement for num, statement in enumerate(proc_temp_list) if num % 2 == 1]
+
+    print(len(proc_num_list))
+    print(len(proc_temp_list))
+
 
     for proc_temp in proc_temp_list:
         if "quit" in proc_temp or "run" in proc_temp:
@@ -490,8 +507,9 @@ def get_sas_statement(sas_content):
             proc_statement = ""
             line_number = -1
             for line in proc_temp_statement.splitlines(True):
+                #print(line)
                 line_list = line.split("          ")
-
+                #print(line_list)
                 if len(line_list) == 2 and line_number == -1:
                     line_number = int(line_list[0]) - 1
 
@@ -542,16 +560,13 @@ def sas_line_number_counter(sas_content):
 # completed
 def get_input_file_name(sas_statement):
 
-    print(sas_statement)
-    print("^^^^^")
     input_file = ""
-    if 'infile' in sas_statement:
-        print("here")
+
     input_file_name_regex = re.compile(r"data.*?infile '(.*?)' ")
     input_file_list = input_file_name_regex.findall(sas_statement)
     if len(input_file_list) != 0:
         input_file = input_file_list[0]
-        print("hi")
+
     return input_file
 
 
@@ -1335,7 +1350,6 @@ if __name__ == "__main__":
         FILE_USR_NM = getOwner(FILE_SAS_F_LOC)
 
         numbered_sas_content = sas_line_number_counter(sas_content)
-        print(numbered_sas_content)
         sas_statement_list = get_sas_statement(numbered_sas_content)
 
         for sas_line_num, sas_statement in sas_statement_list:
