@@ -475,72 +475,21 @@ def get_sas_content(file_path):
 # input data: whole line-numbered sas file content
 # split the sas content based on SAS statement
 def get_sas_statement(sas_content):
+
+    sas_regex = re.compile(r"(\d+)          (proc|data)(.*?)(run;?|quit;?)", re.DOTALL )
+    sas_regex_list = sas_regex.findall(sas_content)
+
     sas_statement_list = []
 
-    #print(sas_content)
-
-    proc_temp_list = re.split(r'(\d+          proc )',sas_content)
-
-    if 'data' in proc_temp_list[0][:20]:
-        proc_temp_list = proc_temp_list[1:]
-
-    print(proc_temp_list[0])
-    print("-----------")
-    print(proc_temp_list[1])
-    print("-----------")
-    print(proc_temp_list[2])
-    print("-----------")
-    print(proc_temp_list[3])
-    print("-----------")
-    print(proc_temp_list[4])
-
-    proc_num_list = [element.split("          ")[0] for element in proc_temp_list]
-    proc_temp_list = ["proc " + statement for num, statement in enumerate(proc_temp_list) if num % 2 == 1]
-
-    print(len(proc_num_list))
-    print(len(proc_temp_list))
-
-
-    for proc_temp in proc_temp_list:
-        if "quit" in proc_temp or "run" in proc_temp:
-            proc_temp_statement = re.split(r"(quit?|run?);", proc_temp)[0] +"quit;"
-            proc_statement = ""
-            line_number = -1
-            for line in proc_temp_statement.splitlines(True):
-                #print(line)
-                line_list = line.split("          ")
-                #print(line_list)
-                if len(line_list) == 2 and line_number == -1:
-                    line_number = int(line_list[0]) - 1
-
-                if proc_statement == "":
-                    proc_statement = line_list[-1].strip()
-                else:
-                    proc_statement += " " + line_list[-1].strip()
-            sas_statement_list.append((line_number, proc_statement))
-
-    data_temp_list = re.split(r"          data ", sas_content)
-    if 'proc' in data_temp_list[0][:20]:
-        data_temp_list = data_temp_list[1:]
-
-    data_temp_list = ["data " + statement for statement in data_temp_list]
-
-    for data_temp in data_temp_list:
-        if "run" in data_temp:
-            data_temp_statement = re.split(r"(run?);", data_temp)[0] + "run;"
-            data_statement = ""
-            line_number = -1
-            for line in data_temp_statement.splitlines(True):
-                line_list = line.split("          ")
-
-                if len(line_list) == 2 and line_number == -1:
-                    line_number = int(line_list[0]) - 1
-
-                if data_statement == "":
-                    data_statement = line_list[-1].strip()
-                else:
-                    data_statement += " " + line_list[-1].strip()
-            sas_statement_list.append((line_number, data_statement))
+    for match in sas_regex_list:
+        line_num = match[0]
+        data_type = match[1]
+        ending = match[3]
+        content_regex = re.compile(r"\n\d+          ")
+        content_lines = content_regex.split(match[2])
+        content_lines = [line.strip() for line in content_lines]
+        content = ' '.join(content_lines)
+        sas_statement_list.append((line_num, data_type + " " + content + " " + ending))
 
     return sas_statement_list
 
