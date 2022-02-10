@@ -584,17 +584,17 @@ def get_input_table_from_sql(proc_sql):
     sql_from_order_regex = re.compile(r"from (.*?) order", re.IGNORECASE)
     sql_from_order_list = sql_from_order_regex.findall(proc_sql)
 
-    sql_from_semi_regex = re.compile(r"from (.*?)(;| )")
+    sql_from_semi_regex = re.compile(r"from (.*?)(;| )", re.IGNORECASE)
     sql_from_semi_list = sql_from_semi_regex.findall(proc_sql)
 
-    sql_from_quit_regex = re.compile(r"from (.*?) quit;")
+    sql_from_quit_regex = re.compile(r"from (.*?) quit;", re.IGNORECASE)
     sql_from_quit_list = sql_from_quit_regex.findall(proc_sql)
 
     # case 1: "from (.*?) where "
     if len(sql_from_where_list) != 0 and len(lib_table_list) == 0:
 
         # check1 whether from is in values
-        is_from_in_bracket_regex = re.compile(r'(.*?)from ', re.DOTALL)
+        is_from_in_bracket_regex = re.compile(r'(.*?)from ', re.IGNORECASE)
         from_in_bracket_list = is_from_in_bracket_regex.findall(proc_sql)
 
         prior_from = from_in_bracket_list[0]
@@ -612,7 +612,7 @@ def get_input_table_from_sql(proc_sql):
     elif len(sql_from_order_list) != 0 and len(lib_table_list) == 0:
 
         # check1 whether from is in brackets
-        is_from_in_values_regex = re.compile(r'\(.*from.*\)')
+        is_from_in_values_regex = re.compile(r'\(.*from.*\)', re.IGNORECASE)
         if re.search(is_from_in_values_regex, proc_sql) is not None:
             sql_from_order_list = []
 
@@ -623,7 +623,7 @@ def get_input_table_from_sql(proc_sql):
     elif len(sql_from_semi_list) != 0 and len(lib_table_list) == 0:
 
         # check1 whether from is in values
-        is_from_in_values_regex = re.compile(r' values\(.*? from .*?\)')
+        is_from_in_values_regex = re.compile(r' values\(.*? from .*?\)', re.IGNORECASE)
         if re.search(is_from_in_values_regex, proc_sql) is not None:
             sql_from_semi_list = []
 
@@ -634,7 +634,7 @@ def get_input_table_from_sql(proc_sql):
     elif len(sql_from_quit_list) != 0 and len(lib_table_list) == 0:
 
         # check1 whether from is in values
-        is_from_in_values_regex = re.compile(r' values\(.*? from .*?\)')
+        is_from_in_values_regex = re.compile(r' values\(.*? from .*?\)', re.IGNORECASE)
         if re.search(is_from_in_values_regex, proc_sql) is not None:
             sql_from_quit_list = []
 
@@ -1308,6 +1308,10 @@ if __name__ == "__main__":
             FILE_SAS_STP, FILE_SAS_STP_NM = get_sas_step_name(sas_statement)
 
             FILE_SAS_INP_FIL_NM = get_input_file_name(sas_statement)
+
+            if FILE_SAS_INP_FIL_NM != "":
+                FILE_SAS_INP_LIB = "Ext"
+                FILE_SAS_INP_TBL = FILE_SAS_INP_FIL_NM.split('/')[-1]
 
             if FILE_SAS_STP == "PROCEDURE Statement":
                 input_lib, input_table, output_lib, output_table = proc_sql_parsing(sas_statement)
