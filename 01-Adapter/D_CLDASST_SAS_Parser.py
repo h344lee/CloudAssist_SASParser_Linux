@@ -476,12 +476,17 @@ def get_sas_content(file_path):
 # split the sas content based on SAS statement
 def get_sas_statement(sas_content):
 
-    sas_regex = re.compile(r"(\d+)          (proc|data)(.*?)(run;?|quit;?)", re.DOTALL )
+    sas_regex = re.compile(r"(\d+)          (Data|Proc|proc|data)(.*?)(run;?|quit;?)", re.DOTALL)
     sas_regex_list = sas_regex.findall(sas_content)
 
     sas_statement_list = []
 
+
     for match in sas_regex_list:
+
+        print(match)
+        print("*****************")
+
         line_num = match[0]
         data_type = match[1]
         ending = match[3]
@@ -682,6 +687,9 @@ def get_output_table_from_sql(proc_sql):
 
     sql_table_regex = re.compile(r"create table (.*?) ")
     lib_table_list += sql_table_regex.findall(proc_sql)
+
+    sql_alter_regex = re.compile(r"alter table (.*?) ")
+    lib_table_list += sql_alter_regex.findall(proc_sql)
 
     if len(lib_table_list) != 0:
         # print(lib_table_list)
@@ -977,7 +985,7 @@ def get_macro_flag(FILE_SAS_INP_LIB, FILE_SAS_INP_TBL, FILE_SAS_OUT_LIB, FILE_SA
 # 3.     ext_db_ref_list is created based on each file as empty list
 #        return the name of the database name
 # 4. on main function, check proc sql in / out part before save it to pandas.
-def get_ext_db(sas_statement):
+def get_ext_db(sas_statement, lib_dict):
     ext_db_name = ""
     # Check with proc sql statement
     proc_sql = sas_statement
@@ -985,6 +993,11 @@ def get_ext_db(sas_statement):
         ext_db_regex = re.compile(r"connect to (.*?)(\(| )")
         ext_db_obj = ext_db_regex.search(proc_sql)
         ext_db_name = ext_db_obj.group(1)
+
+    for lib_name, ext_db in lib_dict.items():
+        if lib_name in sas_statement:
+            ext_db_name = ext_db
+            return ext_db_name.lower()
 
     return ext_db_name.lower()
 
@@ -995,8 +1008,7 @@ def ext_db_checker(record_content):
         'mysql', 'netezza', 'odbc', 'oledb', 'oracle', 'postgres', 'sapase', 'saphana', 'sapiq', 'snow', 'spark',
         'teradata', 'vertica', 'ybrick', 'mongo', 'sforce'
     )
-    library_name_list = []
-    database_name_list = []
+    lib_db_dict = dict()
 
     libname_regex = re.compile(r"libname (\w+?) (\w+?)(;| )", re.IGNORECASE)
     libname_list = libname_regex.findall(record_content)
@@ -1008,13 +1020,12 @@ def ext_db_checker(record_content):
             temp_database_name = lib_db[1].lower()
 
             if temp_database_name in external_database_tuple:
-                library_name_list.append(temp_library_name)
-                database_name_list.append(temp_database_name)
+                lib_db_dict[temp_library_name] = temp_database_name
 
     # print(library_name_list)
     # print(database_name_list)
 
-    return library_name_list, database_name_list
+    return lib_db_dict
 
 
 def get_migration_disp(FILE_SAS_STP, FILE_SAS_STP_NM, sas_statement):
@@ -1212,7 +1223,8 @@ def save_df_to_xlsx(log_df):
 
     if not os.path.isdir('..\\00-Data Model'):
         os.makedirs('..\\00-Data Model')
-    log_df.to_excel("..\\00-Data Model\\D_CLDASST_SAS_Parser_Output.xlsx", float_format="%0.2f", index=False)
+    log_df.to_excel("..\\00-Data Model\\D_CLDASST_DISC_SASF_O.xlsx", float_format="%0.2f", index=False)
+    log_df.to_csv("..\\00-Data Model\\D_CLDASST_DISC_SASF_O.csv", float_format="%0.2f", index=False)
 
 
 # main function
@@ -1298,10 +1310,16 @@ if __name__ == "__main__":
         FILE_SAS_SRC_CR_DT = creation_datetime_format[:10]
         FILE_USR_NM = getOwner(FILE_SAS_F_LOC)
 
+        lib_dict = ext_db_checker(sas_content)
+
+
+
         numbered_sas_content = sas_line_number_counter(sas_content)
         sas_statement_list = get_sas_statement(numbered_sas_content)
 
         for sas_line_num, sas_statement in sas_statement_list:
+
+            print(sas_line_num + " | " + sas_statement)
 
             FILE_LN_NUM = sas_line_num
 
@@ -1326,7 +1344,7 @@ if __name__ == "__main__":
                                                                              FILE_SAS_OUT_LIB,
                                                                              FILE_SAS_OUT_TBL)
 
-            FILE_SAS_EXT_DB = get_ext_db(sas_statement)
+            FILE_SAS_EXT_DB = get_ext_db(sas_statement, lib_dict)
 
             if FILE_SAS_EXT_DB != "":
                 FILE_SAS_OUT_LIB = FILE_SAS_OUT_TBL = FILE_SAS_INP_LIB = FILE_SAS_INP_TBL = ""
@@ -1370,6 +1388,8 @@ if __name__ == "__main__":
                                    FILE_SAS_MIGR_REC_ACT, FILE_SAS_PROC_INMEM_FLG, FILE_SAS_PROC_ELT_FLG,
                                    FILE_SAS_PROC_GRID_FLG, FILE_SAS_PROC_INDB_FLG, FILE_SAS_SRC_TYP,
                                    FILE_SAS_SRC_CR_DT, FILE_SAS_ENV_NAME]
+
+            print(extracted_record[7])
 
             log_df = save_record_to_df(log_df, extracted_record)
 
