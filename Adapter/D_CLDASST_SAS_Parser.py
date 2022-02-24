@@ -441,13 +441,23 @@ def init_proc_cat_prod(cat_prod_dict):
 
 
 def getInventory(current_path, current_folder, visited, file_list):
-    current_path = current_path + '\\' + current_folder
+    if platform.system() == 'Windows':
+        current_path = current_path + '\\' + current_folder
+    else:
+        current_path = current_path + '/' + current_folder
+
     visited[current_path] = True
     logging.debug("current path is " + current_path)
     folders = []
     current_path_files = os.listdir(current_path)
     for file_or_folder in current_path_files:
-        if os.path.isdir(current_path + '\\' + file_or_folder):
+
+        if platform.system() == 'Windows':
+            pointed_path = current_path + '\\' + file_or_folder
+        else:
+            pointed_path = current_path + '/' + file_or_folder
+
+        if os.path.isdir(pointed_path):
             folders.append(file_or_folder)
         else:
             file_list.append((current_path, file_or_folder))
@@ -457,7 +467,12 @@ def getInventory(current_path, current_folder, visited, file_list):
         logging.debug(filepath + " " + filename)
     logging.debug("***************************")
     for child_folder in folders:
-        if visited.get(current_path + '\\' + child_folder) is None:
+        if platform.system() == 'Windows':
+            pointed_path = current_path + '\\' + child_folder
+        else:
+            pointed_path = current_path + '/' + child_folder
+
+        if visited.get(pointed_path) is None:
             logging.debug("go down to " + child_folder)
             getInventory(current_path, child_folder, visited, file_list)
 
@@ -484,8 +499,8 @@ def get_sas_statement(sas_content):
 
     for match in sas_regex_list:
 
-        print(match)
-        print("*****************")
+        # print(match)
+        # print("*****************")
 
         line_num = match[0]
         data_type = match[1]
@@ -1221,11 +1236,16 @@ def save_record_to_df(log_df, extracted_record):
 def save_df_to_xlsx(log_df):
     # check "\output" folder and make it if it is not exist
 
-    if not os.path.isdir('..\\00-Data Model'):
-        os.makedirs('..\\00-Data Model')
-    log_df.to_excel("..\\00-Data Model\\D_CLDASST_DISC_SASF_O.xlsx", float_format="%0.2f", index=False)
-    log_df.to_csv("..\\00-Data Model\\D_CLDASST_DISC_SASF_O.csv", float_format="%0.2f", index=False)
-
+    if platform.system() == 'Windows':
+        if not os.path.isdir('..\\Data_Model\\Extracted_Files'):
+            os.makedirs('..\\Data_Model\\Extracted_Files')
+        log_df.to_excel("..\\Data_Model\\Extracted_Files\\D_CLDASST_DISC_SASF_O.xlsx", float_format="%0.2f", index=False)
+        log_df.to_csv("..\\Data_Model\\Extracted_Files\\D_CLDASST_DISC_SASF_O.csv", float_format="%0.2f", index=False)
+    else:
+        if not os.path.isdir('../Data_Model/Extracted_Files'):
+            os.makedirs('../Data_Model/Extracted_Files')
+        log_df.to_excel("../Data_Model/Extracted_Files/D_CLDASST_DISC_SASF_O.xlsx", float_format="%0.2f", index=False)
+        log_df.to_csv("../Data_Model/Extracted_Files/D_CLDASST_DISC_SASF_O.csv", float_format="%0.2f", index=False)
 
 # main function
 if __name__ == "__main__":
@@ -1276,7 +1296,7 @@ if __name__ == "__main__":
                                    'FILE_SAS_SRC_CR_DT', 'FILE_SAS_ENV_NAME'])
 
     current_path = os.getcwd()
-    current_folder = 'sas_file'
+    current_folder = 'logs'
     visited = dict()
     file_list = []
     cat_prod_dict = dict()
@@ -1292,8 +1312,11 @@ if __name__ == "__main__":
     for file_path, file_name in file_list:
 
         ext_db_lib_name_list = []
+        if platform.system() == 'Windows':
+            file_full_path = file_path + '\\' + file_name
+        else:
+            file_full_path = file_path + '/' + file_name
 
-        file_full_path = file_path + '\\' + file_name
         sas_content = get_sas_content(file_full_path)
         FILE_SAS_F_ID = 'SF_' + str(sas_file_id_counter)
         sas_file_id_counter += 1
@@ -1312,14 +1335,10 @@ if __name__ == "__main__":
 
         lib_dict = ext_db_checker(sas_content)
 
-
-
         numbered_sas_content = sas_line_number_counter(sas_content)
         sas_statement_list = get_sas_statement(numbered_sas_content)
 
         for sas_line_num, sas_statement in sas_statement_list:
-
-            print(sas_line_num + " | " + sas_statement)
 
             FILE_LN_NUM = sas_line_num
 
@@ -1388,8 +1407,6 @@ if __name__ == "__main__":
                                    FILE_SAS_MIGR_REC_ACT, FILE_SAS_PROC_INMEM_FLG, FILE_SAS_PROC_ELT_FLG,
                                    FILE_SAS_PROC_GRID_FLG, FILE_SAS_PROC_INDB_FLG, FILE_SAS_SRC_TYP,
                                    FILE_SAS_SRC_CR_DT, FILE_SAS_ENV_NAME]
-
-            print(extracted_record[7])
 
             log_df = save_record_to_df(log_df, extracted_record)
 
